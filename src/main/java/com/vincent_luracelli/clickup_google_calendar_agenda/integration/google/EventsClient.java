@@ -3,19 +3,20 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.EventResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.EventsResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.InsertEventsRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.UpdateEventRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 
+import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
+import static com.google.auth.http.AuthHttpConstants.BEARER;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil.buildResponseBodyOrThrow;
-import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.builder.EventsPathBuilder.buildGetEventPath;
-import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.builder.EventsPathBuilder.buildGetEventsPath;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.builder.EventsPathBuilder.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
 @Service
@@ -30,34 +31,47 @@ public class EventsClient {
 
     private final AuthService authService;
 
-    public EventResponse get(String eventId) {
-        Request request = new Request.Builder()
-                .url(buildGetEventPath(googleProps.getCalendarId(), eventId))
-                .build();
+    public EventResponse insert(InsertEventsRequest insertEventsRequest) {
+        try {
+            String token = authService.getToken();
+            String path = buildEventByCalendarIdPath(googleProps.getCalendarId());
+            String jsonBody = objectMapper.writeValueAsString(insertEventsRequest);
 
-        try (Response response = okHttpClient.newCall(request).execute()) {
-            String responseBody = buildResponseBodyOrThrow(response, "Events client error: " + response.code() + " - " + response.message());
-            return objectMapper.readValue(responseBody, EventResponse.class);
+            Request request = new Request.Builder()
+                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                    .url(path)
+                    .post(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
+                    .build();
+
+            Response response = okHttpClient.newCall(request).execute();
+            String jsonResponse = buildResponseBodyOrThrow(response, "Events client error: " + response.code() + " - " + response.message());
+
+            response.close();
+            return objectMapper.readValue(jsonResponse, EventResponse.class);
         } catch (IOException e) {
             log.error(e.getMessage());
-            throw new RuntimeException("Exception while getting events from google calendar");
+            throw new RuntimeException("Exception while inserting event into google calendar");
         }
     }
 
-    public EventsResponse getAll() {
-        String token = authService.getToken();
+    public void update(String eventId, UpdateEventRequest updateEventRequest) {
+        try {
+            String token = authService.getToken();
+            String path = buildUpdateEventPath(eventId, googleProps.getCalendarId());
+            String jsonBody = objectMapper.writeValueAsString(updateEventRequest);
 
-        Request request = new Request.Builder()
-                .addHeader("Authorization", "Bearer " + token)
-                .url(buildGetEventsPath(googleProps.getCalendarId()))
-                .build();
+            Request request = new Request.Builder()
+                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                    .url(path)
+                    .put(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
+                    .build();
 
-        try (Response response = okHttpClient.newCall(request).execute()) {
-            String responseBody = buildResponseBodyOrThrow(response, "Events client error: " + response.code() + " - " + response.message());
-            return objectMapper.readValue(responseBody, EventsResponse.class);
+            Response response = okHttpClient.newCall(request).execute();
+            buildResponseBodyOrThrow(response, "Events client error: " + response.code() + " - " + response.message());
+            response.close();
         } catch (IOException e) {
             log.error(e.getMessage());
-            throw new RuntimeException("Exception while getting events from google calendar");
+            throw new RuntimeException("Exception while updating event in google calendar");
         }
     }
 }

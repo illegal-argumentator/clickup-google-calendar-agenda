@@ -30,17 +30,21 @@ public class AuthService {
                             credentialProps.getScopes())
                     .createScoped(credentialProps.getScopes());
 
-            AccessToken accessToken = credentials.getAccessToken();
-
-            if (accessToken == null || !accessToken.getExpirationTime().before(new Date())) {
-                credentials.refresh();
-                accessToken = credentials.getAccessToken();
-            }
-
+            AccessToken accessToken = refreshTokenIfExpired(credentials);
             return accessToken.getTokenValue();
         } catch (IOException e) {
             log.error(e.getMessage());
             throw new RuntimeException(e);
         }
+    }
+
+    private AccessToken refreshTokenIfExpired(GoogleCredentials credentials) throws IOException {
+        AccessToken accessToken = credentials.getAccessToken();
+
+        if (accessToken == null || !accessToken.getExpirationTime().before(new Date())) {
+            credentials.refresh();
+        }
+
+        return accessToken;
     }
 }

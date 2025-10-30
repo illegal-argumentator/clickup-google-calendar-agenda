@@ -1,11 +1,19 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.embedded.Creator;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.embedded.EventDateTime;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.embedded.Organizer;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EventResponse {
 
     private String kind;
@@ -24,26 +32,4 @@ public class EventResponse {
     private EventDateTime start;
     private EventDateTime end;
 
-    @Data
-    public static class Creator {
-        private String id;
-        private String email;
-        private String displayName;
-        private boolean self;
-    }
-
-    @Data
-    public static class Organizer {
-        private String id;
-        private String email;
-        private String displayName;
-        private boolean self;
-    }
-
-    @Data
-    public static class EventDateTime {
-        private Date date;
-        private Date dateTime;
-        private String timeZone;
-    }
 }

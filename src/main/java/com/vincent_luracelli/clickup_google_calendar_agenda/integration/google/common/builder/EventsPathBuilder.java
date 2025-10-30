@@ -4,12 +4,12 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.g
 
 public class EventsPathBuilder {
 
-    public static String buildGetEventPath(String calendarId, String eventId) {
-        return CALENDARS.getPath() + "/%s/events/%s".formatted(calendarId, eventId);
+    public static String buildEventByCalendarIdPath(String calendarId) {
+        return CALENDARS.getPath() + "/%s/events".formatted(calendarId);
     }
 
-    public static String buildGetEventsPath(String calendarId) {
-        return CALENDARS.getPath() + "/%s/events".formatted(calendarId);
+    public static String buildUpdateEventPath(String eventId, String calendarId) {
+        return CALENDARS.getPath() + "/%s/events/%s".formatted(calendarId, eventId);
     }
 
 }
