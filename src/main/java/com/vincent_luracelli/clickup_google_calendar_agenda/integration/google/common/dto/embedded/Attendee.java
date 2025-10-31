@@ -1,24 +1,20 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.common.dto.embedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Attendee {
+public record Attendee(
+        Integer additionalGuests,
+        String comment,
+        String displayName,
 
-    private Integer additionalGuests;
-    private String comment;
-    private String displayName;
+        @NotNull
+        String email,
 
-    @NonNull
-    private String email;
-
-    private Boolean optional;
-    private Boolean resource;
-    private String responseStatus;
-
+        Boolean optional,
+        Boolean resource,
+        String responseStatus) {
 }

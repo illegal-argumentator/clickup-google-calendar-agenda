@@ -36,7 +36,6 @@ public class EventsClient {
             String token = authService.getToken();
             String path = buildEventByCalendarIdPath(googleProps.getCalendarId());
             String jsonBody = objectMapper.writeValueAsString(insertEventsRequest);
-
             Request request = new Request.Builder()
                     .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
                     .url(path)

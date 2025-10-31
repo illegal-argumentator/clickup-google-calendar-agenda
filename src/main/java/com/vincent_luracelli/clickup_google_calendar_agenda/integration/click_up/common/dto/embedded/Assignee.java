@@ -3,7 +3,8 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Team(
+public record Assignee(
         String id,
-        String name) {
+        String username,
+        String email) {
 }

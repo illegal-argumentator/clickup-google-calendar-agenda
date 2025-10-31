@@ -1,18 +1,20 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiRequestException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.TeamsResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.*;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.exception.ClickUpRequestException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.dto.TaskFilterRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-
 import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
-import static com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil.buildResponseBodyOrThrow;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
 
 @Slf4j
 @Service
@@ -22,27 +24,104 @@ public class ClickUpClient {
     @Value("${clickup.api_key}")
     private String CLICKUP_API_KEY;
 
-    private final OkHttpClient okHttpClient;
-
-    private final ObjectMapper objectMapper;
+    private final OkHttpUtil okHttpUtil;
 
     public TeamsResponse findTeams() {
+        String path = ClickUpPaths.TEAM.getPath();
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
         try {
-            String path = ClickUpPaths.TEAMS.getPath();
-
-            Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
-                    .url(path)
-                    .build();
-
-            Response response = okHttpClient.newCall(request).execute();
-            String jsonResponse = buildResponseBodyOrThrow(response, "Click up client error: " + response.code() + " - " + response.message());
-
-            response.close();
-            return objectMapper.readValue(jsonResponse, TeamsResponse.class);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-            throw new RuntimeException("Exception while retrieving teams from click up");
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TeamsResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
         }
     }
+
+    public SpacesResponse findSpacesByTeam(String teamId) {
+        String path = buildSpaceByTeamIdPath(teamId);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, SpacesResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
+    public FoldersResponse findFoldersBySpace(String spaceId) {
+        String path = buildFolderBySpaceIdPath(spaceId);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, FoldersResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
+    public ListsResponse findListsByFolder(String folderId) {
+        String path = buildListByFolderIdPath(folderId);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
+    public ListsResponse findFolderlessListsBySpace(String spaceId) {
+        String path = buildFolderlessListBySpaceIdPath(spaceId);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
+    public TasksResponse findTasksByList(String listId) {
+        String path = buildTaskByListIdPath(listId);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
+    public TasksResponse findFilteredTaskByTeam(String teamId, TaskFilterRequest taskFilterRequest) {
+        String path = buildTaskByTeamIdPath(teamId, taskFilterRequest);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
+        } catch (ApiRequestException e) {
+            throw new ClickUpRequestException(e.getExceptionPayload());
+        }
+    }
+
 }
