@@ -6,6 +6,6 @@ import lombok.Builder;
 @Builder
 public record ExceptionPayload(
         SourceType source,
-        String message,
+        String body,
         int code) {
 }
