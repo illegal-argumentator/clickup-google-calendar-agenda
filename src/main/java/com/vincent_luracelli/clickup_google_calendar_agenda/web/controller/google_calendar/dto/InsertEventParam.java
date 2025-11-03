@@ -10,7 +10,7 @@ import lombok.Data;
 public class InsertEventParam {
 
     @Min(value = 1, message = "Minimum 1 attendee required")
-    private Integer maxAttendees = 1;
+    private Integer maxAttendees;
 
     private Boolean supportsAttachments;
 

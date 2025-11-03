@@ -27,8 +27,6 @@ public class SimpleCORSFilter implements Filter {
 
         HttpServletResponse response = (HttpServletResponse) servletResponse;
 
-        System.out.println(ALLOWED_ORIGINS);
-
         String origin = request.getHeader("Origin");
         if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
             response.setHeader("Access-Control-Allow-Origin", origin);
