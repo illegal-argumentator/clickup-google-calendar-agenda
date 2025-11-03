@@ -1,0 +1,16 @@
+version: '3.8'
+
+networks:
+  vincent-prod:
+
+services:
+  app-service:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: vincent-app
+    restart: unless-stopped
+    networks:
+      - vincent-prod
+    ports:
+      - "4846:4846"

@@ -2,7 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.clic
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.TasksResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.dto.TaskFilterRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,8 +22,8 @@ public class TaskController {
     @GetMapping("/team/{id}/task")
     ResponseEntity<TasksResponse> findFilteredTaskByTeam(
             @PathVariable String id,
-            TaskFilterRequest taskFilterRequest) {
-        return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterRequest));
+            TaskFilterParam taskFilterParam) {
+        return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterParam));
     }
 
 }

@@ -6,7 +6,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUt
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.*;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.exception.ClickUpRequestException;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.dto.TaskFilterRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -110,8 +110,8 @@ public class ClickUpClient {
         }
     }
 
-    public TasksResponse findFilteredTaskByTeam(String teamId, TaskFilterRequest taskFilterRequest) {
-        String path = buildTaskByTeamIdPath(teamId, taskFilterRequest);
+    public TasksResponse findFilteredTaskByTeam(String teamId, TaskFilterParam taskFilterParam) {
+        String path = buildTaskByTeamIdPath(teamId, taskFilterParam);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)

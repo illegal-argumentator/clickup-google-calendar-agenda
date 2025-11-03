@@ -3,6 +3,8 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record Task (
         String id,
@@ -12,7 +14,7 @@ public record Task (
         Status status,
 
         Creator creator,
-        Assignee assignee,
+        List<Assignee> assignees,
 
         @JsonProperty("start_date")
         String startDate,
@@ -20,8 +22,9 @@ public record Task (
         @JsonProperty("due_date")
         String dueDate,
 
-        Integer timeEstimate,
+        String url,
 
-        String teamId,
-        String url) {
+        @JsonProperty("custom_fields")
+        List<CustomField> customFields
+) {
 }
