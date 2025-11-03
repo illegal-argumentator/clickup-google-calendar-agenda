@@ -3,14 +3,13 @@ WORKDIR /build
 
 COPY build.gradle settings.gradle ./
 
-COPY gradlew ./
 COPY gradle ./gradle
 
-RUN ./gradlew dependencies || gradle dependencies
+RUN gradle dependencies
 
 COPY src ./src
 
-RUN ./gradlew clean bootJar -x test || gradle clean bootJar -x test
+RUN gradle clean bootJar -x test
 
 RUN ls -lh build/libs
 
