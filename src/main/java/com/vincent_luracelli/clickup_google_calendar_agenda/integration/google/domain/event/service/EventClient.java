@@ -10,8 +10,8 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.domain.event.common.exception.CalendarEventException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.domain.event.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.domain.event.dto.InsertEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.domain.event.dto.UpdateEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.InsertEventParam;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google.domain.event.dto.PatchEventRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -36,9 +36,9 @@ public class EventClient {
 
     private final OkHttpUtil okHttpUtil;
 
-    public EventResponse insert(InsertEventParam insertEventParam, InsertEventRequest insertEventRequest) {
+    public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
         String token = authService.getToken();
-        String path = buildEventByCalendarIdPath(googleProps.getCalendarId(), insertEventParam);
+        String path = buildEventByCalendarIdPath(googleProps.getCalendarId(), eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(insertEventRequest);
@@ -63,17 +63,17 @@ public class EventClient {
         }
     }
 
-    public void update(String eventId, UpdateEventRequest updateEventRequest) {
+    public void patch(String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
         String token = authService.getToken();
-        String path = buildUpdateEventPath(eventId, googleProps.getCalendarId());
+        String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
 
         try {
-            String jsonBody = objectMapper.writeValueAsString(updateEventRequest);
+            String jsonBody = objectMapper.writeValueAsString(patchEventRequest);
 
             Request request = new Request.Builder()
                     .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
                     .url(path)
-                    .put(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
+                    .patch(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
 
             okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
@@ -84,9 +84,27 @@ public class EventClient {
             log.error("JsonProcessingException: ", e);
             throw new CalendarEventException(ExceptionPayload.builder()
                     .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .body("Couldn't parse request body for updating event")
+                    .body("Couldn't parse request body for patching event")
                     .source(SourceType.API)
                     .build());
+        }
+    }
+
+    public void delete(String eventId, EventParam eventParam) {
+        String token = authService.getToken();
+        String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
+
+        try {
+            Request request = new Request.Builder()
+                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                    .url(path)
+                    .delete()
+                    .build();
+
+            okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
+        } catch (ApiRequestException e) {
+            log.error("ApiRequestException: ", e);
+            throw new CalendarEventException(e.getExceptionPayload());
         }
     }
 }

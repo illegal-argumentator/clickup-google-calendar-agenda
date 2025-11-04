@@ -8,12 +8,10 @@ public record CustomField(
         String id,
         String name,
         String type,
-
-        @JsonProperty("value")
-        LocationValue locationValue
+        Value value
 ) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public record LocationValue(@JsonProperty("formatted_address") String formattedAddress){
+    public record Value(@JsonProperty("formatted_address") String formattedAddress){
     }
 }

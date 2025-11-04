@@ -10,13 +10,14 @@ import java.util.List;
 public class TaskFilterParam {
 
     private Integer page;
-
     private String orderBy;
-
+    private Boolean reverse;
+    private Boolean includeClosed;
+    private List<String> statuses;
     private List<String> spaceIds;
-
     private List<String> projectIds;
-
     private List<String> listIds;
+    private Integer dueDateGt;
+    private Integer dueDateLt;
 
 }

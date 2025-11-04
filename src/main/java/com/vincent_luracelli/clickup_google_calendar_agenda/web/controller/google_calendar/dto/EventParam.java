@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class InsertEventParam {
+public class EventParam {
 
     @Min(value = 1, message = "Minimum 1 attendee required")
     private Integer maxAttendees;

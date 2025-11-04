@@ -28,7 +28,8 @@ public class AuthService {
                             credentialProps.getPrivateKey(),
                             credentialProps.getPrivateKeyId(),
                             credentialProps.getScopes())
-                    .createScoped(credentialProps.getScopes());
+                    .createScoped(credentialProps.getScopes())
+                    .createDelegated(credentialProps.getUser());
 
             AccessToken accessToken = refreshTokenIfExpired(credentials);
             return accessToken.getTokenValue();

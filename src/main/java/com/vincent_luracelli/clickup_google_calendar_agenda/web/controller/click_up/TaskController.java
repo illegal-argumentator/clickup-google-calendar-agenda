@@ -25,5 +25,4 @@ public class TaskController {
             TaskFilterParam taskFilterParam) {
         return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterParam));
     }
-
 }

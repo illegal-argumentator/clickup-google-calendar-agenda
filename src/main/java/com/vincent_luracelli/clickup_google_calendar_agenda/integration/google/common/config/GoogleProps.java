@@ -20,17 +20,11 @@ public class GoogleProps {
     @Getter
     @Setter
     public static class Credentials {
-        private String type;
-        private String projectId;
-        private String privateKeyId;
-        private String privateKey;
-        private String clientEmail;
+        private String user;
         private String clientId;
-        private String authUri;
-        private String tokenUri;
-        private String clientX509CertUrl;
-        private String authProviderX509CertUrl;
-        private String universeDomain;
+        private String clientEmail;
+        private String privateKey;
+        private String privateKeyId;
         private List<String> scopes;
     }
 }

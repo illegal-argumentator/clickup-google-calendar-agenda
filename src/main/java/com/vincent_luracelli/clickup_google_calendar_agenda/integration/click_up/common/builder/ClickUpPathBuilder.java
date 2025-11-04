@@ -37,7 +37,28 @@ public class ClickUpPathBuilder {
         sb.append("?page=%s".formatted(taskFilterParam.getPage()));
 
         if (taskFilterParam.getOrderBy() != null) {
-            sb.append("&order_by[]=%s".formatted(taskFilterParam.getOrderBy()));
+            sb.append("&order_by=%s".formatted(taskFilterParam.getOrderBy()));
+        }
+
+        if (taskFilterParam.getReverse() != null) {
+            sb.append("&reverse=%b".formatted(taskFilterParam.getReverse()));
+        }
+
+        if (taskFilterParam.getIncludeClosed() != null) {
+            sb.append("&include_closed=%b".formatted(taskFilterParam.getIncludeClosed()));
+        }
+
+        if (taskFilterParam.getDueDateGt() != null) {
+            sb.append("&due_date_gt=%d".formatted(taskFilterParam.getDueDateGt()));
+        }
+
+        if (taskFilterParam.getDueDateLt() != null) {
+            sb.append("&due_date_lt=%d".formatted(taskFilterParam.getDueDateLt()));
+        }
+
+        if (taskFilterParam.getStatuses() != null && !taskFilterParam.getStatuses().isEmpty()) {
+            System.out.println(taskFilterParam.getStatuses());
+            taskFilterParam.getStatuses().forEach(statusId -> sb.append("&statuses[]=%s".formatted(statusId.trim().replaceAll(" ", "%20"))));
         }
 
         if (taskFilterParam.getListIds() != null && !taskFilterParam.getListIds().isEmpty()) {
@@ -45,12 +66,14 @@ public class ClickUpPathBuilder {
         }
 
         if (taskFilterParam.getProjectIds() != null && !taskFilterParam.getProjectIds().isEmpty()) {
-            taskFilterParam.getProjectIds().forEach(listId -> sb.append("&project_ids[]=%s".formatted(listId)));
+            taskFilterParam.getProjectIds().forEach(projectId -> sb.append("&project_ids[]=%s".formatted(projectId)));
         }
 
         if (taskFilterParam.getSpaceIds() != null && !taskFilterParam.getSpaceIds().isEmpty()) {
-            taskFilterParam.getSpaceIds().forEach(listId -> sb.append("&space_ids[]=%s".formatted(listId)));
+            taskFilterParam.getSpaceIds().forEach(spaceId -> sb.append("&space_ids[]=%s".formatted(spaceId)));
         }
+
+        System.out.println(sb);
 
         return sb.toString();
     }

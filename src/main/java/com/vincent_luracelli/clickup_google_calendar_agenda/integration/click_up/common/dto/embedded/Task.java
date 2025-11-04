@@ -2,29 +2,30 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 import java.util.List;
 
+@Data
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Task (
-        String id,
+public class Task {
 
-        String name,
-        String description,
-        Status status,
+    private String id;
+    private String name;
+    private String description;
+    private Status status;
+    private Creator creator;
+    private List<Assignee> assignees;
 
-        Creator creator,
-        List<Assignee> assignees,
+    @JsonProperty("start_date")
+    private String startDate;
 
-        @JsonProperty("start_date")
-        String startDate,
+    @JsonProperty("due_date")
+    private String dueDate;
 
-        @JsonProperty("due_date")
-        String dueDate,
+    private String url;
 
-        String url,
+//    @JsonProperty("custom_fields")
+//    private List<CustomField> customFields;
 
-        @JsonProperty("custom_fields")
-        List<CustomField> customFields
-) {
 }
