@@ -17,8 +17,6 @@ public class MainExceptionHandler {
 
     private static final String COMMA_DELIMITER = ", ";
 
-    private static final String COLON_DELIMITER = ": ";
-
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<String> handleConstraintViolationException(ConstraintViolationException exception, HttpServletRequest request, HttpServletResponse response) {
 

@@ -23,6 +23,18 @@ public class Task {
     @JsonProperty("due_date")
     private String dueDate;
 
+    @JsonProperty("date_created")
+    private String dateCreated;
+
+    @JsonProperty("date_updated")
+    private String dateUpdated;
+
+    @JsonProperty("date_closed")
+    private String dateClosed;
+
+    @JsonProperty("date_done")
+    private String dateDone;
+
     private String url;
 
 //    @JsonProperty("custom_fields")

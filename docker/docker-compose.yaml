@@ -1,7 +1,7 @@
 version: '3.8'
 
 networks:
-  vincent-prod:
+  vincent-app:
 
 services:
   app-service:
@@ -11,6 +11,19 @@ services:
     container_name: vincent-app
     restart: unless-stopped
     networks:
-      - vincent-prod
+      - vincent-app
     ports:
       - "4846:4846"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://root:secret@mongodb:27017/mydatabase?authSource=admin
+  mongodb:
+    image: 'mongo:latest'
+    container_name: 'vincent-larrat-db'
+    environment:
+      - 'MONGO_INITDB_DATABASE=mydatabase'
+      - 'MONGO_INITDB_ROOT_PASSWORD=secret'
+      - 'MONGO_INITDB_ROOT_USERNAME=root'
+    networks:
+      - vincent-app
+    ports:
+      - '27017:27017'

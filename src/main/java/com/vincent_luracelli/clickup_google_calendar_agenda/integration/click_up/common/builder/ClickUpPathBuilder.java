@@ -57,7 +57,6 @@ public class ClickUpPathBuilder {
         }
 
         if (taskFilterParam.getStatuses() != null && !taskFilterParam.getStatuses().isEmpty()) {
-            System.out.println(taskFilterParam.getStatuses());
             taskFilterParam.getStatuses().forEach(statusId -> sb.append("&statuses[]=%s".formatted(statusId.trim().replaceAll(" ", "%20"))));
         }
 
@@ -72,8 +71,6 @@ public class ClickUpPathBuilder {
         if (taskFilterParam.getSpaceIds() != null && !taskFilterParam.getSpaceIds().isEmpty()) {
             taskFilterParam.getSpaceIds().forEach(spaceId -> sb.append("&space_ids[]=%s".formatted(spaceId)));
         }
-
-        System.out.println(sb);
 
         return sb.toString();
     }
