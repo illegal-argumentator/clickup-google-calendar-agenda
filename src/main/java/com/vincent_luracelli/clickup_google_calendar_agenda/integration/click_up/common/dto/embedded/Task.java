@@ -37,7 +37,7 @@ public class Task {
 
     private String url;
 
-//    @JsonProperty("custom_fields")
-//    private List<CustomField> customFields;
+    @JsonProperty("custom_fields")
+    private List<CustomField> customFields;
 
 }
