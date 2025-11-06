@@ -7,6 +7,5 @@ public record CustomField(
         String id,
         String name,
         String type,
-        Object value
-) {
+        Object value) {
 }

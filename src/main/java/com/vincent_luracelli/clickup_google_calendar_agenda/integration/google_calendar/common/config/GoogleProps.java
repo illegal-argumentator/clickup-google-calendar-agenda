@@ -5,8 +5,6 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.List;
-
 @Getter
 @Setter
 @Configuration
@@ -15,16 +13,13 @@ public class GoogleProps {
 
     private String calendarId;
 
-    private Credentials credentials;
+    private OAuth oauth;
 
     @Getter
     @Setter
-    public static class Credentials {
-        private String user;
+    public static class OAuth {
         private String clientId;
-        private String clientEmail;
-        private String privateKey;
-        private String privateKeyId;
-        private List<String> scopes;
+        private String clientSecret;
+        private String redirectUri;
     }
 }

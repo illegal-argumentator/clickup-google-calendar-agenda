@@ -1,11 +1,9 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiRequestException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.*;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.exception.ClickUpRequestException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +31,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TeamsResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TeamsResponse.class);
     }
 
     public SpacesResponse findSpacesByTeam(String teamId) {
@@ -47,11 +41,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, SpacesResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, SpacesResponse.class);
     }
 
     public FoldersResponse findFoldersBySpace(String spaceId) {
@@ -61,11 +51,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, FoldersResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, FoldersResponse.class);
     }
 
     public ListsResponse findListsByFolder(String folderId) {
@@ -75,11 +61,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
     public ListsResponse findFolderlessListsBySpace(String spaceId) {
@@ -89,11 +71,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
     public TasksResponse findTasksByList(String listId) {
@@ -103,11 +81,7 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
 
     public TasksResponse findFilteredTaskByTeam(String teamId, TaskFilterParam taskFilterParam) {
@@ -117,11 +91,6 @@ public class ClickUpClient {
                 .url(path)
                 .build();
 
-        try {
-            return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
-        } catch (ApiRequestException e) {
-            throw new ClickUpRequestException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
-
 }

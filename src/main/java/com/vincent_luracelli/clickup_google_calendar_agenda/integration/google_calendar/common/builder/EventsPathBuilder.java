@@ -5,6 +5,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.googl
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.constants.CalendarPaths.CALENDARS;
 
+// TODO rewrite for uri UriComponentsBuilder
 public class EventsPathBuilder {
 
     public static String buildEventByCalendarIdPath(String calendarId, EventParam eventParam) {
