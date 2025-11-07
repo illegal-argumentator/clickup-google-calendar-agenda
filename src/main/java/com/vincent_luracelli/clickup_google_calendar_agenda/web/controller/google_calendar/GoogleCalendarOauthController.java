@@ -17,9 +17,13 @@ public class GoogleCalendarOauthController {
     private final CalendarOAuthService calendarOAuthService;
 
     @GetMapping("/authorize")
-    public void authorize(HttpServletResponse response) throws Exception {
+    public ResponseEntity<ResponsePayload> authorize(HttpServletResponse response) throws Exception {
         String url = calendarOAuthService.authorize();
-        response.sendRedirect(url);
+        return ResponseEntity.ok(ResponsePayload.builder()
+                        .code(HttpStatus.OK.value())
+                        .source(SourceType.API)
+                        .body(url)
+                .build());
     }
 
     @GetMapping("/callback")
