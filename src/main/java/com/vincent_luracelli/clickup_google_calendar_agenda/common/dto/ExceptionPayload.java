@@ -4,7 +4,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceTy
 import lombok.Builder;
 
 @Builder
-public record ResponsePayload(
+public record ExceptionPayload(
         SourceType source,
         String body,
         int code) {

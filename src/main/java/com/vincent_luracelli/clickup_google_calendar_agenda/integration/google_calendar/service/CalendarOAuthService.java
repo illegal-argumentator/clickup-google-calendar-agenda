@@ -7,12 +7,14 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.calendar.CalendarScopes;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.ResponsePayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.MainExceptionHandler;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -40,11 +42,13 @@ public class CalendarOAuthService {
 
     private final CalendarOAuthTokenService calendarOAuthTokenService;
 
-    public String authorize() {
+    public AuthorizeResponse authorize() {
         GoogleAuthorizationCodeFlow flow = getFlow();
-        return flow.newAuthorizationUrl()
+        String url = flow.newAuthorizationUrl()
                 .setRedirectUri(googleProps.getOauth().getRedirectUri())
                 .build();
+
+        return AuthorizeResponse.builder().url(url).build();
     }
 
     public void callback(String code) {
@@ -66,8 +70,9 @@ public class CalendarOAuthService {
         }
     }
 
-    public void me() {
+    public MeResponse me() {
         calendarOAuthTokenService.getValidAccessToken();
+        return MeResponse.builder().message("Authorized.").success(true).build();
     }
 
     private GoogleAuthorizationCodeFlow getFlow() {
