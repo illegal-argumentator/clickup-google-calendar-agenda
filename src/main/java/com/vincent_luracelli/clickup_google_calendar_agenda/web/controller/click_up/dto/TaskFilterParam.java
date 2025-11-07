@@ -17,6 +17,7 @@ public class TaskFilterParam {
     private List<String> spaceIds;
     private List<String> projectIds;
     private List<String> listIds;
+    private List<String> assignees;
     private Integer dueDateGt;
     private Integer dueDateLt;
 

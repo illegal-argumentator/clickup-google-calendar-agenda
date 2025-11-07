@@ -7,32 +7,36 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.c
 
 public class ClickUpPathBuilder {
 
-    public static String buildSpaceByTeamIdPath(String teamId) {
-        return TEAM.getPath() + "/%s/space".formatted(teamId);
+    public static String buildSpaceByTeamIdPath(String id) {
+        return TEAM.getPath() + "/%s/space".formatted(id);
     }
 
-    public static String buildFolderBySpaceIdPath(String spaceId) {
-        return SPACE.getPath() + "/%s/folder".formatted(spaceId);
+    public static String buildTaskByTeamIdPath(String id) {
+        return TEAM.getPath() + "/%s/task".formatted(id);
     }
 
-    public static String buildListByFolderIdPath(String folderId) {
-        return FOLDER.getPath() + "/%s/list".formatted(folderId);
+    public static String buildFolderBySpaceIdPath(String id) {
+        return SPACE.getPath() + "/%s/folder".formatted(id);
     }
 
-    public static String buildFolderlessListBySpaceIdPath(String folderId) {
-        return SPACE.getPath() + "/%s/list".formatted(folderId);
+    public static String buildFolderlessListBySpaceIdPath(String id) {
+        return SPACE.getPath() + "/%s/list".formatted(id);
     }
 
-    public static String buildTaskByListIdPath(String listId) {
-        return LIST.getPath() + "/%s/task".formatted(listId);
+    public static String buildListByFolderIdPath(String id) {
+        return FOLDER.getPath() + "/%s/list".formatted(id);
     }
 
-    public static String buildTaskByTeamIdPath(String teamId) {
-        return TEAM.getPath() + "/%s/task".formatted(teamId);
+    public static String buildTaskByListIdPath(String id) {
+        return LIST.getPath() + "/%s/task".formatted(id);
     }
 
-    public static String buildTaskByTeamIdPath(String teamId, TaskFilterParam taskFilterParam) {
-        String basePath = buildTaskByTeamIdPath(teamId);
+    public static String buildMembersByListIdPath(String id) {
+        return LIST.getPath() + "/%s/member".formatted(id);
+    }
+
+    public static String buildTaskByTeamIdPath(String id, TaskFilterParam taskFilterParam) {
+        String basePath = buildTaskByTeamIdPath(id);
 
         UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromPath(basePath);
 
@@ -74,6 +78,10 @@ public class ClickUpPathBuilder {
 
         if (taskFilterParam.getSpaceIds() != null && !taskFilterParam.getSpaceIds().isEmpty()) {
             taskFilterParam.getSpaceIds().forEach(spaceId -> uriComponentsBuilder.queryParam("space_ids[]", spaceId));
+        }
+
+        if (taskFilterParam.getAssignees() != null && !taskFilterParam.getAssignees().isEmpty()) {
+            taskFilterParam.getAssignees().forEach(assignee -> uriComponentsBuilder.queryParam("assignees[]", assignee));
         }
 
         return uriComponentsBuilder.build().toString();

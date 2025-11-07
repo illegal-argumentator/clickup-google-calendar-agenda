@@ -17,6 +17,7 @@ public class GoogleCalendarOauthController {
     @GetMapping("/authorize")
     public ResponseEntity<AuthorizeResponse> authorize() {
         AuthorizeResponse authorizeResponse = calendarOAuthService.authorize();
+
         return ResponseEntity.ok(authorizeResponse);
     }
 

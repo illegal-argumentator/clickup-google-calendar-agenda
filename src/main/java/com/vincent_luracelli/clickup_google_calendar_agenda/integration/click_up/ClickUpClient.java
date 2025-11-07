@@ -34,8 +34,8 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TeamsResponse.class);
     }
 
-    public SpacesResponse findSpacesByTeam(String teamId) {
-        String path = buildSpaceByTeamIdPath(teamId);
+    public SpacesResponse findSpacesByTeam(String id) {
+        String path = buildSpaceByTeamIdPath(id);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)
@@ -44,8 +44,8 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, SpacesResponse.class);
     }
 
-    public FoldersResponse findFoldersBySpace(String spaceId) {
-        String path = buildFolderBySpaceIdPath(spaceId);
+    public FoldersResponse findFoldersBySpace(String id) {
+        String path = buildFolderBySpaceIdPath(id);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)
@@ -64,8 +64,8 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
-    public ListsResponse findFolderlessListsBySpace(String spaceId) {
-        String path = buildFolderlessListBySpaceIdPath(spaceId);
+    public ListsResponse findFolderlessListsBySpace(String id) {
+        String path = buildFolderlessListBySpaceIdPath(id);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)
@@ -74,8 +74,8 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
-    public TasksResponse findTasksByList(String listId) {
-        String path = buildTaskByListIdPath(listId);
+    public TasksResponse findTasksByList(String id) {
+        String path = buildTaskByListIdPath(id);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)
@@ -84,13 +84,23 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
 
-    public TasksResponse findFilteredTaskByTeam(String teamId, TaskFilterParam taskFilterParam) {
-        String path = buildTaskByTeamIdPath(teamId, taskFilterParam);
+    public TasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam) {
+        String path = buildTaskByTeamIdPath(id, taskFilterParam);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
                 .url(path)
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
+    }
+
+    public MembersResponse findMembersByList(String id) {
+        String path = buildMembersByListIdPath(id);
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, CLICKUP_API_KEY)
+                .url(path)
+                .build();
+
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, MembersResponse.class);
     }
 }

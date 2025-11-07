@@ -1,6 +1,9 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Listing;
 
-public record ListsResponse(java.util.List<List> lists) {
+import java.util.List;
+
+public record ListsResponse(@JsonProperty("lists") List<Listing> listings) {
 }

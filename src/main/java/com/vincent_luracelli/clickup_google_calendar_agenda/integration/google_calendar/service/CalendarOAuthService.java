@@ -8,7 +8,6 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.MainExceptionHandler;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
@@ -80,14 +79,17 @@ public class CalendarOAuthService {
             final NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
 
             GoogleClientSecrets clientSecrets = new GoogleClientSecrets()
-                    .setInstalled(new GoogleClientSecrets.Details()
+                    .setWeb(new GoogleClientSecrets.Details()
                             .setClientId(googleProps.getOauth().getClientId())
                             .setClientSecret(googleProps.getOauth().getClientSecret())
                             .setRedirectUris(List.of(googleProps.getOauth().getRedirectUri()))
                     );
 
             return new GoogleAuthorizationCodeFlow.Builder(
-                    httpTransport, JSON_FACTORY, clientSecrets, List.of(CalendarScopes.CALENDAR))
+                    httpTransport,
+                    JSON_FACTORY,
+                    clientSecrets,
+                    List.of(CalendarScopes.CALENDAR, CalendarScopes.CALENDAR_EVENTS))
                     .setAccessType(ACCESS_TYPE)
                     .setApprovalPrompt(APPROVAL_PROMPT)
                     .build();
@@ -95,4 +97,5 @@ public class CalendarOAuthService {
             throw new ApiException(e.toString(), HttpStatus.UNAUTHORIZED.value(), SourceType.GOOGLE_CALENDAR);
         }
     }
+
 }
