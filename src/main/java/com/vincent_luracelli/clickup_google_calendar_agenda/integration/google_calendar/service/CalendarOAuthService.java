@@ -7,6 +7,7 @@ import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.calendar.CalendarScopes;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.ResponsePayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
@@ -37,6 +38,8 @@ public class CalendarOAuthService {
 
     private final CalendarTokenService calendarTokenService;
 
+    private final CalendarOAuthTokenService calendarOAuthTokenService;
+
     public String authorize() {
         GoogleAuthorizationCodeFlow flow = getFlow();
         return flow.newAuthorizationUrl()
@@ -53,7 +56,7 @@ public class CalendarOAuthService {
 
             CalendarToken calendarToken = CalendarToken.builder()
                     .accessToken(tokenResponse.getAccessToken())
-                    .accessTokenExpiration(tokenResponse.getExpiresInSeconds())
+                    .accessExpiration(tokenResponse.getExpiresInSeconds() + System.currentTimeMillis())
                     .refreshToken(tokenResponse.getRefreshToken())
                     .calendarId(googleProps.getCalendarId())
                     .build();
@@ -61,6 +64,10 @@ public class CalendarOAuthService {
         } catch (IOException e) {
             throw new ApiException(e.getMessage(), HttpStatus.BAD_REQUEST.value(), SourceType.GOOGLE_CALENDAR);
         }
+    }
+
+    public void me() {
+        calendarOAuthTokenService.getValidAccessToken();
     }
 
     private GoogleAuthorizationCodeFlow getFlow() {

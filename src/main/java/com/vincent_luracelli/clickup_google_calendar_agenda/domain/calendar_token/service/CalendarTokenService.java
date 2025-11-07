@@ -14,8 +14,14 @@ public class CalendarTokenService {
     private final CalendarTokenRepository calendarTokenRepository;
 
     public CalendarToken save(CalendarToken calendarToken) {
-        return calendarTokenRepository.save(calendarToken);
+        return findByCalendarId(calendarToken.getCalendarId())
+                .map(existing -> {
+                    calendarToken.setId(existing.getId());
+                    return calendarTokenRepository.save(calendarToken);
+                })
+                .orElseGet(() -> calendarTokenRepository.save(calendarToken));
     }
+
 
     public Optional<CalendarToken> findByCalendarId(String calendarId) {
         return calendarTokenRepository.findByCalendarId(calendarId);

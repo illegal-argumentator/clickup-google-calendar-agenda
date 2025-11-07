@@ -38,12 +38,12 @@ public class CalendarOAuthTokenService {
 
         CalendarToken calendarToken = calendarTokenOptional.get();
 
-        if (calendarToken.getAccessTokenExpiration() <= System.currentTimeMillis()) {
+        if (calendarToken.getAccessExpiration() <= System.currentTimeMillis()) {
             GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
 
             calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
-            calendarToken.setAccessTokenExpiration(
-                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000
+            calendarToken.setAccessExpiration(
+                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds()
             );
 
             if (googleTokenResponse.getRefreshToken() != null) {
