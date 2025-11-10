@@ -17,6 +17,7 @@ public record InsertEventRequest(
         String summary,
         String description,
         String location,
+        String colorId,
         List<Attendee> attendees,
         Reminders reminders) {
 }
