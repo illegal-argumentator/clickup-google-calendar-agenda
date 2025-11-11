@@ -17,6 +17,7 @@ public record PatchEventRequest(
     String summary,
     String description,
     String location,
+    String colorId,
     List<Attendee> attendees,
     Reminders reminders,
     String status) {
