@@ -24,8 +24,4 @@ public class EventService {
     public void saveAll(List<Event> events) {
         eventRepository.saveAll(events);
     }
-
-    public void deleteAllByIds(List<String> ids) {
-        eventRepository.deleteAllByIdIn(ids);
-    }
 }

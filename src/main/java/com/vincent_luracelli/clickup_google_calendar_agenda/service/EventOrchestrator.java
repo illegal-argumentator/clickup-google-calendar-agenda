@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,28 +23,20 @@ public class EventOrchestrator {
 
     private final EventClient eventClient;
 
-    public EventListResponse syncCreatedEvents(EventListParam eventListParam) {
+    public EventListResponse retrieveCreatedEvents(EventListParam eventListParam) {
         EventListResponse eventListResponse = eventClient.list(eventListParam);
-        List<String> deletedEventIds = new ArrayList<>();
 
         Set<String> existingIds = eventService.findAll().stream()
                 .map(Event::getId)
                 .collect(Collectors.toSet());
 
         List<EventResponse> createdEvents = eventListResponse.getItems().stream()
-                .filter(event -> {
-                    boolean contains = existingIds.contains(event.getId());
-                    if (!contains) {
-                        deletedEventIds.add(event.getId());
-                    }
-                    return contains;
-                })
+                .filter(event -> existingIds.contains(event.getId()))
                 .toList();
 
-        eventService.deleteAllByIds(deletedEventIds);
         eventListResponse.setItems(createdEvents);
 
-        log.info("EventOrchestrator: {} - created events, {} - deleted events. Successfully synchronized.", createdEvents.size(), deletedEventIds.size());
+        log.info("EventOrchestrator: {} - created events, {} - fetched events. Successfully synchronized.", createdEvents.size(), eventListResponse.getItems().size());
 
         return eventListResponse;
     }
