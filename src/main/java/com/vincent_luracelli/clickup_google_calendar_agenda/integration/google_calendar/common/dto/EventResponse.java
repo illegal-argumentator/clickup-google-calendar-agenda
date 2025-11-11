@@ -22,6 +22,7 @@ public class EventResponse {
     private String summary;
     private String description;
     private String location;
+    private String colorId;
     private List<Attendee> attendees;
     private EventDateTime start;
     private EventDateTime end;

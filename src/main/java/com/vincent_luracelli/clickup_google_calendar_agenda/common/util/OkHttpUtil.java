@@ -26,6 +26,7 @@ public class OkHttpUtil {
         try {
             return objectMapper.readValue(responseContent, responseTarget);
         } catch (IOException e) {
+            logOkHttpUtilError(e.getMessage());
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
         }
     }
@@ -33,15 +34,20 @@ public class OkHttpUtil {
     public String handleApiRequest(SourceType sourceType, Request request) {
         try (Response response = okHttpClient.newCall(request).execute()) {
             if (!response.isSuccessful()) {
-                // TODO make exception body handler both for click up and google to return structured response
                 String message = objectMapper.readValue(response.body().string(), Object.class).toString();
+                logOkHttpUtilError(message);
                 throw new ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
             }
 
             return response.body().string();
         } catch (IOException e) {
+            logOkHttpUtilError(e.getMessage());
             throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
         }
+    }
+
+    private void logOkHttpUtilError(String message) {
+        log.error("OkHttpUtil: {}", message);
     }
 
 }
