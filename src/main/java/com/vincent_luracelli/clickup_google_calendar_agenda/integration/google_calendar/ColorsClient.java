@@ -7,6 +7,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.googl
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Request;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
@@ -22,6 +23,7 @@ public class ColorsClient {
 
     private final CalendarOAuthTokenService calendarOAuthTokenService;
 
+    @Cacheable("colors")
     public ColorsResponse getColors() {
         String token = calendarOAuthTokenService.getValidAccessToken();
         String path = buildColorsPath();
