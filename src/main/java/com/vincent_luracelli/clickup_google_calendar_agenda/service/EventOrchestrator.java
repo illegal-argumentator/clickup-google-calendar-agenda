@@ -44,6 +44,9 @@ public class EventOrchestrator {
 
         eventService.deleteAllByIds(deletedEventIds);
         eventListResponse.setItems(createdEvents);
+
+        log.info("EventOrchestrator: {} - created events, {} - deleted events. Successfully synchronized.", createdEvents.size(), deletedEventIds.size());
+
         return eventListResponse;
     }
 }

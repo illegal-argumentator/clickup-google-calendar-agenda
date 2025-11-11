@@ -23,14 +23,6 @@ public class EventsPathBuilder {
             uriComponentsBuilder.queryParam("showDeleted", eventListParam.getShowDeleted());
         }
 
-        if (eventListParam.getOrderBy() != null) {
-            uriComponentsBuilder.queryParam("orderBy", eventListParam.getOrderBy().getOrder());
-        }
-
-        if (eventListParam.getTimeZone() != null) {
-            uriComponentsBuilder.queryParam("timeZone", eventListParam.getTimeZone());
-        }
-
         return uriComponentsBuilder.build().toString();
     }
 
