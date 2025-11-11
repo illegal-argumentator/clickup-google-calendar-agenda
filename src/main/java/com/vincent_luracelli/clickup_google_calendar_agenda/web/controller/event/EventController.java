@@ -18,6 +18,6 @@ public class EventController {
 
     @GetMapping("/all/created")
     ResponseEntity<EventListResponse> getCreatedEvents(EventListParam eventListParam) {
-        return ResponseEntity.ok(eventOrchestrator.syncCreatedEvents(eventListParam));
+        return ResponseEntity.ok(eventOrchestrator.retrieveCreatedEvents(eventListParam));
     }
 }
