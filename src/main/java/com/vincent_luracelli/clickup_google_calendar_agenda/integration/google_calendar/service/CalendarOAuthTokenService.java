@@ -25,7 +25,7 @@ public class CalendarOAuthTokenService {
 
     private final CalendarTokenService calendarTokenService;
 
-    public String getValidAccessToken() {
+    public String requireValidToken() {
         String calendarId = googleProps.getCalendarId();
         Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(calendarId);
 

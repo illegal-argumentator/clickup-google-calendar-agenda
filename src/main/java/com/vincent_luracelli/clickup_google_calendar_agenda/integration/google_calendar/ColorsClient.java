@@ -25,7 +25,7 @@ public class ColorsClient {
 
     @Cacheable("colors")
     public ColorsResponse getColors() {
-        String token = calendarOAuthTokenService.getValidAccessToken();
+        String token = calendarOAuthTokenService.requireValidToken();
         String path = buildColorsPath();
 
         Request request = new Request.Builder()

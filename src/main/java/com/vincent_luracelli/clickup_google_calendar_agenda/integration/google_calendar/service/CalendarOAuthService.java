@@ -76,7 +76,7 @@ public class CalendarOAuthService {
     }
 
     public MeResponse me() {
-        calendarOAuthTokenService.getValidAccessToken();
+        calendarOAuthTokenService.requireValidToken();
         return MeResponse.builder()
                 .message("Authorized.")
                 .success(true)
@@ -99,9 +99,7 @@ public class CalendarOAuthService {
                     JSON_FACTORY,
                     clientSecrets,
                     List.of(CalendarScopes.CALENDAR)
-            )
-                    .setAccessType(ACCESS_TYPE)
-                    .build();
+            ).setAccessType(ACCESS_TYPE).build();
 
         } catch (GeneralSecurityException | IOException e) {
             log.error("Error creating GoogleAuthorizationCodeFlow", e);
