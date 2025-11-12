@@ -8,22 +8,9 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.g
 
 public class EventsPathBuilder {
 
-    public static String buildEventByCalendarIdPath(String calendarId, EventParam eventParam) {
-        String basePath = CALENDARS.getPath() + "/%s/events".formatted(calendarId);
+    public static String buildEventByPrimaryCalendarPath(EventParam eventParam) {
+        String basePath = CALENDARS.getPath() + "/primary/events";
         return buildEventParamPath(basePath, eventParam);
-    }
-
-    public static String buildEventListByCalendarIdPath(String calendarId, EventListParam eventListParam) {
-        String basePath = CALENDARS.getPath() + "/%s/events".formatted(calendarId);
-
-
-        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromPath(basePath);
-
-        if (eventListParam.getShowDeleted() != null) {
-            uriComponentsBuilder.queryParam("showDeleted", eventListParam.getShowDeleted());
-        }
-
-        return uriComponentsBuilder.build().toString();
     }
 
     public static String buildEventListByPrimaryCalendarPath(EventListParam eventListParam) {

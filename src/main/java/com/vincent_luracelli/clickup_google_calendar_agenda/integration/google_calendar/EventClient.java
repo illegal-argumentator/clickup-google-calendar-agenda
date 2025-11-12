@@ -39,7 +39,7 @@ public class EventClient {
 
     public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
         String token = calendarOAuthTokenService.requireValidToken();
-        String path = buildEventByCalendarIdPath(googleProps.getCalendarId(), eventParam);
+        String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(insertEventRequest);
