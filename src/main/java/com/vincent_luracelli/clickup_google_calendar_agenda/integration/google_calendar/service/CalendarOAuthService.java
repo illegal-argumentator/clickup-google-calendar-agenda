@@ -17,6 +17,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
+import io.swagger.v3.oas.models.security.Scopes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
@@ -143,7 +144,7 @@ public class CalendarOAuthService {
                     httpTransport,
                     JSON_FACTORY,
                     clientSecrets,
-                    List.of(CalendarScopes.CALENDAR)
+                    List.of(CalendarScopes.CALENDAR, "openid", "email", "profile")
             ).setAccessType(ACCESS_TYPE).build();
 
         } catch (GeneralSecurityException | IOException e) {
