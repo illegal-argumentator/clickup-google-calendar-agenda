@@ -37,21 +37,7 @@ public class CalendarOAuthTokenService {
         }
 
         CalendarToken calendarToken = calendarTokenOptional.get();
-
-        if (calendarToken.getAccessExpiration() <= System.currentTimeMillis()) {
-            GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
-
-            calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
-            calendarToken.setAccessExpiration(
-                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds()
-            );
-
-            if (googleTokenResponse.getRefreshToken() != null) {
-                calendarToken.setRefreshToken(googleTokenResponse.getRefreshToken());
-            }
-
-            calendarTokenService.save(calendarToken);
-        }
+        handleTokenExpiration(calendarToken);
 
         return calendarToken.getAccessToken();
     }
@@ -69,6 +55,23 @@ public class CalendarOAuthTokenService {
             ).execute();
         } catch (GeneralSecurityException | IOException e) {
             throw new ApiException(e.toString(), HttpStatus.UNAUTHORIZED.value(), SourceType.GOOGLE_CALENDAR);
+        }
+    }
+
+    private void handleTokenExpiration(CalendarToken calendarToken) {
+        if (calendarToken.getAccessExpiration() <= System.currentTimeMillis()) {
+            GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
+
+            calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
+            calendarToken.setAccessExpiration(
+                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds()
+            );
+
+            if (googleTokenResponse.getRefreshToken() != null) {
+                calendarToken.setRefreshToken(googleTokenResponse.getRefreshToken());
+            }
+
+            calendarTokenService.save(calendarToken);
         }
     }
 }

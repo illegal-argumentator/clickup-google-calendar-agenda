@@ -58,7 +58,7 @@ public class CalendarOAuthService {
 
             CalendarToken calendarToken = CalendarToken.builder()
                     .accessToken(tokenResponse.getAccessToken())
-                    .accessExpiration(System.currentTimeMillis() + tokenResponse.getExpiresInSeconds() * 1000)
+                    .accessExpiration(System.currentTimeMillis() + tokenResponse.getExpiresInSeconds())
                     .refreshToken(tokenResponse.getRefreshToken())
                     .calendarId(googleProps.getCalendarId())
                     .build();
@@ -76,11 +76,19 @@ public class CalendarOAuthService {
     }
 
     public MeResponse me() {
-        calendarOAuthTokenService.requireValidToken();
-        return MeResponse.builder()
+        MeResponse meResponse = MeResponse.builder()
                 .message("Authorized.")
                 .success(true)
                 .build();
+
+        try {
+            calendarOAuthTokenService.requireValidToken();
+        } catch (ApiException e) {
+            meResponse.setMessage("Unauthorized." + e.getMessage());
+            meResponse.setSuccess(false);
+        }
+
+        return meResponse;
     }
 
     private GoogleAuthorizationCodeFlow getFlow() {

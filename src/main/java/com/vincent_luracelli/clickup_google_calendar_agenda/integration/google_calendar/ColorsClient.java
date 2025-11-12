@@ -23,7 +23,7 @@ public class ColorsClient {
 
     private final CalendarOAuthTokenService calendarOAuthTokenService;
 
-    @Cacheable("colors")
+    @Cacheable("calendar_colors")
     public ColorsResponse getColors() {
         String token = calendarOAuthTokenService.requireValidToken();
         String path = buildColorsPath();

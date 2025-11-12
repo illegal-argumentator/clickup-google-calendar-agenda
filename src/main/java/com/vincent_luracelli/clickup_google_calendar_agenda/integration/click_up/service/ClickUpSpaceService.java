@@ -8,6 +8,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Listing;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Member;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,7 @@ public class ClickUpSpaceService {
 
     private final ClickUpClient clickUpClient;
 
+    @Cacheable("click_up_members_by_space")
     public MembersResponse findMembersBySpace(String id) {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
         ListsResponse listsBySpace = clickUpClient.findFolderlessListsBySpace(id);
