@@ -26,6 +26,19 @@ public class EventsPathBuilder {
         return uriComponentsBuilder.build().toString();
     }
 
+    public static String buildEventListByPrimaryCalendarPath(EventListParam eventListParam) {
+        String basePath = CALENDARS.getPath() + "/primary/events";
+
+
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromPath(basePath);
+
+        if (eventListParam.getShowDeleted() != null) {
+            uriComponentsBuilder.queryParam("showDeleted", eventListParam.getShowDeleted());
+        }
+
+        return uriComponentsBuilder.build().toString();
+    }
+
     public static String buildEventByIdPath(String eventId, String calendarId, EventParam eventParam) {
         String basePath = CALENDARS.getPath() + "/%s/events/%s".formatted(calendarId, eventId);
         return buildEventParamPath(basePath, eventParam);

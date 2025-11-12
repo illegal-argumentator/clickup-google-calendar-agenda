@@ -92,7 +92,7 @@ public class EventClient {
 
     public EventListResponse list(EventListParam eventListParam) {
         String token = calendarOAuthTokenService.requireValidToken();
-        String path = buildEventListByCalendarIdPath(googleProps.getCalendarId(), eventListParam);
+        String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
