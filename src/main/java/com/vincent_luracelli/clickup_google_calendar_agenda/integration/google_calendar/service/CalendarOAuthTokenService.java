@@ -10,6 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CalendarOAuthTokenService {
@@ -54,6 +56,7 @@ public class CalendarOAuthTokenService {
                     oauth.getClientSecret()
             ).execute();
         } catch (GeneralSecurityException | IOException e) {
+            log.error(e.getMessage());
             throw new ApiException(e.toString(), HttpStatus.UNAUTHORIZED.value(), SourceType.GOOGLE_CALENDAR);
         }
     }
@@ -64,7 +67,7 @@ public class CalendarOAuthTokenService {
 
             calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
             calendarToken.setAccessExpiration(
-                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds()
+                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000
             );
 
             if (googleTokenResponse.getRefreshToken() != null) {
