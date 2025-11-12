@@ -30,4 +30,9 @@ public class GoogleCalendarOauthController {
     public ResponseEntity<MeResponse> me() {
         return ResponseEntity.ok(calendarOAuthService.me());
     }
+
+    @DeleteMapping("/revoke")
+    public void revoke(@RequestParam String email) {
+        calendarOAuthService.revoke(email);
+    }
 }

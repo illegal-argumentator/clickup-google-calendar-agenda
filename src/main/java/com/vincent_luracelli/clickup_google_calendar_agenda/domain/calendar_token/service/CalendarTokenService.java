@@ -26,4 +26,8 @@ public class CalendarTokenService {
         return calendarTokenRepository.findByCalendarId(calendarId);
     }
 
+    public void deleteByCalendarId(String calendarId) {
+        calendarTokenRepository.deleteByCalendarId(calendarId);
+    }
+
 }

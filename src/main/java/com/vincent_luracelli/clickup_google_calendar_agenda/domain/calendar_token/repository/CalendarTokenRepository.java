@@ -9,4 +9,6 @@ public interface CalendarTokenRepository extends MongoRepository<CalendarToken, 
 
     Optional<CalendarToken> findByCalendarId(String calendarId);
 
+    void deleteByCalendarId(String calendarId);
+
 }
