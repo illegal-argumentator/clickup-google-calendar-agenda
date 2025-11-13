@@ -6,8 +6,5 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public record Member(
         Integer id,
         String username,
-        String email,
-        String color,
-        String profilePicture,
-        String initials) {
+        String email) {
 }

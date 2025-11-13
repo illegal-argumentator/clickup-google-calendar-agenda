@@ -2,17 +2,15 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiRequestException;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ExceptionPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.exception.CalendarEventException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.GoogleAuthService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarOAuthTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventListParam;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
@@ -35,13 +33,13 @@ public class EventClient {
 
     private final GoogleProps googleProps;
 
-    private final GoogleAuthService googleAuthService;
-
     private final OkHttpUtil okHttpUtil;
 
+    private final CalendarOAuthTokenService calendarOAuthTokenService;
+
     public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = googleAuthService.getToken();
-        String path = buildEventByCalendarIdPath(googleProps.getCalendarId(), eventParam);
+        String token = calendarOAuthTokenService.requireValidToken();
+        String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(insertEventRequest);
@@ -53,21 +51,14 @@ public class EventClient {
                     .build();
 
             return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventResponse.class);
-        } catch (ApiRequestException e) {
-            log.error("ApiRequestException: ", e);
-            throw new CalendarEventException(e.getExceptionPayload());
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
-            throw new CalendarEventException(ExceptionPayload.builder()
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .body("Couldn't parse request body for event creation")
-                    .source(SourceType.API)
-                    .build());
+            throw new ApiException("Couldn't parse request body for event creation", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     public void patch(String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = googleAuthService.getToken();
+        String token = calendarOAuthTokenService.requireValidToken();
         String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
 
         try {
@@ -80,52 +71,35 @@ public class EventClient {
                     .build();
 
             okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
-        } catch (ApiRequestException e) {
-            log.error("ApiRequestException: ", e);
-            throw new CalendarEventException(e.getExceptionPayload());
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
-            throw new CalendarEventException(ExceptionPayload.builder()
-                    .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                    .body("Couldn't parse request body for patching event")
-                    .source(SourceType.API)
-                    .build());
+            throw new ApiException("Couldn't parse request body for patching event", HttpStatus.INTERNAL_SERVER_ERROR.value());
         }
     }
 
     public void delete(String eventId, EventParam eventParam) {
-        String token = googleAuthService.getToken();
+        String token = calendarOAuthTokenService.requireValidToken();
         String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
 
-        try {
-            Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
-                    .url(path)
-                    .delete()
-                    .build();
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                .url(path)
+                .delete()
+                .build();
 
-            okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
-        } catch (ApiRequestException e) {
-            log.error("ApiRequestException: ", e);
-            throw new CalendarEventException(e.getExceptionPayload());
-        }
+        okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
     }
 
     public EventListResponse list(EventListParam eventListParam) {
-        String token = googleAuthService.getToken();
-        String path = buildEventListByCalendarIdPath(googleProps.getCalendarId(), eventListParam);
+        String token = calendarOAuthTokenService.requireValidToken();
+        String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
-        try {
-            Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
-                    .url(path)
-                    .get()
-                    .build();
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                .url(path)
+                .get()
+                .build();
 
-            return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventListResponse.class);
-        } catch (ApiRequestException e) {
-            log.error("ApiRequestException: ", e);
-            throw new CalendarEventException(e.getExceptionPayload());
-        }
+        return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventListResponse.class);
     }
 }

@@ -3,7 +3,9 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Folder(
+public record Priority(
+        String colorId,
         String id,
-        String name) {
+        String orderIndex,
+        String priority) {
 }
