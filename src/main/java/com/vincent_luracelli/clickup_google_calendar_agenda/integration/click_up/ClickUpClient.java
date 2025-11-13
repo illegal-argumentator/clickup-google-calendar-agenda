@@ -80,24 +80,24 @@ public class ClickUpClient {
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
-    public NormalTasksResponse findTasksByList(String id) {
+    public TasksResponse findTasksByList(String id) {
         String path = buildTaskByListIdPath(id);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
                 .url(path)
                 .build();
 
-        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, NormalTasksResponse.class);
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
 
-    public FilteredTasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam) {
+    public TasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam) {
         String path = buildTaskByTeamIdPath(id, taskFilterParam);
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
                 .url(path)
                 .build();
 
-        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, FilteredTasksResponse.class);
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
 
     @Cacheable("click_up_members_by_list")

@@ -15,6 +15,7 @@ public class Task {
     private String description;
     private Status status;
     private Creator creator;
+    private Object priority;
     private List<Assignee> assignees;
 
     @JsonProperty("start_date")
