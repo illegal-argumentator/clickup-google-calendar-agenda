@@ -13,4 +13,10 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class EventListResponse { private List<EventResponse> items;}
+public class EventListResponse {
+
+    private List<EventResponse> items;
+
+    private String nextPageToken;
+
+}

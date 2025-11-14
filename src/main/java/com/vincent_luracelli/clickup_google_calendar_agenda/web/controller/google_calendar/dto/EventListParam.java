@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto;
 
-import com.google.api.client.util.DateTime;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.embedded.OrderBy;
 import lombok.Builder;
 import lombok.Data;
 
@@ -8,11 +8,11 @@ import lombok.Data;
 @Builder
 public class EventListParam {
 
+    private String search;
+    private Boolean singleEvents;
     private Boolean showDeleted;
-    private String orderBy;
+    private OrderBy orderBy;
     private Integer maxResults;
-    private DateTime startTime;
-    private DateTime endTime;
     private String pageToken;
 
 }
