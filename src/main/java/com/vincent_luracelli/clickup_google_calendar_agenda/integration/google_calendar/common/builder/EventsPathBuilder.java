@@ -42,7 +42,7 @@ public class EventsPathBuilder {
             uriComponentsBuilder.queryParam("pageToken", eventListParam.getPageToken());
         }
 
-        return uriComponentsBuilder.build().encode().toUriString();
+        return uriComponentsBuilder.build().toString();
     }
 
     public static String buildEventByIdPath(String eventId, String calendarId, EventParam eventParam) {
