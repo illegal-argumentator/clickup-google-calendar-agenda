@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
 import static com.google.auth.http.AuthHttpConstants.BEARER;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WaitUtil.waitSafely;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.builder.EventsPathBuilder.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
@@ -50,7 +51,12 @@ public class EventClient {
                     .post(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
 
-            return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventResponse.class);
+            try {
+                return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventResponse.class);
+            } catch (ApiException e) {
+                return handleGoogleNetworkError(request, EventResponse.class);
+            }
+
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
             throw new ApiException("Couldn't parse request body for event creation", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -70,6 +76,12 @@ public class EventClient {
                     .patch(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
 
+            try {
+                okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
+            } catch (ApiException e) {
+                handleGoogleNetworkError(request);
+            }
+
             okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
@@ -87,7 +99,11 @@ public class EventClient {
                 .delete()
                 .build();
 
-        okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
+        try {
+            okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
+        } catch (ApiException e) {
+            handleGoogleNetworkError(request);
+        }
     }
 
     public EventListResponse list(EventListParam eventListParam) {
@@ -100,6 +116,42 @@ public class EventClient {
                 .get()
                 .build();
 
-        return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventListResponse.class);
+        try {
+            return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventListResponse.class);
+        } catch (ApiException e) {
+            return handleGoogleNetworkError(request,EventListResponse.class);
+        }
+    }
+
+    private <T> T handleGoogleNetworkError(Request request, Class<T> responseTarget) {
+        int maxRetries = 10;
+        int retryDelay = 5000;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                if (responseTarget == null) {
+                    okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
+                    return null;
+                }
+
+                return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, responseTarget);
+
+            } catch (ApiException e) {
+                boolean isNetworkIssue = e.getCode() == 500 && e.getMessage().contains("Network");
+                if (isNetworkIssue && attempt < maxRetries) {
+                    log.warn("Network unreachable (attempt {}/{}). Retrying…", attempt, maxRetries);
+                    waitSafely(retryDelay);
+                    continue;
+                }
+
+                throw e;
+            }
+        }
+
+        throw new ApiException("Network is unreachable.", HttpStatus.INTERNAL_SERVER_ERROR.value(), SourceType.GOOGLE_CALENDAR);
+    }
+
+    private void handleGoogleNetworkError(Request request) {
+        handleGoogleNetworkError(request, null);
     }
 }
