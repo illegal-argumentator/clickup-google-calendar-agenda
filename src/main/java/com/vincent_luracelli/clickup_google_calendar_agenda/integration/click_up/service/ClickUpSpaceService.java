@@ -5,7 +5,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.ListsResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.MembersResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.SpacesResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Listing;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.ClickUpList;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -32,8 +32,8 @@ public class ClickUpSpaceService {
         List<Future<Set<Member>>> futures = new ArrayList<>();
         Set<Member> members = new HashSet<>();
 
-        for (Listing listing : listsBySpace.listings()) {
-            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(listing.id()).getMembers()));
+        for (ClickUpList clickUpList : listsBySpace.clickUpLists()) {
+            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(clickUpList.id()).getMembers()));
         }
 
         try {

@@ -41,4 +41,5 @@ public class Task {
     @JsonProperty("custom_fields")
     private List<CustomField> customFields;
 
+    private TaskFolder folder;
 }

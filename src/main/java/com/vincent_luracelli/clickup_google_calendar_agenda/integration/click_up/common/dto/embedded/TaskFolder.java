@@ -3,7 +3,9 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Listing(
+public record TaskFolder(
         String id,
-        String name) {
+        String name,
+        Boolean access,
+        Boolean hidden) {
 }

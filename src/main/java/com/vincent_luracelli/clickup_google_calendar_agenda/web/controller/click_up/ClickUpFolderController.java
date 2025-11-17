@@ -16,7 +16,7 @@ public class ClickUpFolderController {
 
     private final ClickUpClient clickUpClient;
 
-    @GetMapping("/space/{id}/folder")
+    @GetMapping("/space/{id}/folders")
     ResponseEntity<FoldersResponse> findFoldersBySpace(@PathVariable String id) {
         return ResponseEntity.ok(clickUpClient.findFoldersBySpace(id));
     }
