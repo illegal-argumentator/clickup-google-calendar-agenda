@@ -59,10 +59,6 @@ public class EventsPathBuilder {
             sb.append("?sendUpdates=%s".formatted(eventParam.getSendUpdates().getUpdate()));
         }
 
-        if (eventParam.getMaxAttendees() != null) {
-            sb.append("&maxAttendees=%d".formatted(eventParam.getMaxAttendees()));
-        }
-
         if (eventParam.getSupportsAttachments() != null) {
             sb.append("&supportsAttachments=%b".formatted(eventParam.getSupportsAttachments()));
         }
