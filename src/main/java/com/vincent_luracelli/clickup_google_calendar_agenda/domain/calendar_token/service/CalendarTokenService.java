@@ -13,8 +13,8 @@ public class CalendarTokenService {
 
     private final CalendarTokenRepository calendarTokenRepository;
 
-    public void save(CalendarToken calendarToken) {
-        findByCalendarId(calendarToken.getCalendarId())
+    public CalendarToken save(CalendarToken calendarToken) {
+        return findByCalendarId(calendarToken.getCalendarId())
                 .map(existing -> {
                     calendarToken.setId(existing.getId());
                     return calendarTokenRepository.save(calendarToken);

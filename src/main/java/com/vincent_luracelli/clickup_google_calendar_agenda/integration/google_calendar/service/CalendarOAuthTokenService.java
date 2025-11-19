@@ -9,9 +9,11 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceTy
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -27,9 +29,11 @@ public class CalendarOAuthTokenService {
 
     private final CalendarTokenService calendarTokenService;
 
+    private final JwtUserDetailsService jwtUserDetailsService;
+
     public String requireValidToken() {
-        String calendarId = googleProps.getCalendarId();
-        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(calendarId);
+        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
+        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(userDetails.getUsername());
 
         if (calendarTokenOptional.isEmpty()) {
             throw new ApiException(

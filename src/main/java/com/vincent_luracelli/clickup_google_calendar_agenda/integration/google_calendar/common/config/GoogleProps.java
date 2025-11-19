@@ -11,8 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("google")
 public class GoogleProps {
 
-    private String calendarId;
-
     private OAuth oauth;
 
     @Getter

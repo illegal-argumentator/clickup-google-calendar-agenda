@@ -6,8 +6,10 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,8 @@ public class CalendarEventService {
     private final EventClient eventClient;
 
     private final EventService eventService;
+
+    private final JwtUserDetailsService jwtUserDetailsService;
 
     public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
         EventResponse eventResponse = eventClient.insert(eventParam, insertEventRequest);
@@ -50,11 +54,13 @@ public class CalendarEventService {
     }
 
     public void patch(String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        eventClient.patch(eventId, patchEventRequest, eventParam);
+        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
+        eventClient.patch(userDetails.getUsername(), eventId, patchEventRequest, eventParam);
     }
 
     public void delete(String eventId, EventParam eventParam) {
-        eventClient.delete(eventId, eventParam);
+        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
+        eventClient.delete(userDetails.getUsername(), eventId, eventParam);
     }
 
 }

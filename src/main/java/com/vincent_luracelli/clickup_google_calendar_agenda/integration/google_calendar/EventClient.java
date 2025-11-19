@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -31,8 +30,6 @@ public class EventClient {
 
     private final ObjectMapper objectMapper;
 
-    private final GoogleProps googleProps;
-
     private final OkHttpUtil okHttpUtil;
 
     private final CalendarOAuthTokenService calendarOAuthTokenService;
@@ -57,9 +54,9 @@ public class EventClient {
         }
     }
 
-    public void patch(String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
+    public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
         String token = calendarOAuthTokenService.requireValidToken();
-        String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
+        String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(patchEventRequest);
@@ -77,9 +74,9 @@ public class EventClient {
         }
     }
 
-    public void delete(String eventId, EventParam eventParam) {
+    public void delete(String calendarId, String eventId, EventParam eventParam) {
         String token = calendarOAuthTokenService.requireValidToken();
-        String path = buildEventByIdPath(eventId, googleProps.getCalendarId(), eventParam);
+        String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
