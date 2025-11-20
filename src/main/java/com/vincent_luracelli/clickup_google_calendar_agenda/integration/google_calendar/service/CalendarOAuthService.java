@@ -14,7 +14,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
@@ -41,14 +40,13 @@ public class CalendarOAuthService {
 
     private final CalendarTokenService calendarTokenService;
 
-    private final CalendarOAuthTokenService calendarOAuthTokenService;
-
     private final UserService userService;
 
     private final OkHttpUtil okHttpUtil;
 
     public AuthorizeResponse authorize() {
         GoogleAuthorizationCodeFlow flow = getFlow();
+
         String url = flow.newAuthorizationUrl()
                 .set("prompt", "consent")
                 .setRedirectUri(googleProps.getOauth().getRedirectUri())
@@ -63,6 +61,7 @@ public class CalendarOAuthService {
     public void callback(String code) {
         try {
             GoogleAuthorizationCodeFlow flow = getFlow();
+
             GoogleTokenResponse tokenResponse = flow.newTokenRequest(code)
                     .setRedirectUri(googleProps.getOauth().getRedirectUri())
                     .execute();
@@ -87,22 +86,8 @@ public class CalendarOAuthService {
         }
     }
 
-    public MeResponse me() {
-        MeResponse meResponse = MeResponse.builder()
-                .message("Authorized.")
-                .success(true)
-                .build();
 
-        try {
-            calendarOAuthTokenService.requireValidToken();
-        } catch (ApiException e) {
-            meResponse.setMessage("Unauthorized. " + e.getMessage());
-            meResponse.setSuccess(false);
-        }
-
-        return meResponse;
-    }
-
+    @Deprecated
     public void revoke(String email) {
         try {
             Optional<CalendarToken> optionalCalendarToken = calendarTokenService.findByCalendarId(email);
@@ -112,7 +97,6 @@ public class CalendarOAuthService {
             }
 
             CalendarToken calendarToken = optionalCalendarToken.get();
-
             Request request = new Request.Builder()
                     .url("https://oauth2.googleapis.com/revoke")
                     .post(RequestBody.create(
