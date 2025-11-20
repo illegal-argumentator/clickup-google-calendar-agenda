@@ -9,7 +9,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarOAuthTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventListParam;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +32,10 @@ public class EventClient {
 
     private final OkHttpUtil okHttpUtil;
 
-    private final CalendarOAuthTokenService calendarOAuthTokenService;
+    private final CalendarAuthTokenService calendarAuthTokenService;
 
     public EventResponse insert(String calendarId ,EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
@@ -55,7 +55,7 @@ public class EventClient {
     }
 
     public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         try {
@@ -75,7 +75,7 @@ public class EventClient {
     }
 
     public void delete(String calendarId, String eventId, EventParam eventParam) {
-        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         Request request = new Request.Builder()
@@ -88,7 +88,7 @@ public class EventClient {
     }
 
     public EventListResponse list(String calendarId, EventListParam eventListParam) {
-        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()

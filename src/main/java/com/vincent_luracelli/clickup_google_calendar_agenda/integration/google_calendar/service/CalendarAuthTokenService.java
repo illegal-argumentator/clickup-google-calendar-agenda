@@ -10,6 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,23 +23,29 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalendarOAuthTokenService {
+public class CalendarAuthTokenService {
 
     private final GoogleProps googleProps;
 
     private final CalendarTokenService calendarTokenService;
 
-    public String requireAccessTokenByCalendarId(String calendarId) {
-        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(calendarId);
+    public MeResponse me(String calendarId) {
+        MeResponse meResponse = MeResponse.builder()
+                .success(true)
+                .message("Authorized.")
+                .build();
 
-        if (calendarTokenOptional.isEmpty()) {
-            throw new ApiException(
-                    "Permission denied. Please finish OAuth flow to proceed.",
-                    HttpStatus.FORBIDDEN.value()
-            );
+        try {
+            findCalendarTokenOrThrow(calendarId);
+        } catch (ApiException e) {
+            return meResponse.toBuilder().success(false).message(e.getMessage()).build();
         }
 
-        CalendarToken calendarToken = calendarTokenOptional.get();
+        return meResponse;
+    }
+
+    public String requireAccessTokenByCalendarId(String calendarId) {
+        CalendarToken calendarToken = findCalendarTokenOrThrow(calendarId);
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);
@@ -88,5 +95,18 @@ public class CalendarOAuthTokenService {
 
     private boolean isTokenExpired(Long tokenExpiration) {
         return tokenExpiration <= System.currentTimeMillis();
+    }
+
+    private CalendarToken findCalendarTokenOrThrow(String calendarId) {
+        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(calendarId);
+
+        if (calendarTokenOptional.isEmpty()) {
+            throw new ApiException(
+                    "Permission denied. Please finish OAuth flow to proceed.",
+                    HttpStatus.FORBIDDEN.value()
+            );
+        }
+
+        return calendarTokenOptional.get();
     }
 }

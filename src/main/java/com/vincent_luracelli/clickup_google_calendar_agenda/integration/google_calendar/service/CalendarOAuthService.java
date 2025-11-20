@@ -8,7 +8,6 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.services.calendar.CalendarScopes;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
@@ -16,16 +15,12 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -41,8 +36,6 @@ public class CalendarOAuthService {
     private final CalendarTokenService calendarTokenService;
 
     private final UserService userService;
-
-    private final OkHttpUtil okHttpUtil;
 
     public AuthorizeResponse authorize() {
         GoogleAuthorizationCodeFlow flow = getFlow();
@@ -83,35 +76,6 @@ public class CalendarOAuthService {
                     HttpStatus.BAD_REQUEST.value(),
                     SourceType.GOOGLE_CALENDAR
             );
-        }
-    }
-
-
-    @Deprecated
-    public void revoke(String email) {
-        try {
-            Optional<CalendarToken> optionalCalendarToken = calendarTokenService.findByCalendarId(email);
-
-            if (optionalCalendarToken.isEmpty()) {
-                throw new ApiException("Already revoked." ,HttpStatus.BAD_REQUEST.value());
-            }
-
-            CalendarToken calendarToken = optionalCalendarToken.get();
-            Request request = new Request.Builder()
-                    .url("https://oauth2.googleapis.com/revoke")
-                    .post(RequestBody.create(
-                            ("token=" + calendarToken.getAccessToken()),
-                            MediaType.get("application/x-www-form-urlencoded")
-                    ))
-                    .build();
-
-            okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, Void.class);
-            calendarTokenService.deleteByCalendarId(calendarToken.getCalendarId());
-
-            log.info("Google OAuth token revoked successfully");
-        } catch (ApiException e) {
-            log.error("Error revoking token", e);
-            throw new ApiException("Failed to revoke token", HttpStatus.BAD_REQUEST.value(), SourceType.GOOGLE_CALENDAR);
         }
     }
 

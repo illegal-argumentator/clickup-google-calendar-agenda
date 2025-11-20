@@ -3,6 +3,5 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.goog
 import lombok.Builder;
 
 @Builder
-public record AuthorizeResponse(
-        String url) {
+public record AuthorizeResponse(String url) {
 }
