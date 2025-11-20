@@ -34,8 +34,8 @@ public class EventClient {
 
     private final CalendarOAuthTokenService calendarOAuthTokenService;
 
-    public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = calendarOAuthTokenService.requireValidToken();
+    public EventResponse insert(String calendarId ,EventParam eventParam, InsertEventRequest insertEventRequest) {
+        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
@@ -55,7 +55,7 @@ public class EventClient {
     }
 
     public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = calendarOAuthTokenService.requireValidToken();
+        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         try {
@@ -75,7 +75,7 @@ public class EventClient {
     }
 
     public void delete(String calendarId, String eventId, EventParam eventParam) {
-        String token = calendarOAuthTokenService.requireValidToken();
+        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventByIdPath(eventId, calendarId, eventParam);
 
         Request request = new Request.Builder()
@@ -87,8 +87,8 @@ public class EventClient {
         okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
     }
 
-    public EventListResponse list(EventListParam eventListParam) {
-        String token = calendarOAuthTokenService.requireValidToken();
+    public EventListResponse list(String calendarId, EventListParam eventListParam) {
+        String token = calendarOAuthTokenService.requireAccessTokenByCalendarId(calendarId);
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()

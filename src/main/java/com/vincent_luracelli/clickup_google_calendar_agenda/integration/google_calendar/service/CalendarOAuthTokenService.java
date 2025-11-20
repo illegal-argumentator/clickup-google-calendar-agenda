@@ -9,11 +9,10 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceTy
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
-import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -29,11 +28,8 @@ public class CalendarOAuthTokenService {
 
     private final CalendarTokenService calendarTokenService;
 
-    private final JwtUserDetailsService jwtUserDetailsService;
-
-    public String requireValidToken() {
-        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
-        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(userDetails.getUsername());
+    public String requireAccessTokenByCalendarId(String calendarId) {
+        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByCalendarId(calendarId);
 
         if (calendarTokenOptional.isEmpty()) {
             throw new ApiException(
@@ -43,7 +39,14 @@ public class CalendarOAuthTokenService {
         }
 
         CalendarToken calendarToken = calendarTokenOptional.get();
-        handleTokenExpiration(calendarToken);
+
+        if (isTokenExpired(calendarToken.getAccessExpiration())) {
+            TokenPayload tokenPayload = requireRefreshToken(calendarToken);
+            calendarTokenService.save(calendarToken.toBuilder()
+                    .accessToken(tokenPayload.getAccessToken())
+                    .refreshToken(tokenPayload.getRefreshToken())
+                    .build());
+        }
 
         return calendarToken.getAccessToken();
     }
@@ -65,20 +68,25 @@ public class CalendarOAuthTokenService {
         }
     }
 
-    private void handleTokenExpiration(CalendarToken calendarToken) {
-        if (calendarToken.getAccessExpiration() <= System.currentTimeMillis()) {
-            GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
+    private TokenPayload requireRefreshToken(CalendarToken calendarToken) {
+        TokenPayload tokenPayload = TokenPayload.builder().build();
 
-            calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
-            calendarToken.setAccessExpiration(
-                    System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000
-            );
+        GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
 
-            if (googleTokenResponse.getRefreshToken() != null) {
-                calendarToken.setRefreshToken(googleTokenResponse.getRefreshToken());
-            }
+        calendarToken.setAccessToken(googleTokenResponse.getAccessToken());
+        calendarToken.setAccessExpiration(
+                System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000
+        );
 
-            calendarTokenService.save(calendarToken);
+        tokenPayload.setAccessToken(googleTokenResponse.getAccessToken());
+        if (googleTokenResponse.getRefreshToken() != null) {
+            tokenPayload.setRefreshToken(googleTokenResponse.getRefreshToken());
         }
+
+        return tokenPayload;
+    }
+
+    private boolean isTokenExpired(Long tokenExpiration) {
+        return tokenExpiration <= System.currentTimeMillis();
     }
 }

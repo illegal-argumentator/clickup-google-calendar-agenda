@@ -6,10 +6,8 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
-import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,20 +22,18 @@ public class CalendarEventService {
 
     private final EventService eventService;
 
-    private final JwtUserDetailsService jwtUserDetailsService;
-
-    public EventResponse insert(EventParam eventParam, InsertEventRequest insertEventRequest) {
-        EventResponse eventResponse = eventClient.insert(eventParam, insertEventRequest);
+    public EventResponse insert(String calendarId, EventParam eventParam, InsertEventRequest insertEventRequest) {
+        EventResponse eventResponse = eventClient.insert(calendarId, eventParam, insertEventRequest);
         eventService.save(Event.builder().id(eventResponse.getId()).title(eventResponse.getSummary()).build());
         return eventResponse;
     }
 
     @Transactional
-    public List<EventResponse> insert(EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
+    public List<EventResponse> insert(String calendarId, EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
         List<EventResponse> eventResponses = new ArrayList<>();
 
         for (InsertEventRequest insertEventRequest : insertEventsRequest) {
-            EventResponse eventResponse = insert(eventParam, insertEventRequest);
+            EventResponse eventResponse = insert(calendarId, eventParam, insertEventRequest);
             eventResponses.add(eventResponse);
         }
 
@@ -53,14 +49,12 @@ public class CalendarEventService {
         return eventResponses;
     }
 
-    public void patch(String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
-        eventClient.patch(userDetails.getUsername(), eventId, patchEventRequest, eventParam);
+    public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
+        eventClient.patch(calendarId, eventId, patchEventRequest, eventParam);
     }
 
-    public void delete(String eventId, EventParam eventParam) {
-        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromContext();
-        eventClient.delete(userDetails.getUsername(), eventId, eventParam);
+    public void delete(String calendarId, String eventId, EventParam eventParam) {
+        eventClient.delete(calendarId, eventId, eventParam);
     }
 
 }

@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @Document
 public class CalendarToken {
 
