@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/google-calendar/oauth")
-public class GoogleCalendarOauthController {
+public class CalendarOauthController {
 
     private final CalendarOAuthService calendarOAuthService;
 

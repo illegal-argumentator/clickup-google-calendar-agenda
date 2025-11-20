@@ -1,6 +1,5 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.common.type.UserRole;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.common.type.UserStatus;
 import jakarta.validation.constraints.NotNull;

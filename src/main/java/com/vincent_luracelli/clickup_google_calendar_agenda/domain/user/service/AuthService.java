@@ -74,8 +74,8 @@ public class AuthService {
         TokenPayload tokenPayload = jwtUserDetailsService.generateTokenPayload(userDetails);
 
         return AuthResponse.builder()
-                .accessToken(tokenPayload.accessToken())
-                .refreshToken(tokenPayload.refreshToken())
+                .accessToken(tokenPayload.getAccessToken())
+                .refreshToken(tokenPayload.getRefreshToken())
                 .build();
     }
 

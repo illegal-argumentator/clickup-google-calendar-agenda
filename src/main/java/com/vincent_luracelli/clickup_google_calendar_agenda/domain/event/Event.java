@@ -1,4 +1,4 @@
-package com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model;
+package com.vincent_luracelli.clickup_google_calendar_agenda.domain.event;
 
 import lombok.Builder;
 import lombok.Data;

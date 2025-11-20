@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.service;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.service.EventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
@@ -23,8 +23,8 @@ public class EventOrchestrator {
 
     private final EventClient eventClient;
 
-    public EventListResponse retrieveCreatedEvents(EventListParam eventListParam) {
-        EventListResponse eventListResponse = eventClient.list(eventListParam);
+    public EventListResponse retrieveCreatedEvents(String calendarId, EventListParam eventListParam) {
+        EventListResponse eventListResponse = eventClient.list(calendarId, eventListParam);
 
         Set<String> existingIds = eventService.findAll().stream()
                 .map(Event::getId)

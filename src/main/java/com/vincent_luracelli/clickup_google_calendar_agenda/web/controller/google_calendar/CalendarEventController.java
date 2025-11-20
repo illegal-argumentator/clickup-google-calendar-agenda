@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/google-calendar/event")
 @RequiredArgsConstructor
-public class GoogleCalendarEventController {
+public class CalendarEventController {
 
     private final CalendarEventService calendarEventService;
 
