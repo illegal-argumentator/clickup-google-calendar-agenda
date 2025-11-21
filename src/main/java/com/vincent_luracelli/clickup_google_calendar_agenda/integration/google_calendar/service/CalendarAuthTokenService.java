@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.OAuth;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
@@ -59,7 +60,7 @@ public class CalendarAuthTokenService {
     }
 
     public GoogleTokenResponse refresh(String refreshToken) {
-        GoogleProps.OAuth oauth = googleProps.getOauth();
+        OAuth oauth = googleProps.getOauth();
 
         try {
             return new GoogleRefreshTokenRequest(

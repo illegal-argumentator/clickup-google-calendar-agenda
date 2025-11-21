@@ -11,7 +11,6 @@ public class UserAntPathResolver implements AntPathResolver {
     private static final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     public static final String[] PERMITTED_PATHS = new String[] {
-            "/click-up/**",
             "/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**"

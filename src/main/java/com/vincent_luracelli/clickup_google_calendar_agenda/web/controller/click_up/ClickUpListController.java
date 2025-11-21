@@ -2,6 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.clic
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.ListsResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +17,18 @@ public class ClickUpListController {
 
     private final ClickUpClient clickUpClient;
 
+    private final JwtUserDetailsService jwtUserDetailsService;
+
     @GetMapping("/folder/{id}/list")
     ResponseEntity<ListsResponse> findListsByFolder(@PathVariable String id) {
-        return ResponseEntity.ok(clickUpClient.findListsByFolder(id));
+        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        return ResponseEntity.ok(clickUpClient.findListsByFolder(id, username));
     }
 
     @GetMapping("/space/{id}/list")
     ResponseEntity<ListsResponse> findFolderlessListsBySpace(@PathVariable String id) {
-        return ResponseEntity.ok(clickUpClient.findFolderlessListsBySpace(id));
+        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        return ResponseEntity.ok(clickUpClient.findFolderlessListsBySpace(id, username));
     }
 
 }

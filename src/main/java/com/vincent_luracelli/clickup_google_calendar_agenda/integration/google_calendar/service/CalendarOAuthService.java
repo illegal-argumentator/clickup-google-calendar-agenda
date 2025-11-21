@@ -15,6 +15,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class CalendarOAuthService {
+
+    @Value("${web.client.redirect-url}")
+    private String CLIENT_REDIRECT_URL;
 
     private static final String ACCESS_TYPE = "offline";
 
@@ -42,7 +46,7 @@ public class CalendarOAuthService {
 
         String url = flow.newAuthorizationUrl()
                 .set("prompt", "consent")
-                .setRedirectUri(googleProps.getOauth().getRedirectUri())
+                .setRedirectUri(CLIENT_REDIRECT_URL)
                 .setAccessType(ACCESS_TYPE)
                 .build();
 
@@ -56,7 +60,7 @@ public class CalendarOAuthService {
             GoogleAuthorizationCodeFlow flow = getFlow();
 
             GoogleTokenResponse tokenResponse = flow.newTokenRequest(code)
-                    .setRedirectUri(googleProps.getOauth().getRedirectUri())
+                    .setRedirectUri(CLIENT_REDIRECT_URL)
                     .execute();
 
             GoogleIdToken googleIdToken = GoogleIdToken.parse(JSON_FACTORY, tokenResponse.getIdToken());
@@ -87,7 +91,7 @@ public class CalendarOAuthService {
                     .setWeb(new GoogleClientSecrets.Details()
                             .setClientId(googleProps.getOauth().getClientId())
                             .setClientSecret(googleProps.getOauth().getClientSecret())
-                            .setRedirectUris(List.of(googleProps.getOauth().getRedirectUri()))
+                            .setRedirectUris(List.of(CLIENT_REDIRECT_URL))
                     );
 
             return new GoogleAuthorizationCodeFlow.Builder(

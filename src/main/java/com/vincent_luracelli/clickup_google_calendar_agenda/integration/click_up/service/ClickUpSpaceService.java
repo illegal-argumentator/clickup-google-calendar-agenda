@@ -25,15 +25,15 @@ public class ClickUpSpaceService {
     private final ClickUpClient clickUpClient;
 
     @Cacheable("click_up_members_by_space")
-    public MembersResponse findMembersBySpace(String id) {
+    public MembersResponse findMembersBySpace(String id, String username) {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ListsResponse listsBySpace = clickUpClient.findFolderlessListsBySpace(id);
+        ListsResponse listsBySpace = clickUpClient.findFolderlessListsBySpace(id, username);
 
         List<Future<Set<Member>>> futures = new ArrayList<>();
         Set<Member> members = new HashSet<>();
 
         for (Listing listing : listsBySpace.listings()) {
-            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(listing.id()).getMembers()));
+            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(listing.id(), username).getMembers()));
         }
 
         try {
@@ -47,7 +47,7 @@ public class ClickUpSpaceService {
         return MembersResponse.builder().members(members).build();
     }
 
-    public SpacesResponse findSpacesByTeam(String id) {
-        return clickUpClient.findSpacesByTeam(id);
+    public SpacesResponse findSpacesByTeam(String id, String username) {
+        return clickUpClient.findSpacesByTeam(id, username);
     }
 }

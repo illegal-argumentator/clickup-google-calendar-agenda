@@ -1,6 +1,5 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.common.exception;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.ExceptionResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

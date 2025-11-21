@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.handler;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.ExceptionResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ExceptionResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.AccessDeniedException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.InvalidTokenException;

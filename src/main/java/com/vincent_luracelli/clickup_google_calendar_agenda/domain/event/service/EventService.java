@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.service;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.Event;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

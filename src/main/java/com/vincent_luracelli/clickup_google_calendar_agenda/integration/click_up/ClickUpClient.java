@@ -2,13 +2,14 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.model.ClickUpToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.*;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -20,16 +21,16 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.c
 @RequiredArgsConstructor
 public class ClickUpClient {
 
-    @Value("${click_up.api_key}")
-    private String CLICK_UP_API_KEY;
-
     private final OkHttpUtil okHttpUtil;
 
-    @Cacheable("click_up_teams")
-    public TeamsResponse findTeams() {
+    private final ClickUpAuthService clickUpAuthService;
+
+    public TeamsResponse findTeams(String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = ClickUpPaths.TEAM.getPath();
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -37,10 +38,12 @@ public class ClickUpClient {
     }
 
     @Cacheable("click_up_spaces")
-    public SpacesResponse findSpacesByTeam(String id) {
+    public SpacesResponse findSpacesByTeam(String id, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildSpaceByTeamIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -48,10 +51,12 @@ public class ClickUpClient {
     }
 
     @Cacheable("click_up_folders")
-    public FoldersResponse findFoldersBySpace(String id) {
+    public FoldersResponse findFoldersBySpace(String id, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildFolderBySpaceIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -59,10 +64,12 @@ public class ClickUpClient {
     }
 
     @Cacheable("click_up_lists")
-    public ListsResponse findListsByFolder(String folderId) {
+    public ListsResponse findListsByFolder(String folderId, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildListByFolderIdPath(folderId);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -70,30 +77,36 @@ public class ClickUpClient {
     }
 
     @Cacheable("click_up_folderless_lists")
-    public ListsResponse findFolderlessListsBySpace(String id) {
+    public ListsResponse findFolderlessListsBySpace(String id, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildFolderlessListBySpaceIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ListsResponse.class);
     }
 
-    public TasksResponse findTasksByList(String id) {
+    public TasksResponse findTasksByList(String id, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildTaskByListIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, TasksResponse.class);
     }
 
-    public TasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam) {
+    public TasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildTaskByTeamIdPath(id, taskFilterParam);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -101,10 +114,12 @@ public class ClickUpClient {
     }
 
     @Cacheable("click_up_members_by_list")
-    public MembersResponse findMembersByList(String id) {
+    public MembersResponse findMembersByList(String id, String userEmail) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(userEmail);
+
         String path = buildMembersByListIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, CLICK_UP_API_KEY)
+                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 

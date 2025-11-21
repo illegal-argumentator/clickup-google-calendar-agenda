@@ -9,6 +9,7 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.c
 @AllArgsConstructor
 public enum ClickUpPaths {
 
+    OAUTH_TOKEN(CLICK_UP_BASE_URL + "/oauth/token"),
     TEAM(CLICK_UP_BASE_URL + "/team"),
     SPACE(CLICK_UP_BASE_URL + "/space"),
     FOLDER(CLICK_UP_BASE_URL + "/folder"),

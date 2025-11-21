@@ -1,4 +1,4 @@
-package com.vincent_luracelli.clickup_google_calendar_agenda.common.dto;
+package com.vincent_luracelli.clickup_google_calendar_agenda.common.exception;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import lombok.Builder;
