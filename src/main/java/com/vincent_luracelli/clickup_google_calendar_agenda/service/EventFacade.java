@@ -17,27 +17,33 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class EventOrchestrator {
+public class EventFacade {
 
     private final EventService eventService;
 
     private final EventClient eventClient;
 
-    public EventListResponse retrieveCreatedEvents(String calendarId, EventListParam eventListParam) {
+    public EventListResponse getCreatedEvents(String calendarId, EventListParam eventListParam) {
         EventListResponse eventListResponse = eventClient.list(calendarId, eventListParam);
 
-        Set<String> existingIds = eventService.findAll().stream()
-                .map(Event::getId)
-                .collect(Collectors.toSet());
-
-        List<EventResponse> createdEvents = eventListResponse.getItems().stream()
-                .filter(event -> existingIds.contains(event.getId()))
-                .toList();
-
+        Set<String> existingIds = mapAllEventsToIds();
+        List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
         eventListResponse.setItems(createdEvents);
 
         log.info("EventOrchestrator: {} - created events, {} - fetched events. Successfully synchronized.", createdEvents.size(), eventListResponse.getItems().size());
 
         return eventListResponse;
+    }
+
+    private Set<String> mapAllEventsToIds() {
+        return eventService.findAll().stream()
+                .map(Event::getId)
+                .collect(Collectors.toSet());
+    }
+
+    private List<EventResponse> getExistingEventsFromCalendar(Set<String> existingIds, EventListResponse eventListResponse) {
+        return eventListResponse.getItems().stream()
+                .filter(event -> existingIds.contains(event.getId()))
+                .toList();
     }
 }

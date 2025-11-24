@@ -20,7 +20,7 @@ public class ClickUpTeamController {
 
     @GetMapping("/team")
     ResponseEntity<TeamsResponse> findTeams() {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpClient.findTeams(username));
     }
 

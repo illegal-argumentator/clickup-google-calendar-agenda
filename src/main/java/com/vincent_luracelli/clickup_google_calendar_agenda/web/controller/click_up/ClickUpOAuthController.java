@@ -14,13 +14,13 @@ public class ClickUpOAuthController {
     private final ClickUpOAuthService clickUpOauthService;
 
     @GetMapping("/authorize")
-    public ResponseEntity<AuthorizeResponse> authorize() {
+    ResponseEntity<AuthorizeResponse> authorize() {
         AuthorizeResponse authorizeResponse = clickUpOauthService.authorize();
         return ResponseEntity.ok(authorizeResponse);
     }
 
     @PostMapping("/callback")
-    public void callback(@RequestParam String code) {
+    void callback(@RequestParam String code) {
         clickUpOauthService.callback(code);
     }
 

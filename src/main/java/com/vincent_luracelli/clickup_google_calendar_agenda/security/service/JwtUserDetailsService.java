@@ -35,12 +35,12 @@ public class JwtUserDetailsService {
                 .build();
     }
 
-    public UserDetails retrieveUserDetailsFromToken(String token) {
+    public UserDetails getUserDetailsFromToken(String token) {
         Claims claims = jwtHelper.extractAllClaims(token);
         return userDetailsService.loadUserByUsername(claims.getSubject());
     }
 
-    public UserDetails retrieveUserDetailsFromContext() {
+    public UserDetails getUserDetailsFromContextOrThrow() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
             throw new AccessDeniedException("Unauthorized.");

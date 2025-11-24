@@ -19,8 +19,8 @@ public class ClickUpAuthController {
     private final ClickUpAuthService clickUpAuthService;
 
     @GetMapping("/me")
-    public ResponseEntity<MeResponse> me() {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+    ResponseEntity<MeResponse> me() {
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpAuthService.me(username));
     }
 

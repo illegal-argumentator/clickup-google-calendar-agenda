@@ -14,13 +14,13 @@ public class CalendarOauthController {
     private final CalendarOAuthService calendarOAuthService;
 
     @GetMapping("/authorize")
-    public ResponseEntity<AuthorizeResponse> authorize() {
+    ResponseEntity<AuthorizeResponse> authorize() {
         AuthorizeResponse authorizeResponse = calendarOAuthService.authorize();
         return ResponseEntity.ok(authorizeResponse);
     }
 
-    @GetMapping("/callback")
-    public void callback(@RequestParam String code) {
+    @PostMapping("/callback")
+    void callback(@RequestParam String code) {
         calendarOAuthService.callback(code);
     }
 

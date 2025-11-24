@@ -70,7 +70,7 @@ public class AuthService {
         }
         String token = refreshRequest.refreshToken().substring(BEARER_PREFIX.length());
 
-        UserDetails userDetails = jwtUserDetailsService.retrieveUserDetailsFromToken(token);
+        UserDetails userDetails = jwtUserDetailsService.getUserDetailsFromToken(token);
         TokenPayload tokenPayload = jwtUserDetailsService.generateTokenPayload(userDetails);
 
         return AuthResponse.builder()

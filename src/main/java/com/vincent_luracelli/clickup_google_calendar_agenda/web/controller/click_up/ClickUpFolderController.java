@@ -21,7 +21,7 @@ public class ClickUpFolderController {
 
     @GetMapping("/space/{id}/folder")
     ResponseEntity<FoldersResponse> findFoldersBySpace(@PathVariable String id) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpClient.findFoldersBySpace(id, username));
     }
 

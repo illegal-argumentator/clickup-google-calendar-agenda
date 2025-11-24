@@ -19,8 +19,8 @@ public class CalendarAuthController {
     private final CalendarAuthTokenService calendarAuthTokenService;
 
     @GetMapping("/me")
-    public ResponseEntity<MeResponse> me() {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+    ResponseEntity<MeResponse> me() {
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(calendarAuthTokenService.me(username));
     }
 

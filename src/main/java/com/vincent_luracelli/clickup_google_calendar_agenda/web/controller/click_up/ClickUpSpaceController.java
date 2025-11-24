@@ -22,13 +22,13 @@ public class ClickUpSpaceController {
 
     @GetMapping("/team/{id}/space")
     ResponseEntity<SpacesResponse> findSpacesByTeam(@PathVariable String id) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpSpaceService.findSpacesByTeam(id, username));
     }
 
     @GetMapping("/member/all/space/{id}")
     ResponseEntity<MembersResponse> findMembersBySpace(@PathVariable String id) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpSpaceService.findMembersBySpace(id, username));
     }
 }

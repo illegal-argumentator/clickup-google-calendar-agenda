@@ -19,8 +19,8 @@ public class CalendarColorsController {
     private final JwtUserDetailsService jwtUserDetailsService;
 
     @GetMapping
-    public ResponseEntity<ColorsResponse> getColors() {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+    ResponseEntity<ColorsResponse> getColors() {
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(colorsClient.getColors(username));
     }
 }

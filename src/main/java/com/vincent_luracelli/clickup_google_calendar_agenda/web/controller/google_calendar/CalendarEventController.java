@@ -27,7 +27,7 @@ public class CalendarEventController {
             @Valid EventParam eventParam,
             @Valid @RequestBody InsertEventRequest insertEventRequest
     ) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         EventResponse eventResponse = calendarEventService.insert(username, eventParam, insertEventRequest);
         return ResponseEntity.ok(eventResponse);
     }
@@ -37,7 +37,7 @@ public class CalendarEventController {
             @Valid EventParam eventParam,
             @Valid @RequestBody List<InsertEventRequest> insertEventsRequest
     ) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         List<EventResponse> eventsResponse = calendarEventService.insert(username, eventParam, insertEventsRequest);
         return ResponseEntity.ok(eventsResponse);
     }
@@ -48,13 +48,13 @@ public class CalendarEventController {
             @Valid @RequestBody PatchEventRequest patchEventRequest,
             @Valid EventParam eventParam
     ) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         calendarEventService.patch(username, id, patchEventRequest, eventParam);
     }
 
     @DeleteMapping("/{id}")
     void deleteEvent(@PathVariable String id, @Valid EventParam eventParam) {
-        String username = jwtUserDetailsService.retrieveUserDetailsFromContext().getUsername();
+        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         calendarEventService.delete(username, id, eventParam);
     }
 
