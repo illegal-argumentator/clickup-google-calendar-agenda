@@ -1,6 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.security.common.config;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.filter.JwtAuthFilter;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.filter.UserAntPathResolver;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,8 +13,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import static com.vincent_luracelli.clickup_google_calendar_agenda.security.filter.UserAntPathResolver.PERMITTED_PATHS;
-
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -22,13 +21,16 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    private final UserAntPathResolver userAntPathResolver;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(configurer -> {})
                 .sessionManagement(sessionManager -> sessionManager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(PERMITTED_PATHS).permitAll()
+                        .requestMatchers(userAntPathResolver.getPermittedPaths(false)).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

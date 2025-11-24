@@ -15,11 +15,14 @@ public class RunnerConfig implements CommandLineRunner {
     @Value("${server.port}")
     private Integer SERVER_PORT;
 
-    private static final String SERVER_URL_TEMPLATE = "http://%s:%d/swagger-ui/index.html";
+    @Value("${server.servlet.context-path:}")
+    private String SERVER_CONTEXT_PATH;
+
+    private static final String SERVER_URL_TEMPLATE = "http://%s:%d%s/swagger-ui/index.html";
 
     @Override
     public void run(String... args) {
-        log.info("Swagger UI: {}", SERVER_URL_TEMPLATE.formatted(SERVER_HOST, SERVER_PORT));
+        log.info("Swagger UI: {}", SERVER_URL_TEMPLATE.formatted(SERVER_HOST, SERVER_PORT, SERVER_CONTEXT_PATH));
     }
 
 }
