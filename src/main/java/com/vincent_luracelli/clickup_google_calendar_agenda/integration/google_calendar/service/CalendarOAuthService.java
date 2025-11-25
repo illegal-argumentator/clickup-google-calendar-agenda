@@ -46,6 +46,7 @@ public class CalendarOAuthService {
 
         String url = flow.newAuthorizationUrl()
                 .set("prompt", "consent")
+                .setState("google_calendar")
                 .setRedirectUri(CLIENT_REDIRECT_URL)
                 .setAccessType(ACCESS_TYPE)
                 .build();

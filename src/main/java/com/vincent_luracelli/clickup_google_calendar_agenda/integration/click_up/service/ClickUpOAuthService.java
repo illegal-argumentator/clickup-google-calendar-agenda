@@ -21,7 +21,7 @@ public class ClickUpOAuthService {
     @Value("${web.client.redirect-url}")
     private String CLIENT_REDIRECT_URL;
 
-    private static final String CLICK_UP_AUTH_URL_TEMPLATE = "https://app.clickup.com/api?client_id=%s&redirect_uri=%s";
+    private static final String CLICK_UP_AUTH_URL_TEMPLATE = "https://app.clickup.com/api?client_id=%s&redirect_uri=%s&state=click_up";
 
     private final ClickUpProps clickUpProps;
 
