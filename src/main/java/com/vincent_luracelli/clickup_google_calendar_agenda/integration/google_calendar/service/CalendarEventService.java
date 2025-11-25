@@ -24,7 +24,11 @@ public class CalendarEventService {
 
     public EventResponse insert(String userEmail, EventParam eventParam, InsertEventRequest insertEventRequest) {
         EventResponse eventResponse = eventClient.insert(userEmail, eventParam, insertEventRequest);
-        eventService.save(Event.builder().id(eventResponse.getId()).title(eventResponse.getSummary()).build());
+        eventService.save(Event.builder()
+                .id(eventResponse.getId())
+                .userEmail(userEmail)
+                .title(eventResponse.getSummary())
+                .build());
         return eventResponse;
     }
 

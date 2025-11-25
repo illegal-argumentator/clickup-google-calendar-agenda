@@ -13,10 +13,6 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-    public List<Event> findAll() {
-        return eventRepository.findAll();
-    }
-
     public List<Event> findAllByUserEmail(String userEmail) {
         return eventRepository.findAllByUserEmail(userEmail);
     }
