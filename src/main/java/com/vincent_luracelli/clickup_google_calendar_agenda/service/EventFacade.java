@@ -23,20 +23,21 @@ public class EventFacade {
 
     private final EventClient eventClient;
 
-    public EventListResponse getCreatedEvents(String calendarId, EventListParam eventListParam) {
-        EventListResponse eventListResponse = eventClient.list(calendarId, eventListParam);
+    public EventListResponse getCreatedEvents(String userEmail, EventListParam eventListParam) {
+        EventListResponse eventListResponse = eventClient.list(userEmail, eventListParam);
+        List<Event> eventsByUserEmail = eventService.findAllByUserEmail(userEmail);
 
-        Set<String> existingIds = mapAllEventsToIds();
+        Set<String> existingIds = mapAllEventsToIds(eventsByUserEmail);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
         eventListResponse.setItems(createdEvents);
 
-        log.info("EventOrchestrator: {} - created events, {} - fetched events. Successfully synchronized.", createdEvents.size(), eventListResponse.getItems().size());
+        log.info("EventFacade: {} - created events, {} - fetched events. Successfully synchronized for user - {}.", createdEvents.size(), eventListResponse.getItems().size(), userEmail);
 
         return eventListResponse;
     }
 
-    private Set<String> mapAllEventsToIds() {
-        return eventService.findAll().stream()
+    private Set<String> mapAllEventsToIds(List<Event> events) {
+        return events.stream()
                 .map(Event::getId)
                 .collect(Collectors.toSet());
     }

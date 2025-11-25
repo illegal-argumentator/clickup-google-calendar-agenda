@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public interface CalendarTokenRepository extends MongoRepository<CalendarToken, String> {
 
-    Optional<CalendarToken> findByCalendarId(String calendarId);
+    Optional<CalendarToken> findByUserEmail(String userEmail);
 
-    void deleteByCalendarId(String calendarId);
+    void deleteByUserEmail(String userEmail);
 
 }

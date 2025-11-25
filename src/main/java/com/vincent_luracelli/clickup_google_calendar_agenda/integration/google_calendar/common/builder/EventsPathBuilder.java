@@ -45,8 +45,8 @@ public class EventsPathBuilder {
         return uriComponentsBuilder.build().toString();
     }
 
-    public static String buildEventByIdPath(String eventId, String calendarId, EventParam eventParam) {
-        String basePath = CALENDARS.getPath() + "/%s/events/%s".formatted(calendarId, eventId);
+    public static String buildEventByIdPath(String eventId, String userEmail, EventParam eventParam) {
+        String basePath = CALENDARS.getPath() + "/%s/events/%s".formatted(userEmail, eventId);
         return buildEventParamPath(basePath, eventParam);
     }
 

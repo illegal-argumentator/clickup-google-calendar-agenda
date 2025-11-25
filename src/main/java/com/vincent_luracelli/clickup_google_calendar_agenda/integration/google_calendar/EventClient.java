@@ -34,8 +34,8 @@ public class EventClient {
 
     private final CalendarAuthTokenService calendarAuthTokenService;
 
-    public EventResponse insert(String calendarId ,EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+    public EventResponse insert(String userEmail ,EventParam eventParam, InsertEventRequest insertEventRequest) {
+        String token = calendarAuthTokenService.requireAccessTokenByUserEmail(userEmail);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
@@ -54,9 +54,9 @@ public class EventClient {
         }
     }
 
-    public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
-        String path = buildEventByIdPath(eventId, calendarId, eventParam);
+    public void patch(String userEmail, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
+        String token = calendarAuthTokenService.requireAccessTokenByUserEmail(userEmail);
+        String path = buildEventByIdPath(eventId, userEmail, eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(patchEventRequest);
@@ -74,9 +74,9 @@ public class EventClient {
         }
     }
 
-    public void delete(String calendarId, String eventId, EventParam eventParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
-        String path = buildEventByIdPath(eventId, calendarId, eventParam);
+    public void delete(String userEmail, String eventId, EventParam eventParam) {
+        String token = calendarAuthTokenService.requireAccessTokenByUserEmail(userEmail);
+        String path = buildEventByIdPath(eventId, userEmail, eventParam);
 
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
@@ -87,8 +87,8 @@ public class EventClient {
         okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request);
     }
 
-    public EventListResponse list(String calendarId, EventListParam eventListParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+    public EventListResponse list(String userEmail, EventListParam eventListParam) {
+        String token = calendarAuthTokenService.requireAccessTokenByUserEmail(userEmail);
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()

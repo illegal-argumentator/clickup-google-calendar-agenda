@@ -24,8 +24,8 @@ public class ColorsClient {
     private final CalendarAuthTokenService calendarAuthTokenService;
 
     @Cacheable("calendar_colors")
-    public ColorsResponse getColors(String calendarId) {
-        String token = calendarAuthTokenService.requireAccessTokenByCalendarId(calendarId);
+    public ColorsResponse getColors(String userEmail) {
+        String token = calendarAuthTokenService.requireAccessTokenByUserEmail(userEmail);
         String path = buildColorsPath();
 
         Request request = new Request.Builder()

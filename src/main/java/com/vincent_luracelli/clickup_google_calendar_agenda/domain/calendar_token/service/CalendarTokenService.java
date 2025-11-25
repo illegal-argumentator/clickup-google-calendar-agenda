@@ -14,7 +14,7 @@ public class CalendarTokenService {
     private final CalendarTokenRepository calendarTokenRepository;
 
     public CalendarToken save(CalendarToken calendarToken) {
-        return findByCalendarId(calendarToken.getCalendarId())
+        return findByUserEmail(calendarToken.getUserEmail())
                 .map(existing -> {
                     calendarToken.setId(existing.getId());
                     return calendarTokenRepository.save(calendarToken);
@@ -22,8 +22,8 @@ public class CalendarTokenService {
                 .orElseGet(() -> calendarTokenRepository.save(calendarToken));
     }
 
-    public Optional<CalendarToken> findByCalendarId(String calendarId) {
-        return calendarTokenRepository.findByCalendarId(calendarId);
+    public Optional<CalendarToken> findByUserEmail(String userEmail) {
+        return calendarTokenRepository.findByUserEmail(userEmail);
     }
 
 }

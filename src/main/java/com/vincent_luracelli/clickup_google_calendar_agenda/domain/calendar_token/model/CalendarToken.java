@@ -15,7 +15,7 @@ public class CalendarToken {
     private String id;
 
     @Indexed(unique = true)
-    private String calendarId;
+    private String userEmail;
 
     private Long accessExpiration;
 

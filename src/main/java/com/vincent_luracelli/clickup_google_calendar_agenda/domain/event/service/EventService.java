@@ -17,6 +17,10 @@ public class EventService {
         return eventRepository.findAll();
     }
 
+    public List<Event> findAllByUserEmail(String userEmail) {
+        return eventRepository.findAllByUserEmail(userEmail);
+    }
+
     public void save(Event event) {
         eventRepository.save(event);
     }

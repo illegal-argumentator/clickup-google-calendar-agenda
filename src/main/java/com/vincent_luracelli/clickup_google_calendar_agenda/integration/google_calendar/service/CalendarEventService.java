@@ -22,18 +22,18 @@ public class CalendarEventService {
 
     private final EventService eventService;
 
-    public EventResponse insert(String calendarId, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        EventResponse eventResponse = eventClient.insert(calendarId, eventParam, insertEventRequest);
+    public EventResponse insert(String userEmail, EventParam eventParam, InsertEventRequest insertEventRequest) {
+        EventResponse eventResponse = eventClient.insert(userEmail, eventParam, insertEventRequest);
         eventService.save(Event.builder().id(eventResponse.getId()).title(eventResponse.getSummary()).build());
         return eventResponse;
     }
 
     @Transactional
-    public List<EventResponse> insert(String calendarId, EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
+    public List<EventResponse> insert(String userEmail, EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
         List<EventResponse> eventResponses = new ArrayList<>();
 
         for (InsertEventRequest insertEventRequest : insertEventsRequest) {
-            EventResponse eventResponse = insert(calendarId, eventParam, insertEventRequest);
+            EventResponse eventResponse = insert(userEmail, eventParam, insertEventRequest);
             eventResponses.add(eventResponse);
         }
 
@@ -49,12 +49,12 @@ public class CalendarEventService {
         return eventResponses;
     }
 
-    public void patch(String calendarId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        eventClient.patch(calendarId, eventId, patchEventRequest, eventParam);
+    public void patch(String userEmail, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
+        eventClient.patch(userEmail, eventId, patchEventRequest, eventParam);
     }
 
-    public void delete(String calendarId, String eventId, EventParam eventParam) {
-        eventClient.delete(calendarId, eventId, eventParam);
+    public void delete(String userEmail, String eventId, EventParam eventParam) {
+        eventClient.delete(userEmail, eventId, eventParam);
     }
 
 }

@@ -69,7 +69,7 @@ public class CalendarOAuthService {
                     .accessToken(tokenResponse.getAccessToken())
                     .accessExpiration(System.currentTimeMillis() + tokenResponse.getExpiresInSeconds())
                     .refreshToken(tokenResponse.getRefreshToken())
-                    .calendarId(googleIdToken.getPayload().getEmail())
+                    .userEmail(googleIdToken.getPayload().getEmail())
                     .build();
 
             CalendarToken savedCalendarToken = calendarTokenService.save(calendarToken);
