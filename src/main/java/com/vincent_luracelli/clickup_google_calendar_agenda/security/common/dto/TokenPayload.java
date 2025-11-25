@@ -9,6 +9,8 @@ public class TokenPayload {
 
     private String accessToken;
 
+    private Long accessExpiration;
+
     private String refreshToken;
 
 }
