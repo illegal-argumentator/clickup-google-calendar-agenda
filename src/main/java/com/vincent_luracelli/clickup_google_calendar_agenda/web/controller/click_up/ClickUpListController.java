@@ -19,13 +19,13 @@ public class ClickUpListController {
 
     private final JwtUserDetailsService jwtUserDetailsService;
 
-    @GetMapping("/folder/{id}/list")
+    @GetMapping("/folder/{id}/lists")
     ResponseEntity<ListsResponse> findListsByFolder(@PathVariable String id) {
         String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpClient.findListsByFolder(id, username));
     }
 
-    @GetMapping("/space/{id}/list")
+    @GetMapping("/space/{id}/lists")
     ResponseEntity<ListsResponse> findFolderlessListsBySpace(@PathVariable String id) {
         String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpClient.findFolderlessListsBySpace(id, username));

@@ -17,13 +17,13 @@ public class ClickUpTaskController {
 
     private final JwtUserDetailsService jwtUserDetailsService;
 
-    @GetMapping("/list/{id}/task")
+    @GetMapping("/list/{id}/tasks")
     ResponseEntity<TasksResponse> findTasksByList(@PathVariable String id) {
         String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpClient.findTasksByList(id, username));
     }
 
-    @GetMapping("/team/{id}/task")
+    @GetMapping("/team/{id}/tasks")
     ResponseEntity<TasksResponse> findFilteredTaskByTeam(
             @PathVariable String id,
             TaskFilterParam taskFilterParam) {

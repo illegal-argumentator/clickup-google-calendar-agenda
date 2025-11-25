@@ -20,7 +20,7 @@ public class ClickUpSpaceController {
 
     private final JwtUserDetailsService jwtUserDetailsService;
 
-    @GetMapping("/team/{id}/space")
+    @GetMapping("/team/{id}/spaces")
     ResponseEntity<SpacesResponse> findSpacesByTeam(@PathVariable String id) {
         String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
         return ResponseEntity.ok(clickUpSpaceService.findSpacesByTeam(id, username));
