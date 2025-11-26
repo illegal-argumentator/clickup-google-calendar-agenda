@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
@@ -20,8 +21,8 @@ public class ClickUpAuthController {
 
     @GetMapping("/me")
     ResponseEntity<MeResponse> me() {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpAuthService.me(username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpAuthService.me(user));
     }
 
 }

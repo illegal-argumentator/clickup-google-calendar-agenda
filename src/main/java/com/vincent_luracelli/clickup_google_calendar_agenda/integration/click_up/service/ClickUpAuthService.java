@@ -3,6 +3,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.model.ClickUpToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.service.ClickUpTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,14 +17,14 @@ public class ClickUpAuthService {
 
     private final ClickUpTokenService clickUpTokenService;
 
-    public MeResponse me(String userEmail) {
+    public MeResponse me(User user) {
         MeResponse meResponse = MeResponse.builder()
                 .success(true)
                 .message("Authorized.")
                 .build();
 
         try {
-            findClickUpTokenOrThrow(userEmail);
+            findClickUpTokenOrThrow(user.getClickUpTokenId());
         } catch (ApiException e) {
             return meResponse.toBuilder().success(false).message(e.getMessage()).build();
         }
