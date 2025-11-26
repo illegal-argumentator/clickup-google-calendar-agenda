@@ -3,15 +3,15 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.dto.OAuth;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.model.ClickUpToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.service.ClickUpTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpOAuthClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.config.ClickUpProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.AccessTokenRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.AccessTokenResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -29,7 +29,7 @@ public class ClickUpOAuthService {
 
     private final ClickUpTokenService clickUpTokenService;
 
-    private final JwtUserDetailsService jwtUserDetailsService;
+    private final UserService userService;
 
     public AuthorizeResponse authorize() {
         OAuth oauth = clickUpProps.getOauth();
@@ -38,7 +38,7 @@ public class ClickUpOAuthService {
                 .build();
     }
 
-    public void callback(String code) {
+    public void callback(String code, User user) {
         OAuth oauth = clickUpProps.getOauth();
         AccessTokenRequest accessTokenRequest = AccessTokenRequest.builder()
                 .clientId(oauth.getClientId())
@@ -47,12 +47,13 @@ public class ClickUpOAuthService {
                 .build();
 
         AccessTokenResponse accessToken = clickUpOAuthClient.getAccessToken(accessTokenRequest);
-        UserDetails userDetails = jwtUserDetailsService.getUserFromContext();
 
         ClickUpToken clickUpToken = ClickUpToken.builder()
                 .accessToken("Bearer " + accessToken.accessToken())
-                .userEmail(userDetails.getUsername())
+                .userEmail(user.getUsername())
                 .build();
-        clickUpTokenService.save(clickUpToken);
+
+        ClickUpToken savedClickUpToken = clickUpTokenService.saveOrUpdateIfExists(clickUpToken);
+        userService.update(user.getEmail(), User.builder().clickUpTokenId(savedClickUpToken.getId()).build());
     }
 }

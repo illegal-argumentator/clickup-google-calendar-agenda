@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.TasksResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
@@ -19,15 +20,15 @@ public class ClickUpTaskController {
 
     @GetMapping("/list/{id}/tasks")
     ResponseEntity<TasksResponse> findTasksByList(@PathVariable String id) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpClient.findTasksByList(id, username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpClient.findTasksByList(id, user));
     }
 
     @GetMapping("/team/{id}/tasks")
     ResponseEntity<TasksResponse> findFilteredTaskByTeam(
             @PathVariable String id,
             TaskFilterParam taskFilterParam) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterParam, username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterParam, user));
     }
 }

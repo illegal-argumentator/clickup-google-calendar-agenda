@@ -1,6 +1,8 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpOAuthService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,8 @@ public class ClickUpOAuthController {
 
     private final ClickUpOAuthService clickUpOauthService;
 
+    private final JwtUserDetailsService jwtUserDetailsService;
+
     @GetMapping("/authorize")
     ResponseEntity<AuthorizeResponse> authorize() {
         AuthorizeResponse authorizeResponse = clickUpOauthService.authorize();
@@ -21,7 +25,8 @@ public class ClickUpOAuthController {
 
     @PostMapping("/callback")
     void callback(@RequestParam String code) {
-        clickUpOauthService.callback(code);
+        User user = jwtUserDetailsService.getUserFromContext();
+        clickUpOauthService.callback(code, user);
     }
 
 }

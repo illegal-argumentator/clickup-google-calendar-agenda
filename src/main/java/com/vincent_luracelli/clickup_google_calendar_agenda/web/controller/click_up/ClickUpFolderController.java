@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.FoldersResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
@@ -21,8 +22,8 @@ public class ClickUpFolderController {
 
     @GetMapping("/space/{id}/folders")
     ResponseEntity<FoldersResponse> findFoldersBySpace(@PathVariable String id) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpClient.findFoldersBySpace(id, username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpClient.findFoldersBySpace(id, user));
     }
 
 }

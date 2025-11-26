@@ -23,9 +23,12 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void updateUserCalendarToken(String email, String calendarTokenId) {
+    public void update(String email, User updateUser) {
         User user = findByEmailOrThrow(email);
-        user.setCalendarTokenId(calendarTokenId);
+
+        Optional.ofNullable(updateUser.getCalendarTokenId()).ifPresent(calendarTokenId -> user.setCalendarTokenId(updateUser.getCalendarTokenId()));
+        Optional.ofNullable(updateUser.getClickUpTokenId()).ifPresent(calendarTokenId -> user.setClickUpTokenId(updateUser.getClickUpTokenId()));
+
         userRepository.save(user);
     }
 

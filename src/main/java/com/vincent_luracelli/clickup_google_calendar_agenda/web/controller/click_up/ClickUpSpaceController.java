@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.SpacesResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.MembersResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpSpaceService;
@@ -22,13 +23,13 @@ public class ClickUpSpaceController {
 
     @GetMapping("/team/{id}/spaces")
     ResponseEntity<SpacesResponse> findSpacesByTeam(@PathVariable String id) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpSpaceService.findSpacesByTeam(id, username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpSpaceService.findSpacesByTeam(id, user));
     }
 
     @GetMapping("/member/all/space/{id}")
     ResponseEntity<MembersResponse> findMembersBySpace(@PathVariable String id) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(clickUpSpaceService.findMembersBySpace(id, username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(clickUpSpaceService.findMembersBySpace(id, user));
     }
 }

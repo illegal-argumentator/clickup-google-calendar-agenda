@@ -10,7 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventListParam;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
@@ -33,10 +33,10 @@ public class EventClient {
 
     private final OkHttpUtil okHttpUtil;
 
-    private final CalendarAuthTokenService calendarAuthTokenService;
+    private final CalendarAuthService calendarAuthService;
 
     public EventResponse insert(User user, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = calendarAuthTokenService.requireAccessTokenByUser(user);
+        String token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
@@ -56,7 +56,7 @@ public class EventClient {
     }
 
     public void patch(User user, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByUser(user);
+        String token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventByIdPath(eventId, user.getEmail(), eventParam);
 
         try {
@@ -76,7 +76,7 @@ public class EventClient {
     }
 
     public void delete(User user, String eventId, EventParam eventParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByUser(user);
+        String token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventByIdPath(eventId, user.getEmail(), eventParam);
 
         Request request = new Request.Builder()
@@ -89,7 +89,7 @@ public class EventClient {
     }
 
     public EventListResponse list(User user, EventListParam eventListParam) {
-        String token = calendarAuthTokenService.requireAccessTokenByUser(user);
+        String token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()

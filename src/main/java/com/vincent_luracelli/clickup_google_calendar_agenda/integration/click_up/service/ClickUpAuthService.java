@@ -31,8 +31,8 @@ public class ClickUpAuthService {
         return meResponse;
     }
 
-    public ClickUpToken findClickUpTokenOrThrow(String userEmail) {
-        Optional<ClickUpToken> clickUpTokenOptional = clickUpTokenService.findByUserEmail(userEmail);
+    public ClickUpToken findClickUpTokenOrThrow(String id) {
+        Optional<ClickUpToken> clickUpTokenOptional = clickUpTokenService.findById(id);
 
         if (clickUpTokenOptional.isEmpty()) {
             throw new ApiException(

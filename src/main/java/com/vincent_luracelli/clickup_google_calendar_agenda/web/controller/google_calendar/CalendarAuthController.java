@@ -1,7 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
 import lombok.RequiredArgsConstructor;
@@ -17,12 +17,12 @@ public class CalendarAuthController {
 
     private final JwtUserDetailsService jwtUserDetailsService;
 
-    private final CalendarAuthTokenService calendarAuthTokenService;
+    private final CalendarAuthService calendarAuthService;
 
     @GetMapping("/me")
     ResponseEntity<MeResponse> me() {
         User user = jwtUserDetailsService.getUserFromContext();
-        return ResponseEntity.ok(calendarAuthTokenService.me(user));
+        return ResponseEntity.ok(calendarAuthService.me(user));
     }
 
 }

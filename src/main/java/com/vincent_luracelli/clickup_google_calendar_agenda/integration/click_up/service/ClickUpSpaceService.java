@@ -1,6 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.ListsResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.MembersResponse;
@@ -25,15 +26,15 @@ public class ClickUpSpaceService {
     private final ClickUpClient clickUpClient;
 
     @Cacheable("click_up_members_by_space")
-    public MembersResponse findMembersBySpace(String id, String username) {
+    public MembersResponse findMembersBySpace(String id, User user) {
         ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-        ListsResponse listsBySpace = clickUpClient.findFolderlessListsBySpace(id, username);
+        ListsResponse listsBySpace = clickUpClient.findFolderlessListsBySpace(id, user);
 
         List<Future<Set<Member>>> futures = new ArrayList<>();
         Set<Member> members = new HashSet<>();
 
         for (Listing listing : listsBySpace.listings()) {
-            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(listing.id(), username).getMembers()));
+            futures.add(executorService.submit(() -> clickUpClient.findMembersByList(listing.id(), user).getMembers()));
         }
 
         try {
@@ -47,7 +48,7 @@ public class ClickUpSpaceService {
         return MembersResponse.builder().members(members).build();
     }
 
-    public SpacesResponse findSpacesByTeam(String id, String username) {
-        return clickUpClient.findSpacesByTeam(id, username);
+    public SpacesResponse findSpacesByTeam(String id, User user) {
+        return clickUpClient.findSpacesByTeam(id, user);
     }
 }

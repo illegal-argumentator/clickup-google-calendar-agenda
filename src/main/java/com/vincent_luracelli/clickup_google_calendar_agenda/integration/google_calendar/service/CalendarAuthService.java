@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest;
 import com.google.api.client.googleapis.auth.oauth2.GoogleTokenResponse;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
@@ -25,7 +26,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class CalendarAuthTokenService {
+public class CalendarAuthService {
 
     private final GoogleProps googleProps;
 
@@ -101,13 +102,18 @@ public class CalendarAuthTokenService {
     }
 
     private CalendarToken findCalendarTokenOrThrow(String id) {
-        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findById(id);
+        ApiException apiException = new ApiException(
+                "Permission denied. Please finish OAuth flow to proceed.",
+                HttpStatus.FORBIDDEN.value()
+        );
 
+        if (StringUtil.isNullOrEmpty(id)) {
+            throw apiException;
+        }
+
+        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findById(id);
         if (calendarTokenOptional.isEmpty()) {
-            throw new ApiException(
-                    "Permission denied. Please finish OAuth flow to proceed.",
-                    HttpStatus.FORBIDDEN.value()
-            );
+            throw apiException;
         }
 
         return calendarTokenOptional.get();
