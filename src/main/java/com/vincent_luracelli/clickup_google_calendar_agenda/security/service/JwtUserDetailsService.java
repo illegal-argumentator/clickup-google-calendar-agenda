@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.security.service;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.AccessDeniedException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.helper.JwtHelper;
@@ -40,12 +41,12 @@ public class JwtUserDetailsService {
         return userDetailsService.loadUserByUsername(claims.getSubject());
     }
 
-    public UserDetails getUserDetailsFromContextOrThrow() {
+    public User getUserFromContext() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof User user)) {
             throw new AccessDeniedException("Unauthorized.");
         }
 
-        return userDetailsService.loadUserByUsername(userDetails.getUsername());
+        return (User) userDetailsService.loadUserByUsername(user.getUsername());
     }
 }

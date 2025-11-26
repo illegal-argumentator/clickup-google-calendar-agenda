@@ -9,6 +9,8 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.Api
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
@@ -28,16 +30,18 @@ public class CalendarAuthTokenService {
 
     private final GoogleProps googleProps;
 
+    private final UserService userService;
+
     private final CalendarTokenService calendarTokenService;
 
-    public MeResponse me(String userEmail) {
+    public MeResponse me(User user) {
         MeResponse meResponse = MeResponse.builder()
                 .success(true)
                 .message("Authorized.")
                 .build();
 
         try {
-            findCalendarTokenOrThrow(userEmail);
+            findCalendarTokenOrThrow(user.getCalendarTokenId());
         } catch (ApiException e) {
             return meResponse.toBuilder().success(false).message(e.getMessage()).build();
         }
@@ -46,7 +50,8 @@ public class CalendarAuthTokenService {
     }
 
     public String requireAccessTokenByUserEmail(String userEmail) {
-        CalendarToken calendarToken = findCalendarTokenOrThrow(userEmail);
+        User user = userService.findByEmailOrThrow(userEmail);
+        CalendarToken calendarToken = findCalendarTokenOrThrow(user.getCalendarTokenId());
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);
@@ -99,8 +104,8 @@ public class CalendarAuthTokenService {
         return tokenExpiration <= System.currentTimeMillis();
     }
 
-    private CalendarToken findCalendarTokenOrThrow(String userEmail) {
-        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findByUserEmail(userEmail);
+    private CalendarToken findCalendarTokenOrThrow(String id) {
+        Optional<CalendarToken> calendarTokenOptional = calendarTokenService.findById(id);
 
         if (calendarTokenOptional.isEmpty()) {
             throw new ApiException(

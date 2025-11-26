@@ -65,11 +65,13 @@ public class CalendarOAuthService {
                     .execute();
 
             GoogleIdToken googleIdToken = GoogleIdToken.parse(JSON_FACTORY, tokenResponse.getIdToken());
+            String userEmail = googleIdToken.getPayload().getEmail();
+
             CalendarToken calendarToken = CalendarToken.builder()
                     .accessToken(tokenResponse.getAccessToken())
                     .accessExpiration(System.currentTimeMillis() + tokenResponse.getExpiresInSeconds())
                     .refreshToken(tokenResponse.getRefreshToken())
-                    .userEmail(googleIdToken.getPayload().getEmail())
+                    .userEmail(userEmail)
                     .build();
 
             CalendarToken savedCalendarToken = calendarTokenService.saveOrUpdateIfExists(calendarToken);

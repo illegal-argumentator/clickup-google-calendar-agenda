@@ -1,6 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.service.EventService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -22,22 +23,23 @@ public class CalendarEventService {
 
     private final EventService eventService;
 
-    public EventResponse insert(String userEmail, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        EventResponse eventResponse = eventClient.insert(userEmail, eventParam, insertEventRequest);
+    public EventResponse insert(User user, EventParam eventParam, InsertEventRequest insertEventRequest) {
+        EventResponse eventResponse = eventClient.insert(user.getEmail(), eventParam, insertEventRequest);
         eventService.save(Event.builder()
                 .id(eventResponse.getId())
-                .userEmail(userEmail)
+                .userEmail(user.getEmail())
                 .title(eventResponse.getSummary())
+                .calendarTokenId(user.getCalendarTokenId())
                 .build());
         return eventResponse;
     }
 
     @Transactional
-    public List<EventResponse> insert(String userEmail, EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
+    public List<EventResponse> insert(User user, EventParam eventParam, List<InsertEventRequest> insertEventsRequest) {
         List<EventResponse> eventResponses = new ArrayList<>();
 
         for (InsertEventRequest insertEventRequest : insertEventsRequest) {
-            EventResponse eventResponse = insert(userEmail, eventParam, insertEventRequest);
+            EventResponse eventResponse = insert(user, eventParam, insertEventRequest);
             eventResponses.add(eventResponse);
         }
 

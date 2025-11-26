@@ -49,4 +49,8 @@ public class CalendarTokenService {
     public Optional<CalendarToken> findByUserEmail(String userEmail) {
         return calendarTokenRepository.findByUserEmail(userEmail);
     }
+
+    public Optional<CalendarToken> findById(String id) {
+        return calendarTokenRepository.findById(id);
+    }
 }

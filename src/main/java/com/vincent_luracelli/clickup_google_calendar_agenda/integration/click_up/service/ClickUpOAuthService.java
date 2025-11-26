@@ -47,7 +47,7 @@ public class ClickUpOAuthService {
                 .build();
 
         AccessTokenResponse accessToken = clickUpOAuthClient.getAccessToken(accessTokenRequest);
-        UserDetails userDetails = jwtUserDetailsService.getUserDetailsFromContextOrThrow();
+        UserDetails userDetails = jwtUserDetailsService.getUserFromContext();
 
         ClickUpToken clickUpToken = ClickUpToken.builder()
                 .accessToken("Bearer " + accessToken.accessToken())

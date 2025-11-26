@@ -19,7 +19,7 @@ public class ClickUpTaskController {
 
     @GetMapping("/list/{id}/tasks")
     ResponseEntity<TasksResponse> findTasksByList(@PathVariable String id) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
+        String username = jwtUserDetailsService.getUserFromContext().getUsername();
         return ResponseEntity.ok(clickUpClient.findTasksByList(id, username));
     }
 
@@ -27,7 +27,7 @@ public class ClickUpTaskController {
     ResponseEntity<TasksResponse> findFilteredTaskByTeam(
             @PathVariable String id,
             TaskFilterParam taskFilterParam) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
+        String username = jwtUserDetailsService.getUserFromContext().getUsername();
         return ResponseEntity.ok(clickUpClient.findFilteredTaskByTeam(id, taskFilterParam, username));
     }
 }

@@ -2,6 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.service;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.service.EventService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
@@ -23,15 +24,15 @@ public class EventFacade {
 
     private final EventClient eventClient;
 
-    public EventListResponse getCreatedEvents(String userEmail, EventListParam eventListParam) {
-        EventListResponse eventListResponse = eventClient.list(userEmail, eventListParam);
-        List<Event> eventsByUserEmail = eventService.findAllByUserEmail(userEmail);
+    public EventListResponse getCreatedEvents(User user, EventListParam eventListParam) {
+        EventListResponse eventListResponse = eventClient.list(user.getEmail(), eventListParam);
+        List<Event> eventsByUserEmail = eventService.findAllByUserEmailAndCalendarTokenId(user.getEmail(), user.getCalendarTokenId());
 
         Set<String> existingIds = mapAllEventsToIds(eventsByUserEmail);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
         eventListResponse.setItems(createdEvents);
 
-        log.info("EventFacade: {} - created events, {} - fetched events. Successfully synchronized for user - {}.", createdEvents.size(), eventListResponse.getItems().size(), userEmail);
+        log.info("EventFacade: {} - created events, {} - fetched events. Successfully synchronized for user - {}.", createdEvents.size(), eventListResponse.getItems().size(), user.getEmail());
 
         return eventListResponse;
     }

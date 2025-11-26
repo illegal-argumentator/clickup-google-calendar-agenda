@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
@@ -27,8 +28,8 @@ public class CalendarEventController {
             @Valid EventParam eventParam,
             @Valid @RequestBody InsertEventRequest insertEventRequest
     ) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
-        EventResponse eventResponse = calendarEventService.insert(username, eventParam, insertEventRequest);
+        User user = jwtUserDetailsService.getUserFromContext();
+        EventResponse eventResponse = calendarEventService.insert(user, eventParam, insertEventRequest);
         return ResponseEntity.ok(eventResponse);
     }
 
@@ -37,8 +38,8 @@ public class CalendarEventController {
             @Valid EventParam eventParam,
             @Valid @RequestBody List<InsertEventRequest> insertEventsRequest
     ) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
-        List<EventResponse> eventsResponse = calendarEventService.insert(username, eventParam, insertEventsRequest);
+        User user = jwtUserDetailsService.getUserFromContext();
+        List<EventResponse> eventsResponse = calendarEventService.insert(user, eventParam, insertEventsRequest);
         return ResponseEntity.ok(eventsResponse);
     }
 
@@ -48,13 +49,13 @@ public class CalendarEventController {
             @Valid @RequestBody PatchEventRequest patchEventRequest,
             @Valid EventParam eventParam
     ) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
+        String username = jwtUserDetailsService.getUserFromContext().getUsername();
         calendarEventService.patch(username, id, patchEventRequest, eventParam);
     }
 
     @DeleteMapping("/{id}")
     void deleteEvent(@PathVariable String id, @Valid EventParam eventParam) {
-        String username = jwtUserDetailsService.getUserDetailsFromContextOrThrow().getUsername();
+        String username = jwtUserDetailsService.getUserFromContext().getUsername();
         calendarEventService.delete(username, id, eventParam);
     }
 
