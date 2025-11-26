@@ -24,18 +24,18 @@ public class User implements UserDetails {
 
     private String clickUpTokenId;
 
-    @NotNull(message = "Email is required")
-    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Invalid email")
+    @NotNull(message = "Email is required.")
+    @Pattern(regexp = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", message = "Please provide a valid email address in the format: username@domain.com.")
     private String email;
 
-    @NotNull(message = "Role is required")
+    @NotNull(message = "Role is required.")
     private UserRole role;
 
-    @NotNull(message = "Status is required")
+    @NotNull(message = "Status is required.")
     private UserStatus status;
 
-    @NotNull(message = "Password is required")
-    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "Invalid password. Should include minimum 8 characters, 1 uppercase character, 1 lowercase character, 1 special symbol")
+    @NotNull(message = "Password is required.")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?]).{8,}$", message = "Please provide a valid password in the format: Qwerty1234@.")
     private String password;
 
     @Override
