@@ -52,4 +52,26 @@ public class MainExceptionHandler {
         return ResponseEntity.badRequest().body(exceptionResponse);
     }
 
+    @ExceptionHandler(EntityAlreadyExistsException.class)
+    public ResponseEntity<ExceptionResponse> handleEntityAlreadyExistsException(EntityAlreadyExistsException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(SourceType.API)
+                .body(e.getMessage())
+                .code(HttpStatus.CONFLICT.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleEntityNotFoundException(EntityNotFoundException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(SourceType.API)
+                .body(e.getMessage())
+                .code(HttpStatus.NOT_FOUND.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
 }

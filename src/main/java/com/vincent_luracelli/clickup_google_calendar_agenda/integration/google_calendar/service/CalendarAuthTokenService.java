@@ -50,7 +50,8 @@ public class CalendarAuthTokenService {
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);
-            calendarTokenService.save(calendarToken.toBuilder()
+
+            calendarTokenService.updateByUserEmail(CalendarToken.builder()
                     .accessToken(tokenPayload.getAccessToken())
                     .accessExpiration(tokenPayload.getAccessExpiration())
                     .refreshToken(tokenPayload.getRefreshToken())
