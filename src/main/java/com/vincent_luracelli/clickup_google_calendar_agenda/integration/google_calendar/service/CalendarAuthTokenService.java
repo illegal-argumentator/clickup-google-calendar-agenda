@@ -80,15 +80,13 @@ public class CalendarAuthTokenService {
     private TokenPayload requireRefreshToken(CalendarToken calendarToken) {
         GoogleTokenResponse googleTokenResponse = refresh(calendarToken.getRefreshToken());
 
-        TokenPayload tokenPayload = TokenPayload.builder().build();
-        tokenPayload.setAccessToken(googleTokenResponse.getAccessToken());
-        tokenPayload.setAccessExpiration(System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000);
+        TokenPayload tokenPayload = TokenPayload.builder()
+                .accessToken(googleTokenResponse.getAccessToken())
+                .accessExpiration(System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000)
+                .refreshToken(calendarToken.getRefreshToken())
+                .build();
 
-        System.out.println(googleTokenResponse.getRefreshToken());
-        System.out.println(googleTokenResponse.getRefreshToken() == null);
-        System.out.println(googleTokenResponse.getRefreshToken() != null);
         if (googleTokenResponse.getRefreshToken() != null) {
-            System.out.println("Check");
             tokenPayload.setRefreshToken(googleTokenResponse.getRefreshToken());
         }
 
