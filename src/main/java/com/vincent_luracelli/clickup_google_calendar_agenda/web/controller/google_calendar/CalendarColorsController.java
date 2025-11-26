@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.ColorsClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.ColorsResponse;
@@ -20,7 +21,7 @@ public class CalendarColorsController {
 
     @GetMapping
     ResponseEntity<ColorsResponse> getColors() {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        return ResponseEntity.ok(colorsClient.getColors(username));
+        User user = jwtUserDetailsService.getUserFromContext();
+        return ResponseEntity.ok(colorsClient.getColors(user));
     }
 }

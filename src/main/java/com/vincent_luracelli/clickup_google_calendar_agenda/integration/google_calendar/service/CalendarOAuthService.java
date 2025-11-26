@@ -10,6 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.Api
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
@@ -56,7 +57,7 @@ public class CalendarOAuthService {
                 .build();
     }
 
-    public void callback(String code) {
+    public void callback(String code, User user) {
         try {
             GoogleAuthorizationCodeFlow flow = getFlow();
 
@@ -66,7 +67,6 @@ public class CalendarOAuthService {
 
             GoogleIdToken googleIdToken = GoogleIdToken.parse(JSON_FACTORY, tokenResponse.getIdToken());
             String userEmail = googleIdToken.getPayload().getEmail();
-            System.out.println("google callback user: " + userEmail);
 
             CalendarToken calendarToken = CalendarToken.builder()
                     .accessToken(tokenResponse.getAccessToken())
@@ -76,7 +76,7 @@ public class CalendarOAuthService {
                     .build();
 
             CalendarToken savedCalendarToken = calendarTokenService.saveOrUpdateIfExists(calendarToken);
-            userService.updateUserCalendarToken(googleIdToken.getPayload().getEmail(), savedCalendarToken.getId());
+            userService.updateUserCalendarToken(user.getEmail(), savedCalendarToken.getId());
         } catch (IOException e) {
             log.error("Error during OAuth callback", e);
             throw new ApiException(

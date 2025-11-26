@@ -49,14 +49,14 @@ public class CalendarEventController {
             @Valid @RequestBody PatchEventRequest patchEventRequest,
             @Valid EventParam eventParam
     ) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        calendarEventService.patch(username, id, patchEventRequest, eventParam);
+        User user = jwtUserDetailsService.getUserFromContext();
+        calendarEventService.patch(user, id, patchEventRequest, eventParam);
     }
 
     @DeleteMapping("/{id}")
     void deleteEvent(@PathVariable String id, @Valid EventParam eventParam) {
-        String username = jwtUserDetailsService.getUserFromContext().getUsername();
-        calendarEventService.delete(username, id, eventParam);
+        User user = jwtUserDetailsService.getUserFromContext();
+        calendarEventService.delete(user, id, eventParam);
     }
 
 }

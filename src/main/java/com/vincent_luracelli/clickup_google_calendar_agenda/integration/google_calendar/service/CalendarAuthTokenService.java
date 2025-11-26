@@ -10,7 +10,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceTy
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.service.CalendarTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service.UserService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.config.GoogleProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
@@ -30,8 +29,6 @@ public class CalendarAuthTokenService {
 
     private final GoogleProps googleProps;
 
-    private final UserService userService;
-
     private final CalendarTokenService calendarTokenService;
 
     public MeResponse me(User user) {
@@ -49,8 +46,7 @@ public class CalendarAuthTokenService {
         return meResponse;
     }
 
-    public String requireAccessTokenByUserEmail(String userEmail) {
-        User user = userService.findByEmailOrThrow(userEmail);
+    public String requireAccessTokenByUser(User user) {
         CalendarToken calendarToken = findCalendarTokenOrThrow(user.getCalendarTokenId());
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
@@ -59,7 +55,7 @@ public class CalendarAuthTokenService {
             calendarTokenService.update(CalendarToken.builder()
                     .accessToken(tokenPayload.getAccessToken())
                     .accessExpiration(tokenPayload.getAccessExpiration())
-                    .userEmail(userEmail)
+                    .userEmail(user.getEmail())
                     .refreshToken(tokenPayload.getRefreshToken())
                     .build());
         }
