@@ -66,6 +66,7 @@ public class CalendarOAuthService {
 
             GoogleIdToken googleIdToken = GoogleIdToken.parse(JSON_FACTORY, tokenResponse.getIdToken());
             String userEmail = googleIdToken.getPayload().getEmail();
+            System.out.println("google callback user: " + userEmail);
 
             CalendarToken calendarToken = CalendarToken.builder()
                     .accessToken(tokenResponse.getAccessToken())
