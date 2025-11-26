@@ -54,6 +54,7 @@ public class CalendarAuthTokenService {
             calendarTokenService.updateByUserEmail(CalendarToken.builder()
                     .accessToken(tokenPayload.getAccessToken())
                     .accessExpiration(tokenPayload.getAccessExpiration())
+                    .userEmail(userEmail)
                     .refreshToken(tokenPayload.getRefreshToken())
                     .build());
         }
