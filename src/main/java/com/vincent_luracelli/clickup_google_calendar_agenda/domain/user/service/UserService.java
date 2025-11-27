@@ -26,8 +26,8 @@ public class UserService {
     public void update(String email, User updateUser) {
         User user = findByEmailOrThrow(email);
 
-        Optional.ofNullable(updateUser.getCalendarTokenId()).ifPresent(calendarTokenId -> user.setCalendarTokenId(updateUser.getCalendarTokenId()));
-        Optional.ofNullable(updateUser.getClickUpTokenId()).ifPresent(calendarTokenId -> user.setClickUpTokenId(updateUser.getClickUpTokenId()));
+        Optional.ofNullable(updateUser.getCalendarTokenId()).ifPresent(user::setCalendarTokenId);
+        Optional.ofNullable(updateUser.getClickUpTokenId()).ifPresent(user::setClickUpTokenId);
 
         userRepository.save(user);
     }

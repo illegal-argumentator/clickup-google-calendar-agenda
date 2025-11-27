@@ -32,6 +32,7 @@ public class ClickUpOAuthClient {
 
         try {
             String jsonBody = objectMapper.writeValueAsString(accessTokenRequest);
+            System.out.println(jsonBody);
             Request request = new Request.Builder()
                     .url(path)
                     .post(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
