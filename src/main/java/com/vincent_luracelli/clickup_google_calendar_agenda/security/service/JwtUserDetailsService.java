@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.security.service;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.common.type.UserStatus;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.AccessDeniedException;
@@ -48,5 +49,9 @@ public class JwtUserDetailsService {
         }
 
         return (User) userDetailsService.loadUserByUsername(user.getUsername());
+    }
+
+    public static boolean isUserActive(UserDetails userDetails) {
+        return userDetails instanceof User && ((User) userDetails).getStatus() == UserStatus.ACTIVE;
     }
 }

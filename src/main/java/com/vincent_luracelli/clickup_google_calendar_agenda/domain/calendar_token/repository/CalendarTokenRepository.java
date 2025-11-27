@@ -9,6 +9,4 @@ public interface CalendarTokenRepository extends MongoRepository<CalendarToken, 
 
     Optional<CalendarToken> findByUserEmail(String userEmail);
 
-    void deleteByUserEmail(String userEmail);
-
 }

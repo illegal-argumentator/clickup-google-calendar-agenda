@@ -6,14 +6,9 @@ import lombok.Getter;
 @Getter
 public class EntityNotFoundException extends RuntimeException {
 
-    private SourceType sourceType = SourceType.API;
+    private final SourceType sourceType = SourceType.API;
 
     public EntityNotFoundException(String message) {
         super(message);
-    }
-
-    public EntityNotFoundException(String message, SourceType sourceType) {
-        super(message);
-        this.sourceType = sourceType;
     }
 }

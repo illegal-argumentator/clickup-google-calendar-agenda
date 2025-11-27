@@ -10,6 +10,7 @@ import lombok.Setter;
 public class OAuth {
 
     private String clientId;
+
     private String clientSecret;
 
 }

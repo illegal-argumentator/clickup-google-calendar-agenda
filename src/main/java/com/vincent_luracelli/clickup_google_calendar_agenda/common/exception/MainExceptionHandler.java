@@ -52,4 +52,33 @@ public class MainExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ExceptionResponse> handleApiException(ApiException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(e.getSourceType())
+                .body(e.getMessage())
+                .code(e.getCode())
+                .build();
+        return ResponseEntity.status(exceptionResponse.code()).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(SourceType.API)
+                .body(e.getMessage())
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .build();
+        return ResponseEntity.internalServerError().body(exceptionResponse);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ExceptionResponse> handleNullPointerException(NullPointerException e) {
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(SourceType.API)
+                .body(e.getMessage())
+                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .build();
+        return ResponseEntity.internalServerError().body(exceptionResponse);
+    }
 }

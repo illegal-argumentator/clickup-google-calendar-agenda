@@ -1,8 +1,8 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.service;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.EntityAlreadyExistsException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.common.type.UserRole;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.common.type.UserStatus;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.exception.UserAlreadyExistsException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.dto.TokenPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exception.AccessDeniedException;
@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.BEARER_PREFIX;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.utils.JwtUtils.isTokenFormatValid;
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +39,7 @@ public class AuthService {
         if (user.getStatus() != UserStatus.ACTIVE) {
             throw new AccessDeniedException("User is unactive.");
         }
+
         matchPasswordsOrThrow(authRequest.password(), user.getPassword());
 
         String accessToken = jwtService.generateAccessToken(user);
@@ -51,7 +53,7 @@ public class AuthService {
 
     public void signUp(AuthRequest authRequest) {
         userService.findByEmail(authRequest.email()).ifPresent(user -> {
-            throw new UserAlreadyExistsException("User already exists.");
+            throw new EntityAlreadyExistsException("User already exists.");
         });
 
         String encodedPassword = passwordEncoder.encode(authRequest.password());
@@ -65,9 +67,10 @@ public class AuthService {
     }
 
     public AuthResponse refresh(RefreshRequest refreshRequest) {
-        if (!refreshRequest.refreshToken().startsWith(BEARER_PREFIX)) {
+        if (!isTokenFormatValid(refreshRequest.refreshToken())) {
             throw new InvalidTokenException("Invalid token.");
         }
+
         String token = refreshRequest.refreshToken().substring(BEARER_PREFIX.length());
 
         UserDetails userDetails = jwtUserDetailsService.getUserDetailsFromToken(token);

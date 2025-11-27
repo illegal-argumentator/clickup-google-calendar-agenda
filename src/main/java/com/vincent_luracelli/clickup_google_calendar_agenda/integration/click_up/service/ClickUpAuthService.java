@@ -5,6 +5,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.service.ClickUpTokenService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.MeResponse;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,26 +21,34 @@ public class ClickUpAuthService {
     public MeResponse me(User user) {
         MeResponse meResponse = MeResponse.builder()
                 .success(true)
-                .message("Authorized.")
+                .message("ClickUp account successfully authorized.")
                 .build();
 
         try {
             findClickUpTokenOrThrow(user.getClickUpTokenId());
         } catch (ApiException e) {
-            return meResponse.toBuilder().success(false).message(e.getMessage()).build();
+            return meResponse.toBuilder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build();
         }
 
         return meResponse;
     }
 
     public ClickUpToken findClickUpTokenOrThrow(String id) {
-        Optional<ClickUpToken> clickUpTokenOptional = clickUpTokenService.findById(id);
+        ApiException apiException = new ApiException(
+                "Please finish OAuth flow to proceed.",
+                HttpStatus.FORBIDDEN.value()
+        );
 
+        if (StringUtils.isEmpty(id)) {
+            throw apiException;
+        }
+
+        Optional<ClickUpToken> clickUpTokenOptional = clickUpTokenService.findById(id);
         if (clickUpTokenOptional.isEmpty()) {
-            throw new ApiException(
-                    "Permission denied. Please finish OAuth flow to proceed.",
-                    HttpStatus.FORBIDDEN.value()
-            );
+            throw apiException;
         }
 
         return clickUpTokenOptional.get();

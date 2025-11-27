@@ -6,14 +6,10 @@ import lombok.Getter;
 @Getter
 public class EntityAlreadyExistsException extends RuntimeException {
 
-    private SourceType sourceType = SourceType.API;
+    private final SourceType sourceType = SourceType.API;
 
     public EntityAlreadyExistsException(String message) {
         super(message);
     }
 
-    public EntityAlreadyExistsException(String message, SourceType sourceType) {
-        super(message);
-        this.sourceType = sourceType;
-    }
 }
