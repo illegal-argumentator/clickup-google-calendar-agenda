@@ -38,6 +38,9 @@ public class ClickUpTokenService {
         ClickUpToken clickUpToken = clickUpTokenRepository.findByUserEmail(updateClickUpToken.getUserEmail())
                 .orElseThrow(() -> new EntityNotFoundException("ClickUp token not found."));
 
+        Optional.ofNullable(updateClickUpToken.getAccessToken()).ifPresent(clickUpToken::setAccessToken);
+        Optional.ofNullable(updateClickUpToken.getUserEmail()).ifPresent(clickUpToken::setUserEmail);
+
         return clickUpTokenRepository.save(clickUpToken);
     }
 
