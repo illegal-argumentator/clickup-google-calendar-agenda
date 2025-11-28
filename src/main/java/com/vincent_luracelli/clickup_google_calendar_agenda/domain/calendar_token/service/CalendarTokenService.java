@@ -25,16 +25,16 @@ public class CalendarTokenService {
         return calendarTokenRepository.save(calendarToken);
     }
 
-    public CalendarToken saveOrUpdateIfExists(CalendarToken calendarToken) {
+    public CalendarToken saveOrUpdateIfExists(String userEmail, CalendarToken calendarToken) {
         try {
             return save(calendarToken);
         } catch (EntityAlreadyExistsException e) {
-            return update(calendarToken);
+            return update(userEmail, calendarToken);
         }
     }
 
-    public CalendarToken update(CalendarToken updateCalendarToken) {
-        CalendarToken calendarToken = calendarTokenRepository.findByUserEmail(updateCalendarToken.getUserEmail())
+    public CalendarToken update(String userEmail,CalendarToken updateCalendarToken) {
+        CalendarToken calendarToken = calendarTokenRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Calendar token not found."));
 
         Optional.ofNullable(updateCalendarToken.getAccessToken()).ifPresent(accessToken -> calendarToken.setAccessToken(updateCalendarToken.getAccessToken()));

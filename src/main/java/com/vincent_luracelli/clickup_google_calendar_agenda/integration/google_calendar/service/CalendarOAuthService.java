@@ -74,7 +74,7 @@ public class CalendarOAuthService {
                     .userEmail(googleIdToken.getPayload().getEmail())
                     .build();
 
-            CalendarToken savedCalendarToken = calendarTokenService.saveOrUpdateIfExists(calendarToken);
+            CalendarToken savedCalendarToken = calendarTokenService.saveOrUpdateIfExists(googleIdToken.getPayload().getEmail(), calendarToken);
             userService.update(user.getEmail(), User.builder().calendarTokenId(savedCalendarToken.getId()).build());
         } catch (IOException e) {
             log.error("Error during OAuth callback", e);
