@@ -56,8 +56,6 @@ public class CalendarAuthService {
             calendarTokenService.update(CalendarToken.builder()
                     .accessToken(tokenPayload.getAccessToken())
                     .accessExpiration(tokenPayload.getAccessExpiration())
-                    .userEmail(user.getEmail())
-                    .refreshToken(tokenPayload.getRefreshToken())
                     .build());
         }
 
@@ -87,7 +85,6 @@ public class CalendarAuthService {
         TokenPayload tokenPayload = TokenPayload.builder()
                 .accessToken(googleTokenResponse.getAccessToken())
                 .accessExpiration(System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000)
-                .refreshToken(calendarToken.getRefreshToken())
                 .build();
 
         if (googleTokenResponse.getRefreshToken() != null) {
