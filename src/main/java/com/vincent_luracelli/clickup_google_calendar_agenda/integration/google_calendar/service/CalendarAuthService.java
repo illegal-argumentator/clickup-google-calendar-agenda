@@ -51,6 +51,7 @@ public class CalendarAuthService {
         CalendarToken calendarToken = findCalendarTokenOrThrow(user.getCalendarTokenId());
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
+            System.out.println("Expired");
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);
 
             calendarTokenService.update(calendarToken.getUserEmail(), CalendarToken.builder()

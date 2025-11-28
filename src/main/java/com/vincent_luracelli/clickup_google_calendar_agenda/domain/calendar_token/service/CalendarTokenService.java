@@ -29,18 +29,20 @@ public class CalendarTokenService {
         try {
             return save(calendarToken);
         } catch (EntityAlreadyExistsException e) {
+            System.out.println("Callback");
             return update(userEmail, calendarToken);
         }
     }
 
     public CalendarToken update(String userEmail,CalendarToken updateCalendarToken) {
+        System.out.println("For update: " + userEmail);
         CalendarToken calendarToken = calendarTokenRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Calendar token not found."));
 
-        Optional.ofNullable(updateCalendarToken.getAccessToken()).ifPresent(accessToken -> calendarToken.setAccessToken(updateCalendarToken.getAccessToken()));
-        Optional.ofNullable(updateCalendarToken.getAccessExpiration()).ifPresent(accessToken -> calendarToken.setAccessExpiration(updateCalendarToken.getAccessExpiration()));
-        Optional.ofNullable(updateCalendarToken.getRefreshToken()).ifPresent(accessToken -> calendarToken.setRefreshToken(updateCalendarToken.getRefreshToken()));
-        Optional.ofNullable(updateCalendarToken.getUserEmail()).ifPresent(accessToken -> calendarToken.setUserEmail(updateCalendarToken.getUserEmail()));
+        Optional.ofNullable(updateCalendarToken.getAccessToken()).ifPresent(calendarToken::setAccessToken);
+        Optional.ofNullable(updateCalendarToken.getAccessExpiration()).ifPresent(calendarToken::setAccessExpiration);
+        Optional.ofNullable(updateCalendarToken.getRefreshToken()).ifPresent(calendarToken::setRefreshToken);
+        Optional.ofNullable(updateCalendarToken.getUserEmail()).ifPresent(calendarToken::setUserEmail);
 
         return calendarTokenRepository.save(calendarToken);
     }
