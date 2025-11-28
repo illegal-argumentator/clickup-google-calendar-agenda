@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
@@ -36,14 +37,14 @@ public class EventClient {
     private final CalendarAuthService calendarAuthService;
 
     public EventResponse insert(User user, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        String token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(insertEventRequest);
 
             Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
                     .url(path)
                     .post(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
@@ -56,14 +57,14 @@ public class EventClient {
     }
 
     public void patch(User user, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        String token = calendarAuthService.requireAccessTokenByUser(user);
-        String path = buildEventByIdPath(eventId, user.getEmail(), eventParam);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+        String path = buildEventByIdPath(eventId, token.getUserEmail(), eventParam);
 
         try {
             String jsonBody = objectMapper.writeValueAsString(patchEventRequest);
 
             Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
                     .url(path)
                     .patch(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
@@ -76,11 +77,11 @@ public class EventClient {
     }
 
     public void delete(User user, String eventId, EventParam eventParam) {
-        String token = calendarAuthService.requireAccessTokenByUser(user);
-        String path = buildEventByIdPath(eventId, user.getEmail(), eventParam);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+        String path = buildEventByIdPath(eventId, token.getUserEmail(), eventParam);
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
                 .url(path)
                 .delete()
                 .build();
@@ -89,11 +90,11 @@ public class EventClient {
     }
 
     public EventListResponse list(User user, EventListParam eventListParam) {
-        String token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
                 .url(path)
                 .get()
                 .build();

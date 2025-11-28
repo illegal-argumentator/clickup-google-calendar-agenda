@@ -47,11 +47,10 @@ public class CalendarAuthService {
         return meResponse;
     }
 
-    public String requireAccessTokenByUser(User user) {
+    public CalendarToken requireAccessTokenByUser(User user) {
         CalendarToken calendarToken = findCalendarTokenOrThrow(user.getCalendarTokenId());
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
-            System.out.println("Expired");
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);
 
             calendarTokenService.update(calendarToken.getUserEmail(), CalendarToken.builder()
@@ -60,7 +59,7 @@ public class CalendarAuthService {
                     .build());
         }
 
-        return calendarToken.getAccessToken();
+        return calendarToken;
     }
 
     public GoogleTokenResponse refresh(String refreshToken) {

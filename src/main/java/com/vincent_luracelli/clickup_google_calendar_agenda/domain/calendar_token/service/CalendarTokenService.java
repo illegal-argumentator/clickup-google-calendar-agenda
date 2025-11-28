@@ -35,7 +35,6 @@ public class CalendarTokenService {
     }
 
     public CalendarToken update(String userEmail,CalendarToken updateCalendarToken) {
-        System.out.println("For update: " + userEmail);
         CalendarToken calendarToken = calendarTokenRepository.findByUserEmail(userEmail)
                 .orElseThrow(() -> new EntityNotFoundException("Calendar token not found."));
 

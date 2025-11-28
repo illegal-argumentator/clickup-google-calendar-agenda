@@ -2,6 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.ColorsResponse;
@@ -26,16 +27,15 @@ public class ColorsClient {
 
     @Cacheable("calendar_colors")
     public ColorsResponse getColors(User user) {
-        String token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
         String path = buildColorsPath();
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token))
+                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getUserEmail()))
                 .url(path)
                 .get()
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, ColorsResponse.class);
     }
-
 }
