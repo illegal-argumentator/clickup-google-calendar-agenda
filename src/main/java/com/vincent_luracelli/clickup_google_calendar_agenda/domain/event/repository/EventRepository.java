@@ -7,5 +7,5 @@ import java.util.List;
 
 public interface EventRepository extends MongoRepository<Event, String> {
 
-    List<Event> findAllByCalendarTokenId(String calendarTokenId);
+    List<Event> findAllByCalendarTokenIdAndUserEmail(String calendarTokenId, String userEmail);
 }

@@ -13,8 +13,8 @@ public class EventService {
 
     private final EventRepository eventRepository;
 
-    public List<Event> findAllByCalendarTokenId(String calendarTokenId) {
-        return eventRepository.findAllByCalendarTokenId(calendarTokenId);
+    public List<Event> findAllByCalendarTokenIdAndUserEmail(String calendarTokenId, String userEmail) {
+        return eventRepository.findAllByCalendarTokenIdAndUserEmail(calendarTokenId, userEmail);
     }
 
     public void save(Event event) {
