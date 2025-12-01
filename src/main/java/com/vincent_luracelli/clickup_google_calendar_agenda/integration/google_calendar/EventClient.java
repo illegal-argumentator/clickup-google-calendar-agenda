@@ -20,9 +20,9 @@ import okhttp3.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
-import static com.google.auth.http.AuthHttpConstants.BEARER;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.builder.EventsPathBuilder.*;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.BEARER_PREFIX;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Slf4j
@@ -44,7 +44,7 @@ public class EventClient {
             String jsonBody = objectMapper.writeValueAsString(insertEventRequest);
 
             Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
+                    .addHeader(AUTHORIZATION_HEADER, "%s %s".formatted(BEARER_PREFIX, token.getAccessToken()))
                     .url(path)
                     .post(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
@@ -64,7 +64,7 @@ public class EventClient {
             String jsonBody = objectMapper.writeValueAsString(patchEventRequest);
 
             Request request = new Request.Builder()
-                    .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
+                    .addHeader(AUTHORIZATION_HEADER, "%s %s".formatted(BEARER_PREFIX, token.getAccessToken()))
                     .url(path)
                     .patch(RequestBody.create(jsonBody, MediaType.get(APPLICATION_JSON_VALUE)))
                     .build();
@@ -81,7 +81,7 @@ public class EventClient {
         String path = buildEventByIdPath(eventId, token.getUserEmail(), eventParam);
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
+                .addHeader(AUTHORIZATION_HEADER, "%s %s".formatted(BEARER_PREFIX, token.getAccessToken()))
                 .url(path)
                 .delete()
                 .build();
@@ -94,7 +94,7 @@ public class EventClient {
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getAccessToken()))
+                .addHeader(AUTHORIZATION_HEADER, "%s %s".formatted(BEARER_PREFIX, token.getAccessToken()))
                 .url(path)
                 .get()
                 .build();

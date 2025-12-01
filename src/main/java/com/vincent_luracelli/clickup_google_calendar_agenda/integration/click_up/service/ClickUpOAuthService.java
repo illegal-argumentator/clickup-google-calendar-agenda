@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.BEARER_PREFIX;
+
 @Service
 @RequiredArgsConstructor
 public class ClickUpOAuthService {
@@ -49,7 +51,7 @@ public class ClickUpOAuthService {
         AccessTokenResponse accessToken = clickUpOAuthClient.getAccessToken(accessTokenRequest);
 
         ClickUpToken clickUpToken = ClickUpToken.builder()
-                .accessToken("Bearer " + accessToken.accessToken())
+                .accessToken(BEARER_PREFIX + accessToken.accessToken())
                 .userEmail(user.getUsername())
                 .build();
 

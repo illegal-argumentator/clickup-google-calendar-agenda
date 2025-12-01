@@ -12,9 +12,9 @@ import okhttp3.Request;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
-import static com.google.auth.http.AuthHttpConstants.BEARER;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.builder.ColorsPathBuilder.buildColorsPath;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.BEARER_PREFIX;
 
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class ColorsClient {
         String path = buildColorsPath();
 
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, "%s %s".formatted(BEARER, token.getUserEmail()))
+                .addHeader(AUTHORIZATION_HEADER, "%s %s".formatted(BEARER_PREFIX, token.getAccessToken()))
                 .url(path)
                 .get()
                 .build();

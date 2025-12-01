@@ -14,8 +14,8 @@ import okhttp3.*;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import static com.google.auth.http.AuthHttpConstants.AUTHORIZATION;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
 
 @Slf4j
 @Service
@@ -31,7 +31,7 @@ public class ClickUpClient {
 
         String path = ClickUpPaths.TEAM.getPath();
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -44,7 +44,7 @@ public class ClickUpClient {
 
         String path = buildSpaceByTeamIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -57,7 +57,7 @@ public class ClickUpClient {
 
         String path = buildFolderBySpaceIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -70,7 +70,7 @@ public class ClickUpClient {
 
         String path = buildListByFolderIdPath(folderId);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -83,7 +83,7 @@ public class ClickUpClient {
 
         String path = buildFolderlessListBySpaceIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -95,7 +95,7 @@ public class ClickUpClient {
 
         String path = buildTaskByListIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -107,7 +107,7 @@ public class ClickUpClient {
 
         String path = buildTaskByTeamIdPath(id, taskFilterParam);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 
@@ -120,7 +120,7 @@ public class ClickUpClient {
 
         String path = buildMembersByListIdPath(id);
         Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION, clickUpToken.getAccessToken())
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)
                 .build();
 

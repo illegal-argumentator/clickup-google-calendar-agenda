@@ -29,7 +29,6 @@ public class CalendarTokenService {
         try {
             return save(calendarToken);
         } catch (EntityAlreadyExistsException e) {
-            System.out.println("Callback");
             return update(userEmail, calendarToken);
         }
     }
