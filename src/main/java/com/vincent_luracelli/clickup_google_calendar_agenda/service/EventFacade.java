@@ -25,11 +25,14 @@ public class EventFacade {
     private final EventClient eventClient;
 
     public EventListResponse getCreatedEvents(User user, EventListParam eventListParam) {
+        System.out.println(user);
         EventListResponse eventListResponse = eventClient.list(user, eventListParam);
+        System.out.println(eventListResponse);
         List<Event> eventsAllByCalendarTokenId = eventService.findAllByCalendarTokenId(user.getCalendarTokenId());
 
         Set<String> existingIds = mapAllEventsToIds(eventsAllByCalendarTokenId);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
+        System.out.println(createdEvents);
         eventListResponse.setItems(createdEvents);
 
         log.info("EventFacade: {} - created events, {} - fetched events. Successfully synchronized for user - {}.", createdEvents.size(), eventListResponse.getItems().size(), user.getEmail());
