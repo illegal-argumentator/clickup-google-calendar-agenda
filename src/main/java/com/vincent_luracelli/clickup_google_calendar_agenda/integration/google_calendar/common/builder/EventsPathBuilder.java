@@ -13,6 +13,10 @@ public class EventsPathBuilder {
         return buildEventParamPath(basePath, eventParam);
     }
 
+    public static String buildEventByPrimaryCalendarAndEventIdPath(String eventId) {
+        return CALENDARS.getPath() + "/primary/events/" + eventId;
+    }
+
     public static String buildEventListByPrimaryCalendarPath(EventListParam eventListParam) {
         String basePath = CALENDARS.getPath() + "/primary/events";
 
