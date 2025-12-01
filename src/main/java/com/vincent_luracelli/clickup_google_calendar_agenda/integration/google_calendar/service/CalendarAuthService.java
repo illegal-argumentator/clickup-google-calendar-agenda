@@ -84,7 +84,7 @@ public class CalendarAuthService {
 
         TokenPayload tokenPayload = TokenPayload.builder()
                 .accessToken(googleTokenResponse.getAccessToken())
-                .accessExpiration(System.currentTimeMillis() + googleTokenResponse.getExpiresInSeconds() * 1000)
+                .accessExpiration(System.currentTimeMillis() + (googleTokenResponse.getExpiresInSeconds() - 60) * 1000)
                 .build();
 
         if (googleTokenResponse.getRefreshToken() != null) {
