@@ -25,17 +25,14 @@ public class EventFacade {
     private final EventClient eventClient;
 
     public EventListResponse getCreatedEvents(User user, EventListParam eventListParam) {
-        System.out.println(user);
         EventListResponse eventListResponse = eventClient.list(user, eventListParam);
-        System.out.println(eventListResponse);
         List<Event> eventsAllByCalendarTokenId = eventService.findAllByCalendarTokenId(user.getCalendarTokenId());
+        log.info("EventFacade: {} - created events, {} - fetched events for user - {}.", eventsAllByCalendarTokenId.size(), eventListResponse.getItems().size(), user.getEmail());
 
         Set<String> existingIds = mapAllEventsToIds(eventsAllByCalendarTokenId);
+        System.out.println("events from db: " + existingIds);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
-        System.out.println(createdEvents);
         eventListResponse.setItems(createdEvents);
-
-        log.info("EventFacade: {} - created events, {} - fetched events. Successfully synchronized for user - {}.", createdEvents.size(), eventListResponse.getItems().size(), user.getEmail());
 
         return eventListResponse;
     }
@@ -47,6 +44,7 @@ public class EventFacade {
     }
 
     private List<EventResponse> getExistingEventsFromCalendar(Set<String> existingIds, EventListResponse eventListResponse) {
+        System.out.println("events from calendar: " + eventListResponse.getItems().stream().map(EventResponse::getId).toList());
         return eventListResponse.getItems().stream()
                 .filter(event -> existingIds.contains(event.getId()))
                 .toList();
