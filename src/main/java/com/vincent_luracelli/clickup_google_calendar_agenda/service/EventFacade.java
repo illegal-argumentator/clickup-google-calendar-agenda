@@ -26,9 +26,9 @@ public class EventFacade {
 
     public EventListResponse getCreatedEvents(User user, EventListParam eventListParam) {
         EventListResponse eventListResponse = eventClient.list(user, eventListParam);
-        List<Event> eventsByUserEmail = eventService.findAllByUserEmailAndCalendarTokenId(user.getEmail(), user.getCalendarTokenId());
+        List<Event> eventsAllByCalendarTokenId = eventService.findAllByCalendarTokenId(user.getCalendarTokenId());
 
-        Set<String> existingIds = mapAllEventsToIds(eventsByUserEmail);
+        Set<String> existingIds = mapAllEventsToIds(eventsAllByCalendarTokenId);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
         eventListResponse.setItems(createdEvents);
 
