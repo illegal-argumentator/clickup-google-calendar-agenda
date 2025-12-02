@@ -8,7 +8,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.GetEventResponse;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventListParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

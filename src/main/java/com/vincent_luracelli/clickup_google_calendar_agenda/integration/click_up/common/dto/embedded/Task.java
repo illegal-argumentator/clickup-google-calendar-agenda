@@ -38,6 +38,13 @@ public class Task {
 
     private String url;
 
+    // TODO
+    private Object list;
+
+    private Object folder;
+
+    private Object space;
+
     @JsonProperty("custom_fields")
     private List<CustomField> customFields;
 
