@@ -4,6 +4,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.Us
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventListResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.security.service.JwtUserDetailsService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.EventFacade;
+import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventListParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +21,8 @@ public class EventController {
     private final JwtUserDetailsService jwtUserDetailsService;
 
     @GetMapping("/all/created")
-    ResponseEntity<EventListResponse> getCreatedEvents() {
+    ResponseEntity<EventListResponse> getCreatedEvents(EventListParam eventListParam) {
         User user = jwtUserDetailsService.getUserFromContext();
-        return ResponseEntity.ok(eventFacade.getCreatedEvents(user));
+        return ResponseEntity.ok(eventFacade.getCreatedEvents(user, eventListParam));
     }
 }
