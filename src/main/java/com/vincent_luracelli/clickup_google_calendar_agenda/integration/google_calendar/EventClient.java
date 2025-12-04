@@ -98,17 +98,4 @@ public class EventClient {
 
         return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventListResponse.class);
     }
-
-    public GetEventResponse get(User user, String eventId) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
-        String path = buildEventByPrimaryCalendarAndEventIdPath(eventId);
-
-        Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION_HEADER, BEARER_PREFIX + token.getAccessToken())
-                .url(path)
-                .get()
-                .build();
-
-        return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, GetEventResponse.class);
-    }
 }
