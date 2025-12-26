@@ -6,5 +6,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public record Option(
         String id,
         String name,
-        String color) {
+        String color,
+        String label) {
 }
