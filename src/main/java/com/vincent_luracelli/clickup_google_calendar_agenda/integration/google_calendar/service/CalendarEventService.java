@@ -43,14 +43,14 @@ public class CalendarEventService {
             eventResponses.add(eventResponse);
         }
 
-        List<Event> events = eventResponses.stream()
-                .map(eventResponse -> Event.builder()
-                        .id(eventResponse.getId())
-                        .title(eventResponse.getSummary())
-                        .build()
-                )
-                .toList();
-        eventService.saveAll(events);
+//        List<Event> events = eventResponses.stream()
+//                .map(eventResponse -> Event.builder()
+//                        .id(eventResponse.getId())
+//                        .title(eventResponse.getSummary())
+//                        .build()
+//                )
+//                .toList();
+//        eventService.saveAll(events);
 
         return eventResponses;
     }

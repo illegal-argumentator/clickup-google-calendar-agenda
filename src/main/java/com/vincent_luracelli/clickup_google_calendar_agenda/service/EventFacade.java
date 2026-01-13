@@ -39,7 +39,8 @@ public class EventFacade {
         eventListResponse.setItems(new ArrayList<>());
 
         for (var isSingleEvents : new boolean[]{false, true}) {
-            var fetchedEvents = getCreatedEvents(user, eventListParam, isSingleEvents);
+            eventListParam.setSingleEvents(isSingleEvents);
+            var fetchedEvents = fetchCreatedEvents(user, eventListParam);
             eventListResponse.getItems().addAll(fetchedEvents.items());
             if (isSingleEvents){
                 eventListResponse.setSingleEventNextPageToken(fetchedEvents.nextPageToken());
@@ -54,8 +55,8 @@ public class EventFacade {
         return eventListResponse;
     }
 
-    private EventListRecord getCreatedEvents(User user, EventListParam eventListParam, boolean singleEvents){
-        eventListParam.setSingleEvents(singleEvents);
+    private EventListRecord fetchCreatedEvents(User user, EventListParam eventListParam){
+
 
         EventListResponse eventListResponse = eventClient.list(user, eventListParam);
         List<Event> eventsAllByCalendarTokenId = eventService.findAllByCalendarTokenIdAndUserEmail(user.getCalendarTokenId(), user.getEmail());
@@ -74,7 +75,7 @@ public class EventFacade {
     }
 
     private List<EventResponse> getExistingEventsFromCalendar(Set<String> existingIds, EventListResponse eventListResponse) {
-        System.out.println("events from calendar: " + eventListResponse.getItems().stream().map(EventResponse::getId).toList());
+//        System.out.println("events from calendar: " + eventListResponse.getItems().stream().map(EventResponse::getId).toList());
         return eventListResponse.getItems().stream()
                 .filter(event -> existingIds.contains(event.getId()))
                 .toList();
