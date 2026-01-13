@@ -18,5 +18,6 @@ public class EventListResponse {
     private List<EventResponse> items;
 
     private String nextPageToken;
+    private String singleEventNextPageToken;
 
 }

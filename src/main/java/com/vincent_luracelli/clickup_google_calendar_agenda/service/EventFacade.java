@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,21 +26,45 @@ public class EventFacade {
 
     private final EventClient eventClient;
 
+    private record EventListRecord(
+            List<EventResponse> items,
+            String nextPageToken
+    ){}
+
     public EventListResponse getCreatedEvents(User user, EventListParam eventListParam) {
         // google calendar api bug fix
         eventListParam.setMaxResults(9999);
-        eventListParam.setSingleEvents(true);
+
+        EventListResponse eventListResponse = new EventListResponse();
+        eventListResponse.setItems(new ArrayList<>());
+
+        for (var isSingleEvents : new boolean[]{false, true}) {
+            var fetchedEvents = getCreatedEvents(user, eventListParam, isSingleEvents);
+            eventListResponse.getItems().addAll(fetchedEvents.items());
+            if (isSingleEvents){
+                eventListResponse.setSingleEventNextPageToken(fetchedEvents.nextPageToken());
+            } else {
+                eventListResponse.setNextPageToken(fetchedEvents.nextPageToken());
+            }
+        }
+
+        Set<String> ids = new HashSet<>();
+        eventListResponse.getItems().removeIf(event -> !ids.add(event.getId()));
+
+        return eventListResponse;
+    }
+
+    private EventListRecord getCreatedEvents(User user, EventListParam eventListParam, boolean singleEvents){
+        eventListParam.setSingleEvents(singleEvents);
 
         EventListResponse eventListResponse = eventClient.list(user, eventListParam);
         List<Event> eventsAllByCalendarTokenId = eventService.findAllByCalendarTokenIdAndUserEmail(user.getCalendarTokenId(), user.getEmail());
-        System.out.println("Created events: " + eventsAllByCalendarTokenId);
-        log.info("EventFacade: {} - created events, {} - fetched events for user - {}.", eventsAllByCalendarTokenId.size(), eventListResponse.getItems().size(), user.getEmail());
+//        System.out.println("Created events: " + eventsAllByCalendarTokenId);
+//        log.info("EventFacade: {} - created events, {} - fetched events for user - {}.", eventsAllByCalendarTokenId.size(), eventListResponse.getItems().size(), user.getEmail());
 
         Set<String> existingIds = mapAllEventsToIds(eventsAllByCalendarTokenId);
         List<EventResponse> createdEvents = getExistingEventsFromCalendar(existingIds, eventListResponse);
-        eventListResponse.setItems(createdEvents);
-
-        return eventListResponse;
+        return new EventListRecord(createdEvents, eventListResponse.getNextPageToken());
     }
 
     private Set<String> mapAllEventsToIds(List<Event> events) {
