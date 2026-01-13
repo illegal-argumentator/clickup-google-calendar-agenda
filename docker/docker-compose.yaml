@@ -27,3 +27,5 @@ services:
       - vincent-app
     ports:
       - '27017:27017'
+    volumes:
+      - /opt/dataox/clickup-google-calendar-agenda/docker/db:/data/db:rw
