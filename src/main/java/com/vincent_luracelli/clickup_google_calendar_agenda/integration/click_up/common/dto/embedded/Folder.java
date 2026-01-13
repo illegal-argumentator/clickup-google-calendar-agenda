@@ -8,10 +8,11 @@ import java.util.List;
 public record Folder(
         String id,
         String name,
-        List<FolderList> list
+        List<FolderList> lists
 
 ) {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     record FolderList(
             String id,
             String name
