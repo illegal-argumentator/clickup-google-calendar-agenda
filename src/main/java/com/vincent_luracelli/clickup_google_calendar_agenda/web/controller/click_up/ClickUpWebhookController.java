@@ -21,6 +21,7 @@ public class ClickUpWebhookController {
 //        System.out.println("Получено событие: " + event);
         System.out.println("Payload: " + payload);
         System.out.println("signature : " + signature);
+        System.out.println("\n\n\n");
 
         // Обработка разных событий
 

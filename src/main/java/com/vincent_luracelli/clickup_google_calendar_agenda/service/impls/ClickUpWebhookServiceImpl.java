@@ -1,5 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.service.impls;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.props.WebBackendProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.ThreadUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryUtils;
@@ -17,16 +19,36 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
+    private final Cache<String, String> secretCacheManager = Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS)
+            .build();
     private final WebBackendProps webBackendProps;
     private final UserRepository userRepository;
     private final ClickUpClient clickUpClient;
 
+
+    @Override
+    public Optional<String> getSecret(String email) {
+        var secret = secretCacheManager.getIfPresent(email);
+        if (secret != null) {
+            return Optional.of(secret);
+        }
+        var user = userRepository.findByEmail(email);
+        if (user.isEmpty()){
+            return Optional.empty();
+        }
+        execute(List.of(user.orElseThrow()));
+
+        return Optional.ofNullable(secretCacheManager.getIfPresent(email));
+    }
 
     @Override
     public void setupWebhook(String... userIds) {
@@ -44,8 +66,6 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
             return;
         }
         execute(users);
-
-
     }
 
     private void execute(List<User> users) {
@@ -66,16 +86,25 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                 }
                 var webhooks = webhookResult.orElseThrow();
                 if (webhooks.stream().anyMatch(it -> it.endpoint().contains(webBackendProps.getDomain()))) {
+                    webhooks.stream().filter(it -> it.endpoint().contains(webBackendProps.getDomain()))
+                            .findFirst()
+                            .ifPresent(existingWebhook -> {
+                                log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
+                                secretCacheManager.put(user.getEmail(), existingWebhook.secret());
+                            });
                     continue;
                 }
                 var body = new ClickUpWebhookBody(
                         "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
-                        Set.of("taskUpdated", "taskDueDateUpdated")
+                        Set.of("taskDueDateUpdated")
                 );
                 TryUtils.tryGet(() -> clickUpClient.createWebhooks(team.id(), body, user), 3,
                         () -> ThreadUtils.sleep(30_000)
                 ).onFail(e -> log.warn(e.getMessage(), e))
-                        .onSuccess(webhook -> log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint()));
+                        .onSuccess(webhook -> {
+                            log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint());
+                            secretCacheManager.put(user.getEmail(), webhook.webhook().secret());
+                        });
             }
         }
     }

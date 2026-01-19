@@ -11,6 +11,7 @@ public record ClickUpWebhook(
         @JsonProperty("team_id")
         String teamId,
         String endpoint,
-        Set<String> events
+        Set<String> events,
+        String secret
 ) {
 }
