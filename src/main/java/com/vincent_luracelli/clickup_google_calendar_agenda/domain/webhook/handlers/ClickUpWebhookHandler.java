@@ -127,12 +127,13 @@ public class ClickUpWebhookHandler {
 
                 var result = TryUtils.tryRun(() -> eventClient.patch(user, event.getId(), request, params));
                 if (result.isSuccess()) {
+                    log.info("Successfully updated event {}", event.getId());
                     continue;
                 }
-                var message =result.getOptionalException().map(Throwable::getMessage)
+                var message = result.getOptionalException().map(Throwable::getMessage)
                         .filter(StringUtils::hasText)
                         .orElse("");
-                if (!message.contains("The specified time range is empty")){
+                if (!message.contains("The specified time range is empty")) {
                     log.warn("New error {}", event.getId(), result.exception());
                     continue;
                 }
@@ -140,7 +141,8 @@ public class ClickUpWebhookHandler {
                 dateTimes.add(request.start());
                 dateTimes.add(request.end());
                 dateTimes.removeIf(Objects::isNull);
-                if (dateTimes.size() == 1) {
+                if (dateTimes.isEmpty()) {
+                    log.warn("No events found for event {}", event.getId());
                     continue;
                 }
 
@@ -189,7 +191,7 @@ public class ClickUpWebhookHandler {
             var instant = java.time.Instant.ofEpochMilli(dateTime);
             var offsetDateTime = java.time.OffsetDateTime.ofInstant(instant, java.time.ZoneOffset.UTC);
             return new EventDateTime(offsetDateTime, "UTC");
-        }catch (Exception e){
+        } catch (Exception e) {
             log.warn("Failed to parse date time from history item: {}", historyItem.after(), e);
             return null;
         }
