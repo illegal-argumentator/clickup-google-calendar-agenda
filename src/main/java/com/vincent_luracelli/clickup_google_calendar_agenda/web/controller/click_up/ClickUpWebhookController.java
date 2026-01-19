@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/clickup/webhook")
+@RequestMapping("/click-up/webhook")
 public class ClickUpWebhookController {
 
     @Hidden
