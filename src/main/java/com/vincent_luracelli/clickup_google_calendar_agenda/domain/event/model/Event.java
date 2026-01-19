@@ -3,7 +3,6 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.ReadOnlyProperty;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
@@ -18,7 +17,6 @@ public class Event {
 
     private String userEmail;
 
-    @ReadOnlyProperty
     private String taskId;
 
     private String calendarTokenId;
