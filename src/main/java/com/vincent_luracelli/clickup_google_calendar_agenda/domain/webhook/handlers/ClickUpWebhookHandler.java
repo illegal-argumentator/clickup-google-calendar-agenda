@@ -72,6 +72,7 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.status(401).body("Invalid signature");
         }
 
+        log.info("Processing webhook for req {}", req);
         var webhookEntity = webhookRepository.findById(req.webhookId()).orElseThrow();
         var userEntity = userRepository.findById(webhookEntity.getUserId()).orElseThrow();
         if (userEntity.getCalendarTokenId() == null) {
@@ -143,12 +144,13 @@ public class ClickUpWebhookHandler {
                     continue;
                 }
 
-                var end = dateTimes.get(0).dateTime().plusMinutes(30);
+                var end = dateTimes.get(0).dateTime().plusHours(1);
 
                 PatchEventRequest newRangeReq = PatchEventRequest.builder()
                         .start(dateTimes.get(0))
                         .end(new EventDateTime(end, "UTC"))
                         .build();
+                log.info("New event range request {}", newRangeReq);
                 var newRangeResult = TryUtils.tryRun(() -> eventClient.patch(user, event.getId(), newRangeReq, params));
                 newRangeResult.onFail(ex -> log.error("Error updating events for taskId {}", event.getId(), ex));
             }
