@@ -18,6 +18,8 @@ public class UserAntPathResolver implements AntPathResolver {
             "/auth/**",
             "/v3/api-docs/**",
             "/swagger-ui/**",
+            "/api/click-up/webhook",
+            "/click-up/webhook"
     };
 
     @Override
