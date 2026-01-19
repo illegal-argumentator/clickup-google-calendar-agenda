@@ -13,7 +13,8 @@ public enum ClickUpPaths {
     TEAM(CLICK_UP_BASE_URL + "/team"),
     SPACE(CLICK_UP_BASE_URL + "/space"),
     FOLDER(CLICK_UP_BASE_URL + "/folder"),
-    LIST(CLICK_UP_BASE_URL + "/list");
+    LIST(CLICK_UP_BASE_URL + "/list"),
+    WEBHOOK(CLICK_UP_BASE_URL + "/webhook");
 
     private final String path;
 }

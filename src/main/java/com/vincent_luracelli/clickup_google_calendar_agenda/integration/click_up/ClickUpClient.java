@@ -6,13 +6,23 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_toke
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.*;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhook;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookBody;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookItem;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookRespond;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
+import io.swagger.v3.oas.annotations.Webhook;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
@@ -21,6 +31,7 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.security.comm
 @Service
 @RequiredArgsConstructor
 public class ClickUpClient {
+    private final RestTemplate restTemplate = new RestTemplate();
 
     private final OkHttpUtil okHttpUtil;
 
@@ -125,5 +136,44 @@ public class ClickUpClient {
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, MembersResponse.class);
+    }
+
+    public List<ClickUpWebhook> getWebhooks(String teamId, User user) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
+
+        String path = ClickUpPaths.TEAM.getPath() + "/" + teamId + "/webhook";
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
+                .url(path)
+                .build();
+
+
+        var response = okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, ClickUpWebhookRespond.class);
+        if (response != null && !CollectionUtils.isEmpty(response.webhooks())) {
+            return response.webhooks();
+        }
+        return List.of();
+    }
+
+    public ClickUpWebhookItem createWebhooks(String teamId, ClickUpWebhookBody body, User user) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
+
+        String path = ClickUpPaths.TEAM.getPath() + "/" + teamId + "/webhook";
+        var request = RequestEntity.post(path)
+                .header(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
+                .body(body);
+
+        var response = restTemplate.exchange(request, ClickUpWebhookItem.class);
+        return response.getBody();
+    }
+
+    public void deleteWebhooks(String webhookId, User user) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
+
+        String path = ClickUpPaths.WEBHOOK.getPath() + "/" + webhookId;
+        var request =  RequestEntity.delete(path)
+                .header(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
+                .build();
+        restTemplate.exchange(request, Void.class);
     }
 }
