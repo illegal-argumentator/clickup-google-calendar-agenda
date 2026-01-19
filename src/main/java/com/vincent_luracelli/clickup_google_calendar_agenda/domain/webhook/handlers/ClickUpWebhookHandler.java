@@ -132,6 +132,7 @@ public class ClickUpWebhookHandler {
                         .filter(StringUtils::hasText)
                         .orElse("");
                 if (!message.contains("The specified time range is empty")){
+                    log.warn("New error {}", event.getId(), result.exception());
                     continue;
                 }
                 ArrayList<EventDateTime> dateTimes = new ArrayList<>();
@@ -142,9 +143,11 @@ public class ClickUpWebhookHandler {
                     continue;
                 }
 
+                var end = dateTimes.get(0).dateTime().plusMinutes(10);
+
                 PatchEventRequest newRangeReq = PatchEventRequest.builder()
                         .start(dateTimes.get(0))
-                        .end(dateTimes.get(0))
+                        .end(new EventDateTime(end, "UTC"))
                         .build();
                 var newRangeResult = TryUtils.tryRun(() -> eventClient.patch(user, event.getId(), newRangeReq, params));
                 newRangeResult.onFail(ex -> log.error("Error updating events for taskId {}", event.getId(), ex));
