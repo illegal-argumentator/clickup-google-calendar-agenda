@@ -11,7 +11,7 @@ import java.util.Map;
 public class ClickUpWebhookController {
 
     @Hidden
-    @PostMapping("/webhook")
+    @PostMapping
     public ResponseEntity<String> handleWebhook(
             @RequestBody Map<String, Object> payload,
             @RequestHeader(value = "X-Signature", required = false) String signature) {
