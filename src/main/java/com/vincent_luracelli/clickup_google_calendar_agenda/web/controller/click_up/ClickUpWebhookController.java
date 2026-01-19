@@ -34,9 +34,9 @@ public class ClickUpWebhookController {
             return ResponseEntity.ok("No history items");
         }
         var historyItem = req.historyItems().get(0);
-        var secretOpt = clickUpWebhookService.getSecret(historyItem.user().email());
+        var secretOpt = clickUpWebhookService.getSecret(req.webhookId());
         if (secretOpt.isEmpty()) {
-            log.warn("No secret found for user {}", historyItem.user().email());
+            log.warn("No secret found for web hook {}", req.webhookId());
             return  ResponseEntity.ok("No secret found for user " + historyItem.user().email());
         }
         if (!WebhookVerifier.verifySignature(secretOpt.get(), payload, signature)) {
