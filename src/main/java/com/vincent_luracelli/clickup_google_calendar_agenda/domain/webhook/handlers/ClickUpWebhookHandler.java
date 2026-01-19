@@ -76,6 +76,10 @@ public class ClickUpWebhookHandler {
 
         var webhookEntity = webhookRepository.findById(req.webhookId()).orElseThrow();
         var userEntity = userRepository.findById(webhookEntity.getUserId()).orElseThrow();
+        if (userEntity.getCalendarTokenId() == null) {
+            log.warn("User {} has no calendar token", userEntity.getEmail());
+            return ResponseEntity.ok("User has no calendar token");
+        }
         var events = eventRepository.findByTaskIdAndUserEmail(req.taskId(), userEntity.getEmail());
         if (events.isEmpty()) {
             log.warn("No events found for taskId {}", req.taskId());
@@ -108,16 +112,14 @@ public class ClickUpWebhookHandler {
         lock.lock();
         try {
             for (Event event : events) {
-//                var result = TryUtils.tryGet(() -> eventClient.getById(user, event.getId()), 3,ThreadUtils.sleepRunnable(30_000));
-//                if (result.isFailure()){
-//                    log.error("Failed to fetch event {} for user {}", event.getId(), user.getEmail());
-//                    continue;
-//                }
-//                var rEvent = result.orElseThrow();
                 PatchEventRequest request = PatchEventRequest.builder()
                         .start(getStartDate(payload))
                         .end(getEndDate(payload))
                         .build();
+                if (request.start() == null && request.end() == null) {
+                    log.info("No start or end date changes for event {}", event.getId());
+                    continue;
+                }
 
                 var params = EventParam.builder()
                         .sendUpdates(EventUpdates.ALL)
@@ -151,12 +153,19 @@ public class ClickUpWebhookHandler {
         return getEventDateTime(historyItemOpt);
     }
 
-    @NotNull
     private EventDateTime getEventDateTime(Optional<ClickUpWebhookPayload.HistoryItem> historyItemOpt) {
         var historyItem = historyItemOpt.orElseThrow();
-        var dateTime = Long.parseLong(historyItem.after());
-        var instant = java.time.Instant.ofEpochMilli(dateTime);
-        var offsetDateTime = java.time.OffsetDateTime.ofInstant(instant, java.time.ZoneOffset.UTC);
-        return new EventDateTime(offsetDateTime, "UTC");
+        if (!StringUtils.hasText(historyItem.after())) {
+            return null;
+        }
+        try {
+            var dateTime = Long.parseLong(historyItem.after());
+            var instant = java.time.Instant.ofEpochMilli(dateTime);
+            var offsetDateTime = java.time.OffsetDateTime.ofInstant(instant, java.time.ZoneOffset.UTC);
+            return new EventDateTime(offsetDateTime, "UTC");
+        }catch (Exception e){
+            log.warn("Failed to parse date time from history item: {}", historyItem.after(), e);
+            return null;
+        }
     }
 }

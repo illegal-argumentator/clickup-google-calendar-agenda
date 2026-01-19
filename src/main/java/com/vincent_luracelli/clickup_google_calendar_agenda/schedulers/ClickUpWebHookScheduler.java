@@ -12,6 +12,6 @@ class ClickUpWebHookScheduler {
 
     @Scheduled(fixedDelay = 60 * 60 * 1000)
     private void runScheduler() {
-        clickUpWebhookService.setupWebhook("69661c40a575dc3589814d33");
+        clickUpWebhookService.setupWebhook();
     }
 }

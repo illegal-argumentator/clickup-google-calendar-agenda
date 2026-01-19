@@ -9,10 +9,13 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.config.ClickUpProps;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.AccessTokenRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.AccessTokenResponse;
+import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.AuthorizeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.BEARER_PREFIX;
 
@@ -30,6 +33,7 @@ public class ClickUpOAuthService {
     private final ClickUpOAuthClient clickUpOAuthClient;
 
     private final ClickUpTokenService clickUpTokenService;
+    private final ClickUpWebhookService clickUpWebhookService;
 
     private final UserService userService;
 
@@ -57,5 +61,6 @@ public class ClickUpOAuthService {
 
         ClickUpToken savedClickUpToken = clickUpTokenService.saveOrUpdateIfExists(clickUpToken);
         userService.update(user.getEmail(), User.builder().clickUpTokenId(savedClickUpToken.getId()).build());
+        CompletableFuture.runAsync(() -> clickUpWebhookService.setupWebhook(user.getId()));
     }
 }
