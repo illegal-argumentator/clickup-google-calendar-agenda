@@ -143,7 +143,7 @@ public class ClickUpWebhookHandler {
                     continue;
                 }
 
-                var end = dateTimes.get(0).dateTime().plusMinutes(10);
+                var end = dateTimes.get(0).dateTime().plusMinutes(30);
 
                 PatchEventRequest newRangeReq = PatchEventRequest.builder()
                         .start(dateTimes.get(0))
