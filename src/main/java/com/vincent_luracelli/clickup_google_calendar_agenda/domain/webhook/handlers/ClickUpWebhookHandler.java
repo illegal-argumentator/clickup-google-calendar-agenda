@@ -84,11 +84,8 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("No events found for taskId " + req.taskId());
         }
 
-        System.out.println("Payload: " + payload);
-        System.out.println("signature : " + signature);
-        System.out.println("\n\n\n");
-
         CompletableFuture.runAsync(() -> updateEvents(events, userEntity, req))
+                .thenRun(() -> log.info("Successfully updated events for taskId {}", req.taskId()))
                 .exceptionally(ex -> {
                     log.error("Error updating events for taskId {}", req.taskId(), ex);
                     return null;
