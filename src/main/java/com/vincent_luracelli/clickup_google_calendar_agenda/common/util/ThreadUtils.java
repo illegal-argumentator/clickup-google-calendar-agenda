@@ -22,4 +22,8 @@ public class ThreadUtils {
             throw new RuntimeException(e);
         }
     }
+
+    public static Runnable sleepRunnable(long millis) {
+        return () -> sleep(millis);
+    }
 }
