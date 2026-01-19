@@ -22,7 +22,7 @@ public class OkHttpUtil {
 
     public <T> T handleApiRequest(SourceType sourceType, Request request, Class<T> responseTarget) {
         String responseContent = handleApiRequest(sourceType, request);
-        log.info("API response: {}", responseContent);
+//        log.info("API response: {}", responseContent);
 
         try {
             return objectMapper.readValue(responseContent, responseTarget);
