@@ -54,7 +54,7 @@ public class ClickUpWebhookHandler {
 
     public ResponseEntity<String> handleWebhook(
             @RequestBody String payload,
-            @RequestHeader(value = "X-Signature", required = false) String signature) {
+            @RequestHeader(value = "X-Signature") String signature) {
 
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
         if (req.historyItems().isEmpty()) {
