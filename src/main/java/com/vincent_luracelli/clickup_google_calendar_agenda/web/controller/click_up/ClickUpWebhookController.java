@@ -13,13 +13,12 @@ public class ClickUpWebhookController {
     @Hidden
     @PostMapping
     public ResponseEntity<String> handleWebhook(
-            @RequestBody Map<String, Object> payload,
+            @RequestBody String payload,
             @RequestHeader(value = "X-Signature", required = false) String signature) {
 
-        String event = (String) payload.get("event");
 //        Map<String, Object> taskData = (Map<String, Object>) payload.get("task_id");
 
-        System.out.println("Получено событие: " + event);
+//        System.out.println("Получено событие: " + event);
         System.out.println("Payload: " + payload);
         System.out.println("signature : " + signature);
 
