@@ -30,9 +30,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -126,7 +124,30 @@ public class ClickUpWebhookHandler {
                         .supportsAttachments(true)
                         .build();
 
-                eventClient.patch(user, event.getId(), request, params);
+                var result = TryUtils.tryRun(() -> eventClient.patch(user, event.getId(), request, params));
+                if (result.isSuccess()) {
+                    continue;
+                }
+                var message =result.getOptionalException().map(Throwable::getMessage)
+                        .filter(StringUtils::hasText)
+                        .orElse("");
+                if (!message.contains("The specified time range is empty")){
+                    continue;
+                }
+                ArrayList<EventDateTime> dateTimes = new ArrayList<>();
+                dateTimes.add(request.start());
+                dateTimes.add(request.end());
+                dateTimes.removeIf(Objects::isNull);
+                if (dateTimes.size() == 1) {
+                    continue;
+                }
+
+                PatchEventRequest newRangeReq = PatchEventRequest.builder()
+                        .start(dateTimes.get(0))
+                        .end(dateTimes.get(0))
+                        .build();
+                var newRangeResult = TryUtils.tryRun(() -> eventClient.patch(user, event.getId(), newRangeReq, params));
+                newRangeResult.onFail(ex -> log.error("Error updating events for taskId {}", event.getId(), ex));
             }
         } finally {
             lock.unlock();
