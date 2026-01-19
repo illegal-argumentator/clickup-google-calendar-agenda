@@ -7,7 +7,10 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.ThreadUt
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.entities.WebhookEntity;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhook;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookBody;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Team;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
@@ -18,6 +21,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -33,21 +37,27 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     private final WebBackendProps webBackendProps;
     private final UserRepository userRepository;
     private final ClickUpClient clickUpClient;
+    private final WebhookRepository webhookRepository;
 
 
     @Override
-    public Optional<String> getSecret(String email) {
-        var secret = secretCacheManager.getIfPresent(email);
+    public Optional<String> getSecret(String webhookId) {
+        var secret = secretCacheManager.getIfPresent(webhookId);
         if (secret != null) {
             return Optional.of(secret);
         }
-        var user = userRepository.findByEmail(email);
+        var webhookEntity = webhookRepository.findById(webhookId);
+        if (webhookEntity.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var user = userRepository.findById(webhookEntity.orElseThrow().getUserId());
         if (user.isEmpty()){
             return Optional.empty();
         }
         execute(List.of(user.orElseThrow()));
 
-        return Optional.ofNullable(secretCacheManager.getIfPresent(email));
+        return Optional.ofNullable(secretCacheManager.getIfPresent(webhookId));
     }
 
     @Override
@@ -90,20 +100,20 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                             .findFirst()
                             .ifPresent(existingWebhook -> {
                                 log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
-                                secretCacheManager.put(user.getEmail(), existingWebhook.secret());
+                                handleWebhook(existingWebhook, user);
                             });
                     continue;
                 }
                 var body = new ClickUpWebhookBody(
                         "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
-                        Set.of("taskDueDateUpdated")
+                        Set.of("taskDueDateUpdated", "taskUpdated")
                 );
                 TryUtils.tryGet(() -> clickUpClient.createWebhooks(team.id(), body, user), 3,
                         () -> ThreadUtils.sleep(30_000)
                 ).onFail(e -> log.warn(e.getMessage(), e))
                         .onSuccess(webhook -> {
                             log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint());
-                            secretCacheManager.put(user.getEmail(), webhook.webhook().secret());
+                            handleWebhook(webhook.webhook(), user);
                         });
             }
         }
@@ -119,5 +129,15 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
         }
 
         return query;
+    }
+
+    private void handleWebhook(ClickUpWebhook webhook, User user) {
+        secretCacheManager.put(webhook.id(), webhook.secret());
+        var entity = new WebhookEntity(
+                webhook.id(),
+                user.getId(),
+                OffsetDateTime.now()
+        );
+        webhookRepository.save(entity);
     }
 }
