@@ -52,9 +52,7 @@ public class ClickUpWebhookHandler {
     private final UserRepository userRepository;
     private final EventClient eventClient;
 
-    public ResponseEntity<String> handleWebhook(
-            @RequestBody String payload,
-            @RequestHeader(value = "X-Signature") String signature) {
+    public ResponseEntity<String> handleWebhook(String payload, String signature) {
 
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
         if (req.historyItems().isEmpty()) {
