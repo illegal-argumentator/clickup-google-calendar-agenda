@@ -7,6 +7,7 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @Data
@@ -17,5 +18,5 @@ public class WebhookEntity {
     private String webhookId;
     private String userId;
     @CreatedDate
-    private OffsetDateTime createdAt;
+    private Instant createdAt;
 }

@@ -21,6 +21,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -136,7 +137,7 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
         var entity = new WebhookEntity(
                 webhook.id(),
                 user.getId(),
-                OffsetDateTime.now()
+                Instant.now()
         );
         webhookRepository.save(entity);
     }
