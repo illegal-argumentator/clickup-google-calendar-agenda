@@ -7,11 +7,13 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.security.common.exce
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class AuthExceptionHandler {
 
@@ -57,5 +59,17 @@ public class AuthExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ExceptionResponse> handleJwtException(Exception e) {
+        log.error(e.getMessage(), e);
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .source(SourceType.API)
+                .body(e.getMessage())
+                .code(HttpStatus.BAD_REQUEST.value())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 }

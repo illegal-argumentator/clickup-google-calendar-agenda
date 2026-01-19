@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 @RequestMapping("/clickup/webhook")
 public class ClickUpWebhookController {
 
+    @Hidden
     @PostMapping("/webhook")
     public ResponseEntity<String> handleWebhook(
             @RequestBody Map<String, Object> payload,
