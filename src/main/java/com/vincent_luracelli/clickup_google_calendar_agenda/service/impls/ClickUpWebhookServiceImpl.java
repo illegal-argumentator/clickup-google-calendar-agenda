@@ -107,7 +107,7 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                 }
                 var body = new ClickUpWebhookBody(
                         "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
-                        Set.of("taskDueDateUpdated", "taskUpdated")
+                        Set.of("taskUpdated")
                 );
                 TryUtils.tryGet(() -> clickUpClient.createWebhooks(team.id(), body, user), 3,
                         () -> ThreadUtils.sleep(30_000)
