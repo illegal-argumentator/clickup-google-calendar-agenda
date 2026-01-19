@@ -16,6 +16,7 @@ public class Event {
     private String title;
 
     private String userEmail;
+    private String taskId;
 
     private String calendarTokenId;
 

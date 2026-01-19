@@ -8,6 +8,7 @@ import java.util.List;
 
 @Builder
 public record InsertEventRequest(
+        String taskId,
         @NotNull(message = "Start date is required")
         EventDateTime start,
 

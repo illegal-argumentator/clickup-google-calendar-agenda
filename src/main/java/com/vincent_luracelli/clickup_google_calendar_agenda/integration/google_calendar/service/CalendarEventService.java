@@ -28,6 +28,7 @@ public class CalendarEventService {
         eventService.save(Event.builder()
                 .id(eventResponse.getId())
                 .userEmail(user.getEmail())
+                .taskId(insertEventRequest.taskId())
                 .title(eventResponse.getSummary())
                 .calendarTokenId(user.getCalendarTokenId())
                 .build());
@@ -42,15 +43,6 @@ public class CalendarEventService {
             EventResponse eventResponse = insert(user, eventParam, insertEventRequest);
             eventResponses.add(eventResponse);
         }
-
-//        List<Event> events = eventResponses.stream()
-//                .map(eventResponse -> Event.builder()
-//                        .id(eventResponse.getId())
-//                        .title(eventResponse.getSummary())
-//                        .build()
-//                )
-//                .toList();
-//        eventService.saveAll(events);
 
         return eventResponses;
     }
