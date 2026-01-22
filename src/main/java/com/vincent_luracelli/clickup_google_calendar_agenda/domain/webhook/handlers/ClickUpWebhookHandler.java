@@ -183,11 +183,19 @@ public class ClickUpWebhookHandler {
 
     private EventDateTime getEventDateTime(Optional<ClickUpWebhookPayload.HistoryItem> historyItemOpt) {
         var historyItem = historyItemOpt.orElseThrow();
-        if (!StringUtils.hasText(historyItem.after())) {
+        if (historyItem.after() == null || historyItem.after().isNull()) {
+            return null;
+        }
+        if (!historyItem.after().isTextual()){
+            return null;
+        }
+        var afterText = historyItem.after().asText();
+
+        if (!StringUtils.hasText(afterText)) {
             return null;
         }
         try {
-            var dateTime = Long.parseLong(historyItem.after());
+            var dateTime = Long.parseLong(afterText);
             var instant = java.time.Instant.ofEpochMilli(dateTime);
             var offsetDateTime = java.time.OffsetDateTime.ofInstant(instant, java.time.ZoneOffset.UTC);
             return new EventDateTime(offsetDateTime, "UTC");

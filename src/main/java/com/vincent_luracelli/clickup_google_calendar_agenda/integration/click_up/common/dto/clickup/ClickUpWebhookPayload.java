@@ -1,6 +1,8 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
+
 import java.util.List;
 
 // Top level webhook payload
@@ -20,8 +22,8 @@ public record ClickUpWebhookPayload(
             @JsonProperty("parent_id") String parentId,
             HistoryData data,
             User user,
-            String before,
-            String after
+            JsonNode before,
+            JsonNode  after
     ) {}
 
     public record User(

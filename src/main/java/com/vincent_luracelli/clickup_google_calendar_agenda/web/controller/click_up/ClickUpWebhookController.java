@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.CompletableFuture;
-
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +21,7 @@ public class ClickUpWebhookController {
             @RequestHeader(value = "X-Signature") String signature) {
 
         try {
-            return CompletableFuture.supplyAsync(() -> clickUpWebhookService.handleWebhook(payload, signature))
-                    .get(30, java.util.concurrent.TimeUnit.SECONDS);
+            return clickUpWebhookService.handleWebhook(payload, signature);
         } catch (Exception e) {
             return ResponseEntity.ok().body(e.getMessage());
         }
