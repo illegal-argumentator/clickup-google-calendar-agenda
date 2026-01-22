@@ -107,7 +107,7 @@ public class ClickUpWebhookHandler {
     }
 
     private void updateEvents(List<Event> events, User user, ClickUpWebhookPayload payload) {
-        var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock());
+        var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
         try {
             for (Event event : events) {
