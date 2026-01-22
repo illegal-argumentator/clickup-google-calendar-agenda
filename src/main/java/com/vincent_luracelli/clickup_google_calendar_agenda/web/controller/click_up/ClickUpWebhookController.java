@@ -20,6 +20,10 @@ public class ClickUpWebhookController {
             @RequestBody String payload,
             @RequestHeader(value = "X-Signature") String signature) {
 
-        return clickUpWebhookService.handleWebhook(payload, signature);
+        try {
+            return clickUpWebhookService.handleWebhook(payload, signature);
+        } catch (Exception e) {
+            return ResponseEntity.ok().body(e.getMessage());
+        }
     }
 }
