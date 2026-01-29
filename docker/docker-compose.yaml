@@ -4,7 +4,7 @@ networks:
   vincent-app:
 
 services:
-  app-service:
+  app-clickup:
     build:
       context: ..
       dockerfile: Dockerfile
@@ -15,8 +15,8 @@ services:
     ports:
       - "4846:4846"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://root:secret@mongodb:27017/mydatabase?authSource=admin
-  mongodb:
+      SPRING_DATA_MONGODB_URI: mongodb://root:secret@mongodb-clickup:27017/mydatabase?authSource=admin
+  mongodb-clickup:
     image: 'mongo:latest'
     container_name: 'vincent-larrat-db'
     environment:
