@@ -38,7 +38,8 @@ public class Task {
 
     private String url;
 
-    // TODO
+    private List<Tag> tags;
+
     private Object list;
 
     private Object folder;
