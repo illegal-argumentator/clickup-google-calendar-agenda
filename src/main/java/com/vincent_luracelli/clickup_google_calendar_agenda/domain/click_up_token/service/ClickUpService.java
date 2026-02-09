@@ -41,9 +41,9 @@ public class ClickUpService {
                     .map(tag -> tag.trim().toLowerCase())
                     .toList();
 
-            return tagNames.stream().allMatch(tagName -> tagName.equals(baustrom) || tagName.equals(bestelbon));
 
+            return !tagNames.isEmpty() && tagNames.stream()
+                    .allMatch(tagName -> tagName.equals(baustrom) || tagName.equals(bestelbon));
         }).toList();
     }
-
 }
