@@ -32,7 +32,7 @@ public class ClickUpService {
     }
 
     public List<Task> filterTasksTagByTagName(List<Task> tasks) {
-        String baustrom = "baustrøm", leveringen = "leveringen", bestelbon = "bestelbon";
+        String baustrom = "baustrøm", bestelbon = "bestelbon";
 
         return tasks.stream().filter(task -> {
             List<String> tagNames = task.getTags().stream()
@@ -40,7 +40,14 @@ public class ClickUpService {
                     .filter(StringUtils::isNotBlank)
                     .map(tag -> tag.trim().toLowerCase())
                     .toList();
-            return !tagNames.contains(leveringen) && (tagNames.contains(baustrom) || tagNames.contains(bestelbon));
+
+            for (String tagName : tagNames) {
+                if (!tagName.equals(baustrom) && !tagName.equals(bestelbon)) {
+                    return false;
+                }
+            }
+
+            return true;
         }).toList();
     }
 
