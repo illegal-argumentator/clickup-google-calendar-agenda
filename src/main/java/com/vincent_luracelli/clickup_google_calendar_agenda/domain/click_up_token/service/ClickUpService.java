@@ -10,9 +10,7 @@ import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 @Service
@@ -23,36 +21,27 @@ public class ClickUpService {
 
     public TasksResponse findFilteredTaskByTeam(String id, TaskFilterParam taskFilterParam, User user) {
         TasksResponse tasksResponse = clickUpClient.findFilteredTaskByTeam(id, taskFilterParam, user);
-        updateTasksTagByTagName(tasksResponse.getTasks());
+        tasksResponse.setTasks(filterTasksTagByTagName(tasksResponse.getTasks()));
         return tasksResponse;
     }
 
     public TasksResponse findTasksByList(String id, User user) {
         TasksResponse tasksResponse = clickUpClient.findTasksByList(id, user);
-        updateTasksTagByTagName(tasksResponse.getTasks());
+        tasksResponse.setTasks(filterTasksTagByTagName(tasksResponse.getTasks()));
         return tasksResponse;
     }
 
-    public void updateTasksTagByTagName(List<Task> tasks) {
+    public List<Task> filterTasksTagByTagName(List<Task> tasks) {
         String baustrom = "baustrøm", leveringen = "leveringen", bestelbon = "bestelbon";
 
-        for (Task task : tasks) {
-            List<Tag> taskTags = task.getTags();
-
-            if (taskTags.isEmpty()) continue;
-
-            List<String> tagNames = taskTags.stream()
-                    .filter(tag -> StringUtils.isNotBlank(tag.name()))
-                    .map(tag -> tag.name().trim().toLowerCase())
+        return tasks.stream().filter(task -> {
+            List<String> tagNames = task.getTags().stream()
+                    .map(Tag::name)
+                    .filter(StringUtils::isNotBlank)
+                    .map(tag -> tag.trim().toLowerCase())
                     .toList();
-
-            List<Tag> tags = new ArrayList<>();
-            if (!tagNames.contains(leveringen) && (tagNames.contains(baustrom) || tagNames.contains(bestelbon))) {
-                tags.addAll(taskTags);
-            }
-
-            task.setTags(tags);
-        }
+            return !tagNames.contains(leveringen) && (tagNames.contains(baustrom) || tagNames.contains(bestelbon));
+        }).toList();
     }
 
 }
