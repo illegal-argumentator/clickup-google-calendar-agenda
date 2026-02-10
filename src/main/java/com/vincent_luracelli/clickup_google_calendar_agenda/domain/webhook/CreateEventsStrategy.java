@@ -59,11 +59,13 @@ public class CreateEventsStrategy implements EventActionStrategy {
 
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
             Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
+            InsertEventRequest insertEventRequest = mapToEventRequest(task);
+            insertEventRequest.withSummary("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName());
 
-            EventResponse eventResponse = eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
+            EventResponse eventResponse = eventClient.insert(user.getCalendarTokenId(), eventParam, insertEventRequest);
             eventRepository.save(Event.builder()
                             .id(eventResponse.getId())
-                            .title("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName())
+                            .title(insertEventRequest.summary())
                             .taskId(task.getId())
                             .userEmail(user.getEmail())
                             .calendarTokenId(user.getCalendarTokenId())

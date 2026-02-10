@@ -31,6 +31,7 @@ public class CalendarEventService {
                 .taskId(insertEventRequest.taskId())
                 .title(eventResponse.getSummary())
                 .calendarTokenId(user.getCalendarTokenId())
+                .attendees(insertEventRequest.attendees())
                 .build());
         return eventResponse;
     }

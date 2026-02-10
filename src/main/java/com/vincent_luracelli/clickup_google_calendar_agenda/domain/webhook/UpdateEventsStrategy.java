@@ -21,6 +21,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -54,7 +55,10 @@ public class UpdateEventsStrategy implements EventActionStrategy {
                 PatchEventRequest request = PatchEventRequest.builder()
                         .start(EventUtils.getStartDate(payload))
                         .end(EventUtils.getEndDate(payload))
+                        .summary(event.getTitle())
+                        .attendees(event.getAttendees())
                         .build();
+
                 if (request.start() == null && request.end() == null) {
                     log.info("No start or end date changes for event {}", event.getId());
                     continue;
