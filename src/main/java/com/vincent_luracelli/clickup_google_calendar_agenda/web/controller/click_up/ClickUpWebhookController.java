@@ -21,7 +21,6 @@ public class ClickUpWebhookController {
             @RequestHeader(value = "X-Signature") String signature) {
 
         try {
-            log.info("Received webhook event. Payload: {}.", payload);
             return clickUpWebhookService.handleWebhook(payload, signature);
         } catch (Exception e) {
             return ResponseEntity.ok().body(e.getMessage());
