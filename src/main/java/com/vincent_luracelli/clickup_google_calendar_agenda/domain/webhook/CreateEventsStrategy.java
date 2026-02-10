@@ -49,7 +49,9 @@ public class CreateEventsStrategy implements EventActionStrategy {
                     .supportsAttachments(true)
                     .build();
 
+            log.info("Webhook task id: {}", payload.taskId());
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+            log.info("Response task id: {}", task.getId());
             eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
         } finally {
             lock.unlock();
