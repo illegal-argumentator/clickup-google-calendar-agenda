@@ -74,6 +74,11 @@ public class ClickUpWebhookHandler {
         if (eventNotMatched) {
             return false;
         }
+
+        if (payload.event().equals(WebhookEvent.TASK_CREATED.getEvent())) {
+            return true;
+        }
+
         var fields = Set.of("start_date", "due_date");
         return payload.historyItems().stream()
                 .filter(it -> StringUtils.hasText(it.field()))
