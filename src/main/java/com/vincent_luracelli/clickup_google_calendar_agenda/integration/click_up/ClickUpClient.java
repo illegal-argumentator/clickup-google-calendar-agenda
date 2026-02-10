@@ -10,6 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookBody;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookItem;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookRespond;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
 import io.swagger.v3.oas.annotations.Webhook;
@@ -36,6 +37,18 @@ public class ClickUpClient {
     private final OkHttpUtil okHttpUtil;
 
     private final ClickUpAuthService clickUpAuthService;
+
+    public Task findTask(String taskId, String tokenId) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
+
+        String path = ClickUpPaths.TASK.getPath() + "/" + taskId;
+        Request request = new Request.Builder()
+                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
+                .url(path)
+                .build();
+
+        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, Task.class);
+    }
 
     public TeamsResponse findTeams(User user) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
@@ -155,8 +168,8 @@ public class ClickUpClient {
         return List.of();
     }
 
-    public ClickUpWebhookItem createWebhooks(String teamId, ClickUpWebhookBody body, User user) {
-        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
+    public ClickUpWebhookItem createWebhooks(String teamId, ClickUpWebhookBody body, String tokenId) {
+        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
 
         String path = ClickUpPaths.TEAM.getPath() + "/" + teamId + "/webhook";
         var request = RequestEntity.post(path)
@@ -167,6 +180,7 @@ public class ClickUpClient {
         return response.getBody();
     }
 
+    @Deprecated
     public void deleteWebhooks(String webhookId, User user) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
 

@@ -33,8 +33,8 @@ public class EventClient {
 
     private final CalendarAuthService calendarAuthService;
 
-    public EventResponse insert(User user, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+    public EventResponse insert(String tokenId, EventParam eventParam, InsertEventRequest insertEventRequest) {
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(tokenId);
         String path = buildEventByPrimaryCalendarPath(eventParam);
 
         try {
@@ -53,8 +53,8 @@ public class EventClient {
         }
     }
 
-    public void patch(User user, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+    public void patch(String calendarTokenId, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(calendarTokenId);
         String path = buildEventByIdPath(eventId, token.getUserEmail(), eventParam);
 
         try {
@@ -74,7 +74,7 @@ public class EventClient {
     }
 
     public void delete(User user, String eventId, EventParam eventParam) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user.getCalendarTokenId());
         String path = buildEventByIdPath(eventId, token.getUserEmail(), eventParam);
 
         Request request = new Request.Builder()
@@ -87,7 +87,7 @@ public class EventClient {
     }
 
     public EventListResponse list(User user, EventListParam eventListParam) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user.getCalendarTokenId());
         String path = buildEventListByPrimaryCalendarPath(eventListParam);
 
         Request request = new Request.Builder()
@@ -100,7 +100,7 @@ public class EventClient {
     }
 
     public EventResponse getById(User user, String eventId) {
-        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user);
+        CalendarToken token = calendarAuthService.requireAccessTokenByUser(user.getCalendarTokenId());
         String path = buildEventByPrimaryCalendarAndEventIdPath(eventId);
 
         Request request = new Request.Builder()

@@ -14,7 +14,8 @@ public enum ClickUpPaths {
     SPACE(CLICK_UP_BASE_URL + "/space"),
     FOLDER(CLICK_UP_BASE_URL + "/folder"),
     LIST(CLICK_UP_BASE_URL + "/list"),
-    WEBHOOK(CLICK_UP_BASE_URL + "/webhook");
+    WEBHOOK(CLICK_UP_BASE_URL + "/webhook"),
+    TASK(CLICK_UP_BASE_URL + "/task");
 
     private final String path;
 }

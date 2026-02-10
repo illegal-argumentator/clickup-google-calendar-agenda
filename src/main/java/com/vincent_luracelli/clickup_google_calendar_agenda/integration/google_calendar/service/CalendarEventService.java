@@ -24,7 +24,7 @@ public class CalendarEventService {
     private final EventService eventService;
 
     public EventResponse insert(User user, EventParam eventParam, InsertEventRequest insertEventRequest) {
-        EventResponse eventResponse = eventClient.insert(user, eventParam, insertEventRequest);
+        EventResponse eventResponse = eventClient.insert(user.getCalendarTokenId(), eventParam, insertEventRequest);
         eventService.save(Event.builder()
                 .id(eventResponse.getId())
                 .userEmail(user.getEmail())
@@ -48,7 +48,7 @@ public class CalendarEventService {
     }
 
     public void patch(User user, String eventId, PatchEventRequest patchEventRequest, EventParam eventParam) {
-        eventClient.patch(user, eventId, patchEventRequest, eventParam);
+        eventClient.patch(user.getCalendarTokenId(), eventId, patchEventRequest, eventParam);
     }
 
     public void delete(User user, String eventId, EventParam eventParam) {
