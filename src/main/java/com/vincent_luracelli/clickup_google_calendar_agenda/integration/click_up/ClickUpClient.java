@@ -38,7 +38,7 @@ public class ClickUpClient {
 
     private final ClickUpAuthService clickUpAuthService;
 
-    public Task findTask(String taskId, String tokenId) {
+    public Task findTask(String tokenId, String taskId) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
 
         String path = ClickUpPaths.TASK.getPath() + "/" + taskId;
