@@ -10,6 +10,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Folder;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.EventDateTime;
@@ -58,12 +59,11 @@ public class CreateEventsStrategy implements EventActionStrategy {
 
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
             Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
-            // folder={id=90127484820, name=hidden, hidden=true, access=true}
-            log.info("Task: {}", task);
-            log.info("Folder: {}", folder);
-            eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
+
+            EventResponse eventResponse = eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
             eventRepository.save(Event.builder()
-                            .title(task.getName())
+                            .id(eventResponse.getId())
+                            .title("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName())
                             .taskId(task.getId())
                             .userEmail(user.getEmail())
                             .calendarTokenId(user.getCalendarTokenId())
