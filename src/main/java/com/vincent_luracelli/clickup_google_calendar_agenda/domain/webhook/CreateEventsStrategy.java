@@ -2,6 +2,8 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
@@ -38,6 +40,8 @@ public class CreateEventsStrategy implements EventActionStrategy {
 
     private final ClickUpClient clickUpClient;
 
+    private final EventRepository eventRepository;
+
     @Override
     public void execute(User user, ClickUpWebhookPayload payload) {
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
@@ -49,10 +53,15 @@ public class CreateEventsStrategy implements EventActionStrategy {
                     .supportsAttachments(true)
                     .build();
 
-            log.info("Webhook task id: {}", payload.taskId());
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-            log.info("Response task id: {}", task.getId());
+            log.info("Task: {}", task);
             eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
+            eventRepository.save(Event.builder()
+                            .title(task.getName())
+                            .taskId(task.getId())
+                            .userEmail(user.getEmail())
+                            .calendarTokenId(user.getCalendarTokenId())
+                    .build());
         } finally {
             lock.unlock();
         }
