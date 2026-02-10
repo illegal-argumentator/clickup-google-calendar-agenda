@@ -42,11 +42,23 @@ public class Task {
 
     private Object list;
 
-    private Object folder;
+    private Folder folder;
 
     private Object space;
 
     @JsonProperty("custom_fields")
     private List<CustomField> customFields;
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Folder {
+
+        private String id;
+
+        private String name;
+
+        private boolean access;
+
+    }
 
 }

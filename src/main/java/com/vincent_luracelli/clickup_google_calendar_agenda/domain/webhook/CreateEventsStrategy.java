@@ -7,6 +7,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.reposit
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Folder;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -20,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -54,7 +57,10 @@ public class CreateEventsStrategy implements EventActionStrategy {
                     .build();
 
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+            Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
+            // folder={id=90127484820, name=hidden, hidden=true, access=true}
             log.info("Task: {}", task);
+            log.info("Folder: {}", folder);
             eventClient.insert(user.getCalendarTokenId(), eventParam, mapToEventRequest(task));
             eventRepository.save(Event.builder()
                             .title(task.getName())
@@ -74,11 +80,17 @@ public class CreateEventsStrategy implements EventActionStrategy {
 
     private InsertEventRequest mapToEventRequest(Task task) {
         EventDateTime start = EventDateTime.builder()
-                .dateTime(task.getStartDate() == null ? OffsetDateTime.now() : OffsetDateTime.parse(task.getStartDate()))
+                .dateTime(task.getStartDate() == null
+                        ? OffsetDateTime.now(ZoneOffset.UTC)
+                        : parseTimestamp(task.getStartDate()))
+                .timeZone("UTC")
                 .build();
 
         EventDateTime end = EventDateTime.builder()
-                .dateTime(task.getDueDate() == null ? OffsetDateTime.now() : OffsetDateTime.parse(task.getDueDate()))
+                .dateTime(task.getDueDate() == null
+                        ? OffsetDateTime.now(ZoneOffset.UTC)
+                        : parseTimestamp(task.getDueDate()))
+                .timeZone("UTC")
                 .build();
 
         List<Attendee> attendees = task.getAssignees().stream()
@@ -95,4 +107,12 @@ public class CreateEventsStrategy implements EventActionStrategy {
                 .taskId(task.getId())
                 .build();
     }
+
+    private OffsetDateTime parseTimestamp(String value) {
+        return OffsetDateTime.ofInstant(
+                Instant.ofEpochMilli(Long.parseLong(value)),
+                ZoneOffset.UTC
+        );
+    }
+
 }
