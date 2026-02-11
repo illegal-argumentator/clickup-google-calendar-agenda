@@ -55,8 +55,6 @@ public class UpdateEventsStrategy implements EventActionStrategy {
                 PatchEventRequest request = PatchEventRequest.builder()
                         .start(EventUtils.getStartDate(payload))
                         .end(EventUtils.getEndDate(payload))
-                        .summary(event.getTitle())
-                        .attendees(event.getAttendees())
                         .build();
 
                 if (request.start() == null && request.end() == null) {

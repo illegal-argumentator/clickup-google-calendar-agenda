@@ -20,6 +20,15 @@ public class EventUtils {
         return getEventDateTime(historyItemOpt);
     }
 
+    public static String getTitle(ClickUpWebhookPayload payload) {
+        var historyItemOpt = payload.historyItems().stream()
+                .filter(it -> "after".equals(it.field()))
+                .findFirst();
+        return historyItemOpt.map(historyItem -> historyItem.after().asText()).orElse(null);
+
+    }
+
+
     public static EventDateTime getEndDate(ClickUpWebhookPayload payload) {
         var historyItemOpt = payload.historyItems().stream()
                 .filter(it -> "due_date".equals(it.field()))

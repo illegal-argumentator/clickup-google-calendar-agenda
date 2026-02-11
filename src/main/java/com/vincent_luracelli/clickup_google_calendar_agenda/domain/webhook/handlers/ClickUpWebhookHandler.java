@@ -2,11 +2,14 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.hand
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.JsonMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookVerifier;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.service.ClickUpService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventActionFactory;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
 import lombok.RequiredArgsConstructor;
@@ -23,21 +26,17 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ClickUpWebhookHandler {
     private final ClickUpWebhookService clickUpWebhookService;
-    private final EventRepository eventRepository;
+    private final ClickUpClient clickUpClient;
+    private final ClickUpService clickUpService;
     private final WebhookRepository webhookRepository;
     private final UserRepository userRepository;
     private final EventActionFactory eventActionFactory;
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
-
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
         if (req.historyItems().isEmpty()) {
             log.warn("Empty history items received");
             return ResponseEntity.ok("No history items");
-        }
-        if (!isValidWebhook(req)) {
-            log.info("Ignoring irrelevant webhook event: {}", req.event());
-            return ResponseEntity.ok("Irrelevant event");
         }
 
         var secretOpt = clickUpWebhookService.getSecret(req.webhookId());
@@ -58,6 +57,12 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("User has no calendar token");
         }
 
+        if (!isValidWebhook(userEntity, req)) {
+            log.info("Ignoring irrelevant webhook event: {}", req.event());
+            return ResponseEntity.ok("Irrelevant event");
+        }
+
+
         CompletableFuture.runAsync(() -> eventActionFactory.getStrategy(extractEventFrom(req.event())).execute(userEntity, req))
                 .thenRun(() -> log.info("Successfully updated events for taskId {}", req.taskId()))
                 .exceptionally(ex -> {
@@ -68,7 +73,7 @@ public class ClickUpWebhookHandler {
         return ResponseEntity.ok("OK");
     }
 
-    private boolean isValidWebhook(ClickUpWebhookPayload payload) {
+    private boolean isValidWebhook(User user, ClickUpWebhookPayload payload) {
         boolean eventNotMatched = Arrays.stream(WebhookEvent.values())
                 .noneMatch(event -> event.getEvent().equals(payload.event()));
         if (eventNotMatched) {
@@ -76,7 +81,8 @@ public class ClickUpWebhookHandler {
         }
 
         if (payload.event().equals(WebhookEvent.TASK_CREATED.getEvent())) {
-            return true;
+            Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+            return !clickUpService.filterTasksTagByTagName(List.of(task)).isEmpty();
         }
 
         var fields = Set.of("start_date", "due_date");
