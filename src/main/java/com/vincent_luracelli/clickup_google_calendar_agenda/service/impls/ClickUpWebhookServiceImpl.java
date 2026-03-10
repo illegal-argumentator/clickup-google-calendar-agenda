@@ -106,6 +106,7 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                                 log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
                                 handleWebhook(existingWebhook, user.getId());
                                 // TODO delete webhooks
+//                                clickUpClient.deleteWebhooks(existingWebhook.id(), user);
                             });
                     continue;
                 }

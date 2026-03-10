@@ -32,11 +32,12 @@ public record TryResult<T>(
         if (!isFailure()) {
             return result;
         }
+
         if (exception instanceof RuntimeException runtimeException) {
             throw runtimeException;
         }
-        throw new TryResultException(exception);
 
+        throw new TryResultException(exception);
     }
 
     public T orElseThrow(Supplier<? extends RuntimeException> supplier) throws TryResultException {
@@ -83,9 +84,6 @@ public record TryResult<T>(
         return this;
     }
 
-
-
-
     public <R> TryResult<R> map(TryFunction<T, R> mapper) {
         if (isFailure()) {
             return TryResult.failure(exception);
@@ -96,7 +94,6 @@ public record TryResult<T>(
             return TryResult.failure(e);
         }
     }
-
 
     public <R> TryResult<R> flatMap(Function<T, TryResult<R>> mapper) {
         if (isFailure()) {
