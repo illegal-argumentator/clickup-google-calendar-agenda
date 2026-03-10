@@ -43,9 +43,10 @@ public class ClickUpService {
                     .toList();
 
 
-            log.info("Requested tags: {}.", tagNames);
-            return !tagNames.isEmpty() && tagNames.stream()
+            boolean matches = !tagNames.isEmpty() && tagNames.stream()
                     .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()) || tagName.equals(TagType.BESTELBON.getTag()));
+            log.info("Requested tags: {}. Matches all: {}.", tagNames, matches);
+            return matches;
         }).toList();
     }
 }
