@@ -102,8 +102,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
                 }
 
                 var params = EventParam.builder()
-                        .sendUpdates(EventUpdates.ALL)
-                        .supportsAttachments(true)
+                        .sendUpdates(EventUpdates.NONE)
+                        .supportsAttachments(false)
                         .build();
 
                 var result = TryUtils.tryRun(() -> eventClient.patch(user.getCalendarTokenId(), event.getId(), request, params));
