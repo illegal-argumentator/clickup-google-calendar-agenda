@@ -38,17 +38,15 @@ import java.util.concurrent.locks.ReentrantLock;
 @RequiredArgsConstructor
 public class UpdateEventsStrategy implements EventActionStrategy {
 
+    private static final Set<String> ALLOWED_TAGS = Set.of(
+            TagType.BAUSTROM.getTag(),
+            TagType.BESTELBON.getTag()
+    );
     private final Cache<String, ReentrantLock> lockCacheManager = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(1, TimeUnit.HOURS)
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build();
-
-    private static final Set<String> ALLOWED_TAGS = Set.of(
-            TagType.BAUSTROM.getTag(),
-            TagType.BESTELBON.getTag()
-    );
-
     private final EventClient eventClient;
 
     private final EventRepository eventRepository;
@@ -66,25 +64,22 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
 
-        boolean hasTag = hasTags(payload.historyItems());
-        if (hasTag) {
-            Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-            List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-            if (!tasks.isEmpty()) {
-                InsertEventRequest request = InsertEventRequest.builder()
-                        .summary(task.getName())
-                        .start(EventDateTime.builder()
-                                .dateTime(OffsetDateTime.now())
-                                .build())
-                        .end(EventDateTime.builder()
-                                .dateTime(OffsetDateTime.now().plusHours(1))
-                                .build())
-                        .build();
+        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+        List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
+        if (!tasks.isEmpty()) {
+            InsertEventRequest request = InsertEventRequest.builder()
+                    .summary(task.getName())
+                    .start(EventDateTime.builder()
+                            .dateTime(OffsetDateTime.now())
+                            .build())
+                    .end(EventDateTime.builder()
+                            .dateTime(OffsetDateTime.now().plusHours(1))
+                            .build())
+                    .build();
 
-                EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
-                calendarEventService.insert(user, eventParam, request);
-                return;
-            }
+            EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
+            calendarEventService.insert(user, eventParam, request);
+            return;
         }
 
         try {
@@ -138,42 +133,6 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         } finally {
             lock.unlock();
         }
-    }
-
-    private boolean hasTags(List<ClickUpWebhookPayload.HistoryItem> historyItems) {
-
-        for (ClickUpWebhookPayload.HistoryItem item : historyItems) {
-
-            if (!item.field().startsWith("tag")) {
-                continue;
-            }
-
-            JsonNode tagsNode = item.after();
-
-            // якщо тег видалили
-            if (tagsNode == null || tagsNode.isNull()) {
-                tagsNode = item.before();
-            }
-
-            if (tagsNode == null || !tagsNode.isArray() || tagsNode.isEmpty()) {
-                return false;
-            }
-
-            for (JsonNode tagNode : tagsNode) {
-                String tagName = tagNode.path("name")
-                        .asText("")
-                        .trim()
-                        .toLowerCase();
-
-                if (!ALLOWED_TAGS.contains(tagName)) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        return false;
     }
 
     @Override
