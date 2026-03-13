@@ -94,7 +94,7 @@ public class ClickUpWebhookHandler {
             return !EventUtils.filterTasksTagByTagName(List.of(task)).isEmpty();
         }
 
-        var fields = Set.of("start_date", "due_date", "tag");
+        var fields = Set.of("start_date", "due_date", "tag", "tag_added", "tag_removed");
         return EventUtils.anyMatchToItems(fields, payload.historyItems());
 
     }
