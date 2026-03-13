@@ -8,7 +8,9 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.E
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -48,6 +50,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private final EventRepository eventRepository;
 
     private final CalendarEventService calendarEventService;
+    private final ClickUpClient clickUpClient;
 
     @Override
     public void execute(User user, ClickUpWebhookPayload payload) {
@@ -65,7 +68,10 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         boolean hasTag = hasTags(payload.historyItems());
         if (hasTag && !taskIds.contains(payload.taskId())) {
+            Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+
             InsertEventRequest request = InsertEventRequest.builder()
+                    .summary(task.getName())
                     .start(EventDateTime.builder()
                             .dateTime(OffsetDateTime.now())
                             .build())
