@@ -45,6 +45,11 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             .expireAfterAccess(1, TimeUnit.HOURS)
             .build();
 
+    private static final Set<String> ALLOWED_TAGS = Set.of(
+            TagType.BAUSTROM.getTag(),
+            TagType.BESTELBON.getTag()
+    );
+
     private final EventClient eventClient;
 
     private final EventRepository eventRepository;
@@ -146,18 +151,22 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             }
 
             JsonNode after = item.after();
-            if (after == null || !after.isArray()) {
-                continue;
+            if (after == null || !after.isArray() || after.isEmpty()) {
+                return false;
             }
 
             for (JsonNode tagNode : after) {
-                String tagName = tagNode.path("name").asText("").trim().toLowerCase();
+                String tagName = tagNode.path("name")
+                        .asText("")
+                        .trim()
+                        .toLowerCase();
 
-                if (tagName.equals(TagType.BAUSTROM.getTag())
-                        || tagName.equals(TagType.BESTELBON.getTag())) {
-                    return true;
+                if (!ALLOWED_TAGS.contains(tagName)) {
+                    return false;
                 }
             }
+
+            return true;
         }
 
         return false;
