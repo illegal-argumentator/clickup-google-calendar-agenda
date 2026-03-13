@@ -87,6 +87,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
             EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
             calendarEventService.insert(user, eventParam, request);
+            return;
         }
 
         try {
