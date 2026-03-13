@@ -73,7 +73,9 @@ public class UpdateEventsStrategy implements EventActionStrategy {
                             .dateTime(OffsetDateTime.now().plusHours(1))
                             .build())
                     .build();
-                calendarEventService.insert(user, null, request);
+
+            EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
+            calendarEventService.insert(user, eventParam, request);
         }
 
         try {
