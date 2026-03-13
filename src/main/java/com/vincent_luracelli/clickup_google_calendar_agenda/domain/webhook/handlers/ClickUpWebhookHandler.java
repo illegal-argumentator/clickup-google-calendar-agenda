@@ -91,7 +91,7 @@ public class ClickUpWebhookHandler {
 
         if (payload.event().equals(WebhookEvent.TASK_CREATED.getEvent())) {
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-            return !clickUpService.filterTasksTagByTagName(List.of(task)).isEmpty();
+            return !EventUtils.filterTasksTagByTagName(List.of(task)).isEmpty();
         }
 
         var fields = Set.of("start_date", "due_date", "tag");

@@ -1,6 +1,9 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Tag;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.EventDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
@@ -71,5 +74,20 @@ public class EventUtils {
                 .anyMatch(item -> allowed.contains(item.field()));
     }
 
+    public static List<Task> filterTasksTagByTagName(List<Task> tasks) {
+        return tasks.stream().filter(task -> {
+            List<String> tagNames = task.getTags().stream()
+                    .map(Tag::name)
+                    .filter(io.micrometer.common.util.StringUtils::isNotBlank)
+                    .map(tag -> tag.trim().toLowerCase())
+                    .toList();
+
+
+            boolean matches = !tagNames.isEmpty() && tagNames.stream()
+                    .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()) || tagName.equals(TagType.BESTELBON.getTag()));
+            log.info("Requested tags: {}. Matches all: {}.", tagNames, matches);
+            return matches;
+        }).toList();
+    }
 
 }

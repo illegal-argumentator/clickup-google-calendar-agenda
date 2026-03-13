@@ -32,7 +32,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -67,27 +66,25 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
 
-        Set<String> taskIds = events.stream()
-                .map(Event::getTaskId)
-                .collect(Collectors.toSet());
-
         boolean hasTag = hasTags(payload.historyItems());
-        if (hasTag && !taskIds.contains(payload.taskId())) {
+        if (hasTag) {
             Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+            List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
+            if (!tasks.isEmpty()) {
+                InsertEventRequest request = InsertEventRequest.builder()
+                        .summary(task.getName())
+                        .start(EventDateTime.builder()
+                                .dateTime(OffsetDateTime.now())
+                                .build())
+                        .end(EventDateTime.builder()
+                                .dateTime(OffsetDateTime.now().plusHours(1))
+                                .build())
+                        .build();
 
-            InsertEventRequest request = InsertEventRequest.builder()
-                    .summary(task.getName())
-                    .start(EventDateTime.builder()
-                            .dateTime(OffsetDateTime.now())
-                            .build())
-                    .end(EventDateTime.builder()
-                            .dateTime(OffsetDateTime.now().plusHours(1))
-                            .build())
-                    .build();
-
-            EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
-            calendarEventService.insert(user, eventParam, request);
-            return;
+                EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
+                calendarEventService.insert(user, eventParam, request);
+                return;
+            }
         }
 
         try {
