@@ -7,6 +7,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.Us
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventActionFactory;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
@@ -16,9 +17,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -31,6 +33,13 @@ public class ClickUpWebhookHandler {
     private final WebhookRepository webhookRepository;
     private final UserRepository userRepository;
     private final EventActionFactory eventActionFactory;
+
+    private static WebhookEvent extractEventFrom(String event) {
+        return Arrays.stream(WebhookEvent.values())
+                .filter(webhookEvent -> webhookEvent.getEvent().equals(event))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("No webhook event found."));
+    }
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
@@ -85,18 +94,9 @@ public class ClickUpWebhookHandler {
             return !clickUpService.filterTasksTagByTagName(List.of(task)).isEmpty();
         }
 
-        var fields = Set.of("start_date", "due_date");
-        return payload.historyItems().stream()
-                .filter(it -> StringUtils.hasText(it.field()))
-                .anyMatch(item -> fields.contains(item.field()));
+        var fields = Set.of("start_date", "due_date", "tag");
+        return EventUtils.anyMatchToItems(fields, payload.historyItems());
 
-    }
-
-    private static WebhookEvent extractEventFrom(String event) {
-        return Arrays.stream(WebhookEvent.values())
-                .filter(webhookEvent -> webhookEvent.getEvent().equals(event))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No webhook event found."));
     }
 
 }

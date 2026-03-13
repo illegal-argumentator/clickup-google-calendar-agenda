@@ -5,7 +5,9 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 public class EventUtils {
@@ -61,6 +63,12 @@ public class EventUtils {
             log.warn("Failed to parse date time from history item: {}", historyItem.after(), e);
             return null;
         }
+    }
+
+    public static boolean anyMatchToItems(Set<String> allowed, List<ClickUpWebhookPayload.HistoryItem> historyItems) {
+        return historyItems.stream()
+                .filter(it -> StringUtils.hasText(it.field()))
+                .anyMatch(item -> allowed.contains(item.field()));
     }
 
 

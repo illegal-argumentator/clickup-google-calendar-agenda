@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryUtils;
@@ -8,10 +9,13 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.reposit
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.EventDateTime;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarEventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +23,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -40,6 +47,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
     private final EventRepository eventRepository;
 
+    private final CalendarEventService calendarEventService;
+
     @Override
     public void execute(User user, ClickUpWebhookPayload payload) {
         var events = eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
@@ -49,6 +58,23 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
+
+        Set<String> taskIds = events.stream()
+                .map(Event::getTaskId)
+                .collect(Collectors.toSet());
+
+        boolean hasTag = hasTags(payload.historyItems());
+        if (hasTag && !taskIds.contains(payload.taskId())) {
+            InsertEventRequest request = InsertEventRequest.builder()
+                    .start(EventDateTime.builder()
+                            .dateTime(OffsetDateTime.now())
+                            .build())
+                    .end(EventDateTime.builder()
+                            .dateTime(OffsetDateTime.now().plusHours(1))
+                            .build())
+                    .build();
+                calendarEventService.insert(user, null, request);
+        }
 
         try {
             for (Event event : events) {
@@ -101,6 +127,32 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         } finally {
             lock.unlock();
         }
+    }
+
+    private boolean hasTags(List<ClickUpWebhookPayload.HistoryItem> historyItems) {
+
+        for (ClickUpWebhookPayload.HistoryItem item : historyItems) {
+
+            if (!"tag".equals(item.field())) {
+                continue;
+            }
+
+            JsonNode after = item.after();
+            if (after == null || !after.isArray()) {
+                continue;
+            }
+
+            for (JsonNode tagNode : after) {
+                String tagName = tagNode.path("name").asText("").trim().toLowerCase();
+
+                if (tagName.equals(TagType.BAUSTROM.getTag())
+                        || tagName.equals(TagType.BESTELBON.getTag())) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override

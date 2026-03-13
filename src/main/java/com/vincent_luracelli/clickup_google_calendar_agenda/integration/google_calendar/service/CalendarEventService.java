@@ -1,12 +1,12 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.service.EventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
