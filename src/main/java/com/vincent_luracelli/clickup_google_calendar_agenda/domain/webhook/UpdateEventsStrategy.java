@@ -146,16 +146,22 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         for (ClickUpWebhookPayload.HistoryItem item : historyItems) {
 
-            if (!"tag".equals(item.field())) {
+            if (!item.field().startsWith("tag")) {
                 continue;
             }
 
-            JsonNode after = item.after();
-            if (after == null || !after.isArray() || after.isEmpty()) {
+            JsonNode tagsNode = item.after();
+
+            // якщо тег видалили
+            if (tagsNode == null || tagsNode.isNull()) {
+                tagsNode = item.before();
+            }
+
+            if (tagsNode == null || !tagsNode.isArray() || tagsNode.isEmpty()) {
                 return false;
             }
 
-            for (JsonNode tagNode : after) {
+            for (JsonNode tagNode : tagsNode) {
                 String tagName = tagNode.path("name")
                         .asText("")
                         .trim()
