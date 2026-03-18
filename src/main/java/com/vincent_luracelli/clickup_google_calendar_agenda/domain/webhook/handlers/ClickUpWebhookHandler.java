@@ -13,6 +13,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarEventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
@@ -109,15 +110,14 @@ public class ClickUpWebhookHandler {
 
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+        System.out.println("Task: " + task);
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         if (!tasks.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
-            System.out.println("Task time: " + taskTime);
-            System.out.println("Task: " + task);
-
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
                     .start(taskTime.start())
+                    .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
                     .end(taskTime.end())
                     .build();
 
