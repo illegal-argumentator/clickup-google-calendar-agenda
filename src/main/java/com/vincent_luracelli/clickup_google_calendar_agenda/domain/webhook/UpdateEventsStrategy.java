@@ -28,6 +28,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Component
 @RequiredArgsConstructor
 public class UpdateEventsStrategy implements EventActionStrategy {
+
     private final Cache<String, ReentrantLock> lockCacheManager = Caffeine.newBuilder()
             .maximumSize(10_000)
             .expireAfterWrite(1, TimeUnit.HOURS)
