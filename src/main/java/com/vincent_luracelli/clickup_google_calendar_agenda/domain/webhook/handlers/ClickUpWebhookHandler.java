@@ -113,6 +113,7 @@ public class ClickUpWebhookHandler {
         if (!tasks.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             System.out.println("Task time: " + taskTime);
+            System.out.println("Task: " + task);
 
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
