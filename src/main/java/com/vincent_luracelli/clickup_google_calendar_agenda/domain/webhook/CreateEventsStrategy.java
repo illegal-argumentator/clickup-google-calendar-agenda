@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Folder;
@@ -13,7 +14,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.EventResponse;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.EventDateTime;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Reminders;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
@@ -22,9 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -64,11 +61,11 @@ public class CreateEventsStrategy implements EventActionStrategy {
 
             EventResponse eventResponse = eventClient.insert(user.getCalendarTokenId(), eventParam, insertEventRequest);
             eventRepository.save(Event.builder()
-                            .id(eventResponse.getId())
-                            .title(insertEventRequest.summary())
-                            .taskId(task.getId())
-                            .userEmail(user.getEmail())
-                            .calendarTokenId(user.getCalendarTokenId())
+                    .id(eventResponse.getId())
+                    .title(insertEventRequest.summary())
+                    .taskId(task.getId())
+                    .userEmail(user.getEmail())
+                    .calendarTokenId(user.getCalendarTokenId())
                     .build());
         } finally {
             lock.unlock();
@@ -81,27 +78,15 @@ public class CreateEventsStrategy implements EventActionStrategy {
     }
 
     private InsertEventRequest mapToEventRequest(Task task) {
-        EventDateTime start = EventDateTime.builder()
-                .dateTime(task.getStartDate() == null
-                        ? OffsetDateTime.now(ZoneOffset.UTC)
-                        : parseTimestamp(task.getStartDate()))
-                .timeZone("UTC")
-                .build();
-
-        EventDateTime end = EventDateTime.builder()
-                .dateTime(task.getDueDate() == null
-                        ? OffsetDateTime.now(ZoneOffset.UTC)
-                        : parseTimestamp(task.getDueDate()))
-                .timeZone("UTC")
-                .build();
+        EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
 
         List<Attendee> attendees = task.getAssignees().stream()
                 .map(assignee -> Attendee.builder().email(assignee.email()).build())
                 .toList();
 
         return InsertEventRequest.builder()
-                .start(start)
-                .end(end)
+                .start(taskTime.start())
+                .end(taskTime.end())
                 .summary(task.getName())
                 .description(task.getDescription())
                 .attendees(attendees)
@@ -109,12 +94,4 @@ public class CreateEventsStrategy implements EventActionStrategy {
                 .taskId(task.getId())
                 .build();
     }
-
-    private OffsetDateTime parseTimestamp(String value) {
-        return OffsetDateTime.ofInstant(
-                Instant.ofEpochMilli(Long.parseLong(value)),
-                ZoneOffset.UTC
-        );
-    }
-
 }

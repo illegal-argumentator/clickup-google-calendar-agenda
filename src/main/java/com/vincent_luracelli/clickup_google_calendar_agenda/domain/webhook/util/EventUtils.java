@@ -49,7 +49,7 @@ public class EventUtils {
         if (historyItem.after() == null || historyItem.after().isNull()) {
             return null;
         }
-        if (!historyItem.after().isTextual()){
+        if (!historyItem.after().isTextual()) {
             return null;
         }
         var afterText = historyItem.after().asText();

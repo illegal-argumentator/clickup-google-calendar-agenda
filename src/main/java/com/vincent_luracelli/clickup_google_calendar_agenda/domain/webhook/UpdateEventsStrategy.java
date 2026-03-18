@@ -1,12 +1,12 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -67,14 +66,12 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         if (!tasks.isEmpty()) {
+            EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
+
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
-                    .start(EventDateTime.builder()
-                            .dateTime(OffsetDateTime.now())
-                            .build())
-                    .end(EventDateTime.builder()
-                            .dateTime(OffsetDateTime.now().plusHours(1))
-                            .build())
+                    .start(taskTime.start())
+                    .end(taskTime.end())
                     .build();
 
             EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();

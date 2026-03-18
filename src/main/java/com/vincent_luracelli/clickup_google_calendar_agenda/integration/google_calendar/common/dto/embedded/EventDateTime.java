@@ -5,7 +5,7 @@ import lombok.Builder;
 
 import java.time.OffsetDateTime;
 
-@Builder
+@Builder(toBuilder = true)
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record EventDateTime(
         OffsetDateTime dateTime,
