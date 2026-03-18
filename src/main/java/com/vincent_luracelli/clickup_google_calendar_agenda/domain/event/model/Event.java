@@ -1,9 +1,12 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -20,5 +23,7 @@ public class Event {
     private String taskId;
 
     private String calendarTokenId;
+
+    List<Attendee> attendees;
 
 }

@@ -14,6 +14,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookBody;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Team;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -23,10 +24,12 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -101,21 +104,14 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                             .findFirst()
                             .ifPresent(existingWebhook -> {
                                 log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
-                                handleWebhook(existingWebhook, user);
+                                handleWebhook(existingWebhook, user.getId());
+                                // TODO delete webhooks
+//                                clickUpClient.deleteWebhooks(existingWebhook.id(), user);
                             });
                     continue;
                 }
-                var body = new ClickUpWebhookBody(
-                        "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
-                        Set.of("taskUpdated")
-                );
-                TryUtils.tryGet(() -> clickUpClient.createWebhooks(team.id(), body, user), 3,
-                        () -> ThreadUtils.sleep(30_000)
-                ).onFail(e -> log.warn(e.getMessage(), e))
-                        .onSuccess(webhook -> {
-                            log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint());
-                            handleWebhook(webhook.webhook(), user);
-                        });
+
+                createWebhook(team.id(), user);
             }
         }
     }
@@ -132,13 +128,28 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
         return query;
     }
 
-    private void handleWebhook(ClickUpWebhook webhook, User user) {
+    private void handleWebhook(ClickUpWebhook webhook, String userId) {
         secretCacheManager.put(webhook.id(), webhook.secret());
         var entity = new WebhookEntity(
                 webhook.id(),
-                user.getId(),
+                userId,
                 Instant.now()
         );
         webhookRepository.save(entity);
+    }
+
+    private void createWebhook(String teamId, User user) {
+        var body = new ClickUpWebhookBody(
+                "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
+                Arrays.stream(WebhookEvent.values()).map(WebhookEvent::getEvent).collect(Collectors.toSet())
+        );
+
+        TryUtils.tryGet(() -> clickUpClient.createWebhooks(teamId, body, user.getClickUpTokenId()), 3,
+                        () -> ThreadUtils.sleep(30_000)
+                ).onFail(e -> log.warn(e.getMessage(), e))
+                .onSuccess(webhook -> {
+                    log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint());
+                    handleWebhook(webhook.webhook(), user.getId());
+                });
     }
 }

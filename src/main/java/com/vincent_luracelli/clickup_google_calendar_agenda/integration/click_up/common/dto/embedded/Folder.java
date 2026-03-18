@@ -1,6 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public record Folder(
 ) {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    record FolderList(
+    public record FolderList(
             String id,
             String name
     ) {

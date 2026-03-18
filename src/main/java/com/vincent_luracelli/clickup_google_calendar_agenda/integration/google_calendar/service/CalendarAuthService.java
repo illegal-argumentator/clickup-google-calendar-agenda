@@ -32,14 +32,14 @@ public class CalendarAuthService {
 
     private final CalendarTokenService calendarTokenService;
 
-    public MeResponse me(User user) {
+    public MeResponse me(String tokenId) {
         MeResponse meResponse = MeResponse.builder()
                 .success(true)
                 .message("Authorized.")
                 .build();
 
         try {
-            findCalendarTokenOrThrow(user.getCalendarTokenId());
+            findCalendarTokenOrThrow(tokenId);
         } catch (ApiException e) {
             return meResponse.toBuilder().success(false).message(e.getMessage()).build();
         }
@@ -47,8 +47,8 @@ public class CalendarAuthService {
         return meResponse;
     }
 
-    public CalendarToken requireAccessTokenByUser(User user) {
-        CalendarToken calendarToken = findCalendarTokenOrThrow(user.getCalendarTokenId());
+    public CalendarToken requireAccessTokenByUser(String tokenId) {
+        CalendarToken calendarToken = findCalendarTokenOrThrow(tokenId);
 
         if (isTokenExpired(calendarToken.getAccessExpiration())) {
             TokenPayload tokenPayload = requireRefreshToken(calendarToken);

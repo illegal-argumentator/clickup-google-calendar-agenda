@@ -22,7 +22,7 @@ public class CalendarAuthController {
     @GetMapping("/me")
     ResponseEntity<MeResponse> me() {
         User user = jwtUserDetailsService.getUserFromContext();
-        return ResponseEntity.ok(calendarAuthService.me(user));
+        return ResponseEntity.ok(calendarAuthService.me(user.getCalendarTokenId()));
     }
 
 }
