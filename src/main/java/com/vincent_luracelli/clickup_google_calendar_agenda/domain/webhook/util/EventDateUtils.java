@@ -17,18 +17,18 @@ public class EventDateUtils {
 
         if (task.getStartDate() == null) {
             if (task.getDueDate() != null) {
-                start.toBuilder().dateTime(parseTimestamp(task.getDueDate())).build();
+                start = start.toBuilder().dateTime(parseTimestamp(task.getDueDate())).build();
             }
         } else {
-            start.toBuilder().dateTime(parseTimestamp(task.getStartDate())).build();
+            start = start.toBuilder().dateTime(parseTimestamp(task.getStartDate())).build();
         }
 
         if (task.getDueDate() == null) {
             if (task.getStartDate() != null) {
-                end.toBuilder().dateTime(parseTimestamp(task.getStartDate())).build();
+                end = end.toBuilder().dateTime(parseTimestamp(task.getStartDate())).build();
             }
         } else {
-            end.toBuilder().dateTime(parseTimestamp(task.getDueDate())).build();
+            end = end.toBuilder().dateTime(parseTimestamp(task.getDueDate())).build();
         }
 
         return new TaskTimeline(start, end);

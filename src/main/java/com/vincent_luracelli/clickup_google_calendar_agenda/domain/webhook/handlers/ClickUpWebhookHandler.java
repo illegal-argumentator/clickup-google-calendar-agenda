@@ -73,7 +73,6 @@ public class ClickUpWebhookHandler {
         }
 
         if (isValidWebhook(userEntity, req, Set.of("tag", "tag_added", "tag_removed"))) {
-            log.info("Creating task.");
             CompletableFuture.runAsync(() -> createEvent(userEntity, req));
             return ResponseEntity.ok("OK");
         }
@@ -114,7 +113,6 @@ public class ClickUpWebhookHandler {
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         if (!tasks.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
-            log.info("Task time: {}, task: {}", taskTime, task);
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
                     .start(taskTime.start())
