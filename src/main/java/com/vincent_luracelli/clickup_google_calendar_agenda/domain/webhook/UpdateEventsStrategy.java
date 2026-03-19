@@ -120,7 +120,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
-        if (tasks.isEmpty() && events.isEmpty()) {
+        if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
