@@ -72,13 +72,7 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("User has no calendar token");
         }
 
-        if (isValidWebhook(userEntity, req, Set.of("tag", "tag_added", "tag_removed"))) {
-            log.info("Creating event when tag modified.");
-            CompletableFuture.runAsync(() -> createEvent(userEntity, req));
-            return ResponseEntity.ok("OK");
-        }
-
-        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date"))) {
+        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date", "tag", "tag_added", "tag_removed"))) {
             log.info("Ignoring irrelevant webhook event: {}", req.event());
             return ResponseEntity.ok("Irrelevant event");
         }
@@ -108,22 +102,4 @@ public class ClickUpWebhookHandler {
 
         return EventUtils.anyMatchToItems(events, payload.historyItems());
     }
-
-    private void createEvent(User user, ClickUpWebhookPayload payload) {
-        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-        List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-        if (!tasks.isEmpty()) {
-            EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
-            InsertEventRequest request = InsertEventRequest.builder()
-                    .summary(task.getName())
-                    .start(taskTime.start())
-                    .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
-                    .end(taskTime.end())
-                    .build();
-
-            EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
-            calendarEventService.insert(user, eventParam, request);
-        }
-    }
-
 }
