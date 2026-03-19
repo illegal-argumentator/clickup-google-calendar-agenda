@@ -73,6 +73,7 @@ public class ClickUpWebhookHandler {
         }
 
         if (isValidWebhook(userEntity, req, Set.of("tag", "tag_added", "tag_removed"))) {
+            log.info("Creating event when tag modified.");
             CompletableFuture.runAsync(() -> createEvent(userEntity, req));
             return ResponseEntity.ok("OK");
         }
