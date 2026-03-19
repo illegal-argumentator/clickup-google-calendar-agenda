@@ -72,11 +72,10 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("User has no calendar token");
         }
 
-        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date", "tag", "tag_added", "tag_removed"))) {
+        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date", "tag", "tag_added"))) {
             log.info("Ignoring irrelevant webhook event: {}", req.event());
             return ResponseEntity.ok("Irrelevant event");
         }
-
 
         CompletableFuture.runAsync(() -> eventActionFactory.getStrategy(extractEventFrom(req.event())).execute(userEntity, req))
                 .thenRun(() -> log.info("Successfully updated events for taskId {}", req.taskId()))

@@ -58,7 +58,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
 
-        if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added", "tag_removed"), payload.historyItems())) {
+        if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added"), payload.historyItems())) {
             CompletableFuture.runAsync(() -> createEvent(user, payload));
             return;
         }
@@ -119,7 +119,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-        if (tasks.isEmpty()) {
+        List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
+        if (tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
