@@ -49,6 +49,12 @@ public class CreateEventsStrategy implements EventActionStrategy {
         lock.lock();
 
         try {
+            var events = eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
+            if (!events.isEmpty()) {
+                log.warn("Event already exists by taskId {}", payload.taskId());
+                return;
+            }
+
             EventParam eventParam = EventParam.builder()
                     .sendUpdates(EventUpdates.ALL)
                     .supportsAttachments(true)
