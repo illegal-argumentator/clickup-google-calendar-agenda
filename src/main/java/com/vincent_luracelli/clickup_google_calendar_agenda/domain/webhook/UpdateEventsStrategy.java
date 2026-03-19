@@ -119,7 +119,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-        if (!tasks.isEmpty()) {
+        if (tasks.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary(task.getName())
