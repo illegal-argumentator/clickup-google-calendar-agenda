@@ -55,6 +55,8 @@ public class CreateEventsStrategy implements EventActionStrategy {
                 return;
             }
 
+            log.info("Creating event.");
+
             EventParam eventParam = EventParam.builder()
                     .sendUpdates(EventUpdates.ALL)
                     .supportsAttachments(true)

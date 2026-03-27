@@ -60,6 +60,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         lock.lock();
 
         if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added"), payload.historyItems())) {
+            log.info("Tag spotted on update, processing event creation...");
             CompletableFuture.runAsync(() -> createEvent(user, payload));
             return;
         }
@@ -119,14 +120,14 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-//        Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
+        Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
-                    .summary(task.getName())
+                    .summary("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName())
                     .start(taskTime.start())
                     .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
                     .end(taskTime.end())
