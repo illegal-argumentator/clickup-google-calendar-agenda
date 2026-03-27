@@ -78,7 +78,7 @@ public class ClickUpWebhookHandler {
         }
 
         CompletableFuture.runAsync(() -> eventActionFactory.getStrategy(extractEventFrom(req.event())).execute(userEntity, req))
-                .thenRun(() -> log.info("Successfully updated events for taskId {}", req.taskId()))
+                .thenRun(() -> log.info("Successfully executed events for taskId {}", req.taskId()))
                 .exceptionally(ex -> {
                     log.error("Error updating events for taskId {}", req.taskId(), ex);
                     return null;

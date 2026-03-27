@@ -119,14 +119,14 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-        Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
+//        Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
-                    .summary("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName())
+                    .summary(task.getName())
                     .start(taskTime.start())
                     .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
                     .end(taskTime.end())
