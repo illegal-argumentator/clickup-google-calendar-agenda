@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
-@Component
+//@Component
 @RequiredArgsConstructor
 public class CreateEventsStrategy implements EventActionStrategy {
 
