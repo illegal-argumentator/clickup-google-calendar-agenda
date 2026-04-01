@@ -13,7 +13,7 @@ public class ClickUpWebHookHealthcheckScheduler {
 
     private final WebhookHealthService healthService;
 
-    @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 1000, initialDelay = 60 * 1000)
     private void runScheduler() {
         log.info("Processing webhook healthcheck.");
         healthService.checkAndFix();
