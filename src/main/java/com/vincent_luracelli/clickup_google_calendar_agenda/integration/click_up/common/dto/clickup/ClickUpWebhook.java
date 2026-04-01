@@ -12,6 +12,10 @@ public record ClickUpWebhook(
         String teamId,
         String endpoint,
         Set<String> events,
-        String secret
+        String secret,
+        Health health
 ) {
+
+    public record Health(String status, int failCount) {}
+
 }

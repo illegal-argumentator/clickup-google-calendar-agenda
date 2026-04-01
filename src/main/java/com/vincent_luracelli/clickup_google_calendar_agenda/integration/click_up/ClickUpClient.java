@@ -193,7 +193,6 @@ public class ClickUpClient {
         return response.getBody();
     }
 
-    @Deprecated
     public void deleteWebhooks(String webhookId, User user) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(user.getClickUpTokenId());
 
