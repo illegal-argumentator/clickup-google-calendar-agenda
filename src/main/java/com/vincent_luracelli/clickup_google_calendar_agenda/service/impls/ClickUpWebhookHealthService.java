@@ -7,6 +7,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhook;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Team;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookHealth;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookHealthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,23 +33,24 @@ public class ClickUpWebhookHealthService implements WebhookHealthService {
     }
 
     private void processForUser(User user) {
-
         TeamsResponse teams = clickUpClient.findTeams(user);
         teams.teams().forEach(team -> processUserForTeam(user, team));
     }
 
     private void processUserForTeam(User user, Team team) {
         List<ClickUpWebhook> webhooks = clickUpClient.getWebhooks(team.id(), user);
-        System.out.println("-------------------------------------------------");
-        webhooks.forEach(webhook -> processWebhook(user, webhook));
-        System.out.println("-------------------------------------------------");
+        webhooks.forEach(webhook -> processWebhook(team.id(), user, webhook));
     }
 
-    private void processWebhook(User user, ClickUpWebhook webhook) {
+    private void processWebhook(String teamId, User user, ClickUpWebhook webhook) {
         ClickUpWebhook.Health health = webhook.health();
-        System.out.println("user: " + user.getEmail() + ", health: " + health.status());
-
+        log.info("Checking webhook health for user: {}, health: {}.", user.getEmail(), health.status());
+        if (!WebhookHealth.isActive(health.status())) fixWebhook(webhook.id(), teamId, user);
     }
 
-
+    private void fixWebhook(String webhookId, String teamId, User user) {
+        log.warn("Found failing webhook for user: {}. Fixing...", user.getEmail());
+        clickUpClient.deleteWebhooks(webhookId, user);
+        webhookService.createWebhook(teamId, user);
+    }
 }

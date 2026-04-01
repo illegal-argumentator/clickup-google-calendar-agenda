@@ -43,7 +43,6 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     private final ClickUpClient clickUpClient;
     private final WebhookRepository webhookRepository;
 
-
     @Override
     public Optional<String> getSecret(String webhookId) {
         var secret = secretCacheManager.getIfPresent(webhookId);
@@ -138,7 +137,8 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
         webhookRepository.save(entity);
     }
 
-    private void createWebhook(String teamId, User user) {
+    @Override
+    public void createWebhook(String teamId, User user) {
         var body = new ClickUpWebhookBody(
                 "https://" +   webBackendProps.getDomain() + webBackendProps.getClickUpWebhookPath(),
                 Arrays.stream(WebhookEvent.values()).map(WebhookEvent::getEvent).collect(Collectors.toSet())
