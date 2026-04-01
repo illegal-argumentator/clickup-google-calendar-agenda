@@ -16,6 +16,10 @@ public record ClickUpWebhook(
         Health health
 ) {
 
-    public record Health(String status, int failCount) {}
+    public record Health(
+            String status,
+            @JsonProperty("fail_count")
+            int failCount
+    ) {}
 
 }
