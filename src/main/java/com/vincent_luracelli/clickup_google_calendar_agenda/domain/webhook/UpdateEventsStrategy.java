@@ -60,8 +60,10 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         lock.lock();
 
         if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added"), payload.historyItems())) {
-            CompletableFuture.runAsync(() -> createEvent(user, payload));
-            return;
+            if (events.isEmpty()) {
+                CompletableFuture.runAsync(() -> createEvent(user, payload));
+                return;
+            }
         }
 
         try {
