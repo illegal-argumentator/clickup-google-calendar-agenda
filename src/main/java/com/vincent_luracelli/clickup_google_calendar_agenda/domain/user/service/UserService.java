@@ -6,8 +6,12 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.Us
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,5 +42,13 @@ public class UserService {
 
     public User findByEmailOrThrow(@NotNull String email) {
         return findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User not found."));
+    }
+
+    public List<User> findAllClickUpAuthorized() {
+        Query query = new Query().addCriteria(
+                Criteria.where("clickUpTokenId").exists(true).ne(null)
+        );
+
+        return userRepository.findBy(query);
     }
 }

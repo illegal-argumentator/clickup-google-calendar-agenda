@@ -61,6 +61,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added"), payload.historyItems())) {
             if (events.isEmpty()) {
+                log.info("Creating event for tag update.");
                 CompletableFuture.runAsync(() -> createEvent(user, payload));
                 return;
             }
@@ -136,7 +137,9 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
             EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
             calendarEventService.insert(user, eventParam, request);
+            return;
         }
+        log.info("Couldn't create because task is already created.");
     }
 
     @Override
