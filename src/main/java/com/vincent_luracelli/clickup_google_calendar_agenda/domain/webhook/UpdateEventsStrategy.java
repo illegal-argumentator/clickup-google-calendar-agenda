@@ -10,7 +10,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Folder;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -122,16 +121,13 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
     private void createEvent(User user, ClickUpWebhookPayload payload) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-        Folder folder = clickUpClient.findFolder(user.getClickUpTokenId(), task.getFolder().getId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
         List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
-
-        log.info("Task list lol: " + task.getList());
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             InsertEventRequest request = InsertEventRequest.builder()
-                    .summary("\uD83D\uDCC5 [" + folder.lists().get(0).name() + "] " + task.getName())
+                    .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                     .start(taskTime.start())
                     .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
                     .end(taskTime.end())

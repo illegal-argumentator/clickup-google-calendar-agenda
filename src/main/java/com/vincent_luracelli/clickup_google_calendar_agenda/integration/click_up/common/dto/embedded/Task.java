@@ -40,9 +40,9 @@ public class Task {
 
     private List<Tag> tags;
 
-    private Object list;
+    private Embedded list;
 
-    private Folder folder;
+    private Embedded folder;
 
     private Object space;
 
@@ -51,7 +51,7 @@ public class Task {
 
     @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Folder {
+    public static class Embedded {
 
         private String id;
 
@@ -60,5 +60,7 @@ public class Task {
         private boolean access;
 
     }
+
+
 
 }
