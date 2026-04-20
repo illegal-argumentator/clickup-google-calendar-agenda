@@ -84,7 +84,7 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     private void execute(List<User> users) {
         for (User user : users) {
             var result = TryUtils.tryGet(() -> clickUpClient.findTeams(user), 3, () -> ThreadUtils.sleep(30_000))
-                    .filter(it -> !CollectionUtils.isEmpty(it.teams()))
+//                    .filter(it -> !CollectionUtils.isEmpty(it.teams()))
                     .onFail(e -> log.warn(e.getMessage(), e));
             if (result.isFailure()){
                 continue;
@@ -105,7 +105,7 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                                 log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
                                 handleWebhook(existingWebhook, user.getId());
                                 // TODO delete webhooks
-//                                clickUpClient.deleteWebhooks(existingWebhook.id(), user);
+                                clickUpClient.deleteWebhooks(existingWebhook.id(), user);
                             });
                     continue;
                 }
