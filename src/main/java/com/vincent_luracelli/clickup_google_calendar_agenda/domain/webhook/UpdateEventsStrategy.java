@@ -50,80 +50,92 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
     @Override
     public void execute(User user, ClickUpWebhookPayload payload) {
-        var events = eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
+
+        List<Event> events =
+                eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
+
         if (events.isEmpty()) {
             log.warn("No events found for taskId {}", payload.taskId());
         }
 
-        var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
+        ReentrantLock lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
+
         lock.lock();
-
-        if (EventUtils.anyMatchToItems(Set.of("tag_added", "tag"), payload.historyItems())) {
-            if (events.isEmpty()) {
-                log.info("Creating event for tag update.");
-                CompletableFuture.runAsync(() -> createEvent(user, payload, events));
-                return;
-            }
-        }
-
-        if (EventUtils.anyMatchToItems(Set.of("tag_removed"), payload.historyItems())) {
-            if (events.isEmpty()) {
-                log.info("Removed tag from task. Deleting from events.");
-                CompletableFuture.runAsync(() -> deleteEvent(user, payload, events));
-                return;
-            }
-        }
-
         try {
-            for (Event event : events) {
-                PatchEventRequest request = PatchEventRequest.builder()
-                        .start(EventUtils.getStartDate(payload))
-                        .end(EventUtils.getEndDate(payload))
-                        .build();
 
-                if (request.start() == null && request.end() == null) {
-                    log.info("No start or end date changes for event {}", event.getId());
-                    continue;
-                }
+            boolean hasTagChange = EventUtils.anyMatchToItems(
+                    Set.of("tag_added", "tag"),
+                    payload.historyItems()
+            );
 
-                var params = EventParam.builder()
-                        .sendUpdates(EventUpdates.NONE)
-                        .supportsAttachments(false)
-                        .build();
+            boolean hasTagRemoved = EventUtils.anyMatchToItems(
+                    Set.of("tag_removed"),
+                    payload.historyItems()
+            );
 
-                var result = TryUtils.tryRun(() -> eventClient.patch(user.getCalendarTokenId(), event.getId(), request, params));
-                if (result.isSuccess()) {
-                    log.info("Successfully updated event {}", event.getId());
-                    continue;
-                }
-                var message = result.getOptionalException().map(Throwable::getMessage)
-                        .filter(StringUtils::hasText)
-                        .orElse("");
-                if (!message.contains("The specified time range is empty")) {
-                    log.warn("New error {}", event.getId(), result.exception());
-                    continue;
-                }
-                ArrayList<EventDateTime> dateTimes = new ArrayList<>();
-                dateTimes.add(request.start());
-                dateTimes.add(request.end());
-                dateTimes.removeIf(Objects::isNull);
-                if (dateTimes.isEmpty()) {
-                    log.warn("No events found for event {}", event.getId());
-                    continue;
-                }
+            boolean hasEvents = !events.isEmpty();
 
-                var end = dateTimes.get(0).dateTime().plusHours(1);
-
-                PatchEventRequest newRangeReq = PatchEventRequest.builder()
-                        .start(dateTimes.get(0))
-                        .end(new EventDateTime(end, "UTC"))
-                        .build();
-                log.info("New event range request {}", newRangeReq);
-                var newRangeResult = TryUtils.tryRun(() -> eventClient.patch(user.getCalendarTokenId(), event.getId(), newRangeReq, params));
-                newRangeResult.onFail(ex -> log.error("Error updating events for taskId {}", event.getId(), ex));
+            if (hasTagChange && !hasEvents) {
+                log.info("Creating event for tag update.");
+                CompletableFuture.runAsync(
+                        () -> createEvent(user, payload, events)
+                );
+                return;
             }
+
+            if (hasTagRemoved && hasEvents) {
+                log.info("Deleting events for taskId {}", payload.taskId());
+                CompletableFuture.runAsync(
+                        () -> deleteEvent(user, payload, events)
+                );
+                return;
+            }
+
+            updateEvents(user, payload, events);
+
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void updateEvents(User user, ClickUpWebhookPayload payload, List<Event> events) {
+
+        EventParam params = EventParam.builder()
+                .sendUpdates(EventUpdates.NONE)
+                .supportsAttachments(false)
+                .build();
+
+        for (Event event : events) {
+
+            PatchEventRequest request = PatchEventRequest.builder()
+                    .start(EventUtils.getStartDate(payload))
+                    .end(EventUtils.getEndDate(payload))
+                    .build();
+
+            if (request.start() == null && request.end() == null) {
+                log.info("No date changes for event {}", event.getId());
+                continue;
+            }
+
+            var result = TryUtils.tryRun(() ->
+                    eventClient.patch(
+                            user.getCalendarTokenId(),
+                            event.getId(),
+                            request,
+                            params
+                    )
+            );
+
+            if (result.isSuccess()) {
+                log.info("Successfully updated event {}", event.getId());
+                continue;
+            }
+
+            String message = result.getOptionalException()
+                    .map(Throwable::getMessage)
+                    .orElse("");
+
+            log.warn("Failed update event {}: {}", event.getId(), message);
         }
     }
 
