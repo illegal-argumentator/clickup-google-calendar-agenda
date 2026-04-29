@@ -66,6 +66,14 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             }
         }
 
+        if (EventUtils.anyMatchToItems(Set.of("tag_removed"), payload.historyItems())) {
+            if (events.isEmpty()) {
+                log.info("Removed tag from task. Deleting from events.");
+                CompletableFuture.runAsync(() -> deleteEvent(user, payload));
+                return;
+            }
+        }
+
         try {
             for (Event event : events) {
                 PatchEventRequest request = PatchEventRequest.builder()
@@ -138,6 +146,16 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             return;
         }
         log.info("Couldn't create because task is already created.");
+    }
+
+    private void deleteEvent(User user, ClickUpWebhookPayload payload) {
+        List<Event> events = eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
+        log.info("Deleting events: {}.", events);
+
+//        EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
+//        calendarEventService.delete(user, "eventParam", eventParam);
+
+//        log.info("Couldn't create because task is already created.");
     }
 
     @Override

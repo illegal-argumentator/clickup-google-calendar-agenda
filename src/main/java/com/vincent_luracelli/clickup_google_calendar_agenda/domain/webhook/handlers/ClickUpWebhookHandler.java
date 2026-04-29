@@ -72,7 +72,7 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("User has no calendar token");
         }
 
-        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date", "tag", "tag_added"))) {
+        if (!isValidWebhook(userEntity, req, Set.of("start_date", "due_date", "tag", "tag_added", "tag_removed"))) {
             log.info("Ignoring irrelevant webhook event: {}", req.event());
             return ResponseEntity.ok("Irrelevant event");
         }
