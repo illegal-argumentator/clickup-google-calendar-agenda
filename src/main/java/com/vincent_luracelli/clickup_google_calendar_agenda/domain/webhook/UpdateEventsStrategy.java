@@ -137,6 +137,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                     .start(taskTime.start())
+                    .taskId(task.getId())
                     .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
                     .end(taskTime.end())
                     .build();
@@ -155,13 +156,9 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             log.info("Deleting events: {}.", events);
-
+            EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
+            events.forEach(event -> calendarEventService.delete(user, event.getId(), eventParam));
         }
-
-//        EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
-//        calendarEventService.delete(user, "eventParam", eventParam);
-
-//        log.info("Couldn't create because task is already created.");
     }
 
     @Override
