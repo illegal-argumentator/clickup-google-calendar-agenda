@@ -80,12 +80,19 @@ public class ClickUpWebhookHandler {
             return ResponseEntity.ok("Irrelevant event");
         }
 
-        CompletableFuture.runAsync(() -> eventActionFactory.getStrategy(extractEventFrom(req.event())).execute(userEntity, req))
-                .thenRun(() -> log.info("Successfully executed events for taskId {}", req.taskId()))
-                .exceptionally(ex -> {
-                    log.error("Error updating events for taskId {}", req.taskId(), ex);
-                    return null;
-                });
+        CompletableFuture.runAsync(() -> {
+            log.info("ASYNC START taskId={}", req.taskId());
+
+            try {
+                eventActionFactory.getStrategy(extractEventFrom(req.event()))
+                        .execute(userEntity, req);
+
+                log.info("ASYNC END taskId={}", req.taskId());
+            } catch (Exception e) {
+                log.error("ASYNC FAILED taskId={}", req.taskId(), e);
+                throw e;
+            }
+        });
 
         return ResponseEntity.ok("OK");
     }
