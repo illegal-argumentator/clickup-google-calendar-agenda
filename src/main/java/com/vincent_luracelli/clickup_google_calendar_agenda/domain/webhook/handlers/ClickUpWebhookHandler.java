@@ -65,8 +65,11 @@ public class ClickUpWebhookHandler {
         }
 
         log.info("Processing webhook for req {}", req);
-        var webhookEntity = webhookRepository.findById(req.webhookId()).orElseThrow();
-        var userEntity = userRepository.findById(webhookEntity.getUserId()).orElseThrow();
+        var webhook = webhookRepository.findById(req.webhookId())
+                .orElseThrow(() -> new RuntimeException("Webhook not found: " + req.webhookId()));
+        var userEntity = userRepository.findById(webhook.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found: " + webhook.getUserId()));
+
         if (userEntity.getCalendarTokenId() == null) {
             log.warn("User {} has no calendar token", userEntity.getEmail());
             return ResponseEntity.ok("User has no calendar token");

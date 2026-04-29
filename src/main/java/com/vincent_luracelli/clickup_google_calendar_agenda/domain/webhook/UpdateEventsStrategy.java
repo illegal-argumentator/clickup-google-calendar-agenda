@@ -58,10 +58,10 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         var lock = lockCacheManager.get(user.getId(), k -> new ReentrantLock(true));
         lock.lock();
 
-        if (EventUtils.anyMatchToItems(Set.of("tag", "tag_added"), payload.historyItems())) {
+        if (EventUtils.anyMatchToItems(Set.of("tag_added", "tag"), payload.historyItems())) {
             if (events.isEmpty()) {
                 log.info("Creating event for tag update.");
-                CompletableFuture.runAsync(() -> createEvent(user, payload));
+                CompletableFuture.runAsync(() -> createEvent(user, payload, events));
                 return;
             }
         }
@@ -69,7 +69,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         if (EventUtils.anyMatchToItems(Set.of("tag_removed"), payload.historyItems())) {
             if (events.isEmpty()) {
                 log.info("Removed tag from task. Deleting from events.");
-                CompletableFuture.runAsync(() -> deleteEvent(user, payload));
+                CompletableFuture.runAsync(() -> deleteEvent(user, payload, events));
                 return;
             }
         }
@@ -127,10 +127,9 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         }
     }
 
-    private void createEvent(User user, ClickUpWebhookPayload payload) {
+    private void createEvent(User user, ClickUpWebhookPayload payload, List<Event> events) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-        List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
@@ -149,15 +148,17 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         log.info("Couldn't create because task is already created.");
     }
 
-    private void deleteEvent(User user, ClickUpWebhookPayload payload) {
+    private void deleteEvent(User user, ClickUpWebhookPayload payload, List<Event> events) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
         List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-        List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             log.info("Deleting events: {}.", events);
             EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
-            events.forEach(event -> calendarEventService.delete(user, event.getId(), eventParam));
+            events.forEach(event -> {
+                eventRepository.deleteById(event.getId());
+                calendarEventService.delete(user, event.getId(), eventParam);
+            });
         }
     }
 
