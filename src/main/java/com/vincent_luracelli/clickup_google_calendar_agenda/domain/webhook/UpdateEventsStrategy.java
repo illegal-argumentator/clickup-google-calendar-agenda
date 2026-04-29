@@ -149,8 +149,14 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     }
 
     private void deleteEvent(User user, ClickUpWebhookPayload payload) {
-        List<Event> events = eventRepository.findByTaskIdAndUserEmail(payload.taskId(), user.getEmail());
-        log.info("Deleting events: {}.", events);
+        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+        List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
+        List<Event> events = eventRepository.findByTaskIdAndUserEmail(task.getId(), user.getEmail());
+
+        if (!tasks.isEmpty() && events.isEmpty()) {
+            log.info("Deleting events: {}.", events);
+
+        }
 
 //        EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
 //        calendarEventService.delete(user, "eventParam", eventParam);
