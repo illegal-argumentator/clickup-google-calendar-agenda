@@ -86,7 +86,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             if (hasTagRemoved && hasEvents) {
                 log.info("Deleting events for taskId {}", payload.taskId());
                 CompletableFuture.runAsync(
-                        () -> deleteEvent(user, payload, events)
+                        () -> deleteEvent(user, events)
                 );
                 return;
             }
@@ -160,11 +160,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         log.info("Couldn't create because task is already created.");
     }
 
-    private void deleteEvent(User user, ClickUpWebhookPayload payload, List<Event> events) {
-        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-        List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-
-        if (!tasks.isEmpty() && events.isEmpty()) {
+    private void deleteEvent(User user,List<Event> events) {
+        if (events.isEmpty()) {
             log.info("Deleting events: {}.", events);
             EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
             events.forEach(event -> {
