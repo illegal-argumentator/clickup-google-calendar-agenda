@@ -160,15 +160,23 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         log.info("Couldn't create because task is already created.");
     }
 
-    private void deleteEvent(User user,List<Event> events) {
+    private void deleteEvent(User user, List<Event> events) {
+
         if (events.isEmpty()) {
-            log.info("Deleting events: {}.", events);
-            EventParam eventParam = EventParam.builder().sendUpdates(EventUpdates.ALL).build();
-            events.forEach(event -> {
-                eventRepository.deleteById(event.getId());
-                calendarEventService.delete(user, event.getId(), eventParam);
-            });
+            log.info("No events to delete");
+            return;
         }
+
+        log.info("Deleting {} events", events.size());
+
+        EventParam eventParam = EventParam.builder()
+                .sendUpdates(EventUpdates.ALL)
+                .build();
+
+        events.forEach(event -> {
+            eventRepository.deleteById(event.getId());
+            calendarEventService.delete(user, event.getId(), eventParam);
+        });
     }
 
     @Override
