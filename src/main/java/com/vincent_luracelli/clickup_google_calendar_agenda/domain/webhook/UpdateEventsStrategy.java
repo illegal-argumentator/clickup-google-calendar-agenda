@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType.GENODIGDEN;
 
@@ -152,6 +153,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             } catch (IllegalArgumentException e) {
                 log.error(e.getMessage());
             }
+
+            System.out.println("Attendees: " + String.join(", ", attendees));
 
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
