@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Optional;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -61,6 +62,10 @@ public class Task {
 
     }
 
-
+    public Optional<CustomField> getCustomFieldByName(String name) {
+        return customFields.stream()
+                .filter(cf -> cf.name().equalsIgnoreCase(name))
+                .findFirst();
+    }
 
 }
