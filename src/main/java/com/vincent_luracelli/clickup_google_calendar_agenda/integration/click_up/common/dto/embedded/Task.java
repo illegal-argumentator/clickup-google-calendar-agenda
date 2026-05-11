@@ -68,23 +68,4 @@ public class Task {
                 .filter(cf -> cf.name().equalsIgnoreCase(name))
                 .findFirst();
     }
-
-    public List<String> castToStringList(Object field) {
-        if (field instanceof List<?> rawList) {
-            List<String> result = new ArrayList<>();
-
-            for (Object item : rawList) {
-                if (item instanceof String str) {
-                    result.add(str);
-                } else {
-                    throw new IllegalArgumentException("List contains non-string values");
-                }
-            }
-
-            return result;
-        }
-
-        throw new IllegalArgumentException("Not a list");
-    }
-
 }

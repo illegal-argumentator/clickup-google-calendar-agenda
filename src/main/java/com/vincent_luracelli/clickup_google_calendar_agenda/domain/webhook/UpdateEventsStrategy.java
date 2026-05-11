@@ -11,6 +11,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Option;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -163,9 +164,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private List<String> getAttendeesEmails(Task task) {
         try {
             Optional<CustomField> genodigden = task.getCustomFieldByName(GENODIGDEN.getTag());
-            System.out.println(genodigden);
-            List<String> ids = task.castToStringList(genodigden.get().value());
-            return List.of();
+            return genodigden.map(customField -> customField.typeConfig().options().stream().map(Option::label).toList()).orElseGet(List::of);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
         }
