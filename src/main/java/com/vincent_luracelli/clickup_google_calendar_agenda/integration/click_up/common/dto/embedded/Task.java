@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,6 +67,24 @@ public class Task {
         return customFields.stream()
                 .filter(cf -> cf.name().equalsIgnoreCase(name))
                 .findFirst();
+    }
+
+    public List<String> castToStringList(Object field) {
+        if (field instanceof List<?> rawList) {
+            List<String> result = new ArrayList<>();
+
+            for (Object item : rawList) {
+                if (item instanceof String str) {
+                    result.add(str);
+                } else {
+                    throw new IllegalArgumentException("List contains non-string values");
+                }
+            }
+
+            return result;
+        }
+
+        throw new IllegalArgumentException("Not a list");
     }
 
 }

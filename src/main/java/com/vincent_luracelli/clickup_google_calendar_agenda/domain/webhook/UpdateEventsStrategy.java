@@ -144,12 +144,20 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
             Optional<CustomField> genodigden = task.getCustomFieldByName(GENODIGDEN.getTag());
-            System.out.println("Super tag: " + genodigden);
+
+            List<String> attendees = new ArrayList<>();
+
+            try {
+                attendees = task.castToStringList(genodigden.get().value());
+            } catch (IllegalArgumentException e) {
+                log.error(e.getMessage());
+            }
+
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                     .start(taskTime.start())
                     .taskId(task.getId())
-                    .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
+                    .attendees(attendees.stream().map(assignee -> new Attendee(assignee, null)).toList())
                     .end(taskTime.end())
                     .build();
 
