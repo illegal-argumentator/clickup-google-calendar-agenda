@@ -150,6 +150,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
                     .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                     .start(taskTime.start())
                     .taskId(task.getId())
+                    .description(task.getDescription())
                     .attendees(getAttendeesEmails(task).stream().map(assignee -> new Attendee(assignee, null)).toList())
                     .end(taskTime.end())
                     .build();
