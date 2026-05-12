@@ -2,16 +2,29 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
+@Slf4j
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record CustomField(
         String id,
         String name,
         String type,
 
-        @Deprecated
         Object value,
 
         @JsonProperty("type_config")
         TypeConfig typeConfig) {
+
+    public <T> List<T> valueToList(Class<T> tClass) {
+        if (value instanceof List<?> list) {
+            return list.stream()
+                    .map(tClass::cast)
+                    .toList();
+        }
+        return List.of();
+    }
+
 }
