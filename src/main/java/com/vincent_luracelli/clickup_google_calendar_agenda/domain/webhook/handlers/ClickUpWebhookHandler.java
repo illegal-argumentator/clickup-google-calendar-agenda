@@ -2,23 +2,16 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.hand
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.JsonMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookVerifier;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.click_up_token.service.ClickUpService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventActionFactory;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarEventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
-import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.google_calendar.dto.EventParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -38,7 +31,6 @@ public class ClickUpWebhookHandler {
     private final WebhookRepository webhookRepository;
     private final UserRepository userRepository;
     private final EventActionFactory eventActionFactory;
-    private final CalendarEventService calendarEventService;
 
     private static WebhookEvent extractEventFrom(String event) {
         return Arrays.stream(WebhookEvent.values())

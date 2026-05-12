@@ -169,6 +169,7 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private List<String> getAttendeesEmails(Task task) {
         try {
             Optional<CustomField> genodigden = task.getCustomFieldByName(GENODIGDEN.getTag());
+            System.out.println(genodigden);
             return genodigden.map(customField -> customField.typeConfig().options().stream().map(Option::label).toList()).orElseGet(List::of);
         } catch (IllegalArgumentException e) {
             log.error(e.getMessage());
