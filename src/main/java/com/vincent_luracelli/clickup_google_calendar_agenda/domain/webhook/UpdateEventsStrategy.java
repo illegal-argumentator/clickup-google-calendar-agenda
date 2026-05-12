@@ -112,8 +112,8 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         for (Event event : events) {
 
             PatchEventRequest request = PatchEventRequest.builder()
-                    .start(new EventDateTime(task.getStartDate(), "UTC"))
-                    .end(new EventDateTime(task.getDueDate(), "UTC"))
+                    .start(new EventDateTime(task.getOffsetStartDate(), "UTC"))
+                    .end(new EventDateTime(task.getOffsetDueDate(), "UTC"))
                     .build();
 
             if (request.start() == null && request.end() == null) {

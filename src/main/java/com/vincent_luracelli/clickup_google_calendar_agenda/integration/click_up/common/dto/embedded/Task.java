@@ -75,7 +75,7 @@ public class Task {
                 .findFirst();
     }
 
-    public OffsetDateTime getStartDate() {
+    public OffsetDateTime getOffsetStartDate() {
         if (StringUtils.hasText(startDate)) {
             return parseDate(startDate);
         }
@@ -83,7 +83,7 @@ public class Task {
         return OffsetDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
     }
 
-    public OffsetDateTime getDueDate() {
+    public OffsetDateTime getOffsetDueDate() {
         if (StringUtils.hasText(dueDate)) {
 
             OffsetDateTime dueDateOffset = parseDate(dueDate);
