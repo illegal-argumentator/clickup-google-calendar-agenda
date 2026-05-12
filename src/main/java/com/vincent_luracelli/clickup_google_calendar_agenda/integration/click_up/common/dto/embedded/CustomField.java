@@ -24,7 +24,17 @@ public record CustomField(
     public <T> List<T> valueToList(Class<T> tClass) {
         if (value instanceof List<?> list) {
             return list.stream()
-                    .map(item -> objectMapper.convertValue(item, tClass))
+                    .map(item -> {
+                        if (item instanceof String str) {
+                            if (tClass.equals(TagField.class)) {
+                                TagField tag = new TagField();
+                                tag.setId(str);
+                                tag.setLabel(str);
+                                return tClass.cast(tag);
+                            }
+                        }
+                        return objectMapper.convertValue(item, tClass);
+                    })
                     .toList();
         }
         return List.of();
