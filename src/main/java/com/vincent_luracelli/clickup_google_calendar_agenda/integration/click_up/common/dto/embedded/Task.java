@@ -105,6 +105,6 @@ public class Task {
 
     private OffsetDateTime parseDate(String date) {
         if (!StringUtils.hasText(date)) throw new IllegalArgumentException("Date is required.");
-        return OffsetDateTime.ofInstant(Instant.parse(date), ZoneOffset.UTC);
+        return OffsetDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(date)), ZoneOffset.UTC);
     }
 }
