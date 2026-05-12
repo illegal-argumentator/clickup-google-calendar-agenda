@@ -96,11 +96,9 @@ public class Task {
 
                 return dueDateOffset;
             }
-
-            return dueDateOffset.minus(Duration.of(30, ChronoUnit.MINUTES));
         }
 
-        return OffsetDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+        return getOffsetStartDate().plus(Duration.of(30, ChronoUnit.MINUTES));
     }
 
     private OffsetDateTime parseDate(String date) {
