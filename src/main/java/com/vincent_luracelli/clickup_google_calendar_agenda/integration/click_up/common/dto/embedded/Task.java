@@ -3,7 +3,13 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+import org.springframework.util.StringUtils;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -67,5 +73,38 @@ public class Task {
         return customFields.stream()
                 .filter(cf -> cf.name().equalsIgnoreCase(name))
                 .findFirst();
+    }
+
+    public OffsetDateTime getStartDate() {
+        if (StringUtils.hasText(startDate)) {
+            return parseDate(startDate);
+        }
+
+        return OffsetDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    }
+
+    public OffsetDateTime getDueDate() {
+        if (StringUtils.hasText(dueDate)) {
+
+            OffsetDateTime dueDateOffset = parseDate(dueDate);
+            if (StringUtils.hasText(startDate)) {
+
+                OffsetDateTime startDateOffset = parseDate(startDate);
+                if (startDateOffset.isAfter(dueDateOffset)) {
+                    return startDateOffset.plus(Duration.of(30, ChronoUnit.MINUTES));
+                }
+
+                return dueDateOffset;
+            }
+
+            return dueDateOffset.minus(Duration.of(30, ChronoUnit.MINUTES));
+        }
+
+        return OffsetDateTime.ofInstant(Instant.now(), ZoneOffset.UTC);
+    }
+
+    private OffsetDateTime parseDate(String date) {
+        if (!StringUtils.hasText(date)) throw new IllegalArgumentException("Date is required.");
+        return OffsetDateTime.ofInstant(Instant.parse(date), ZoneOffset.UTC);
     }
 }

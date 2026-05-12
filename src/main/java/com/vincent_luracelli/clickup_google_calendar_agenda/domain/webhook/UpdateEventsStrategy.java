@@ -17,6 +17,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_c
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.EventDateTime;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarEventService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
@@ -25,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -99,17 +102,18 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     }
 
     private void updateEvents(User user, ClickUpWebhookPayload payload, List<Event> events) {
-
         EventParam params = EventParam.builder()
                 .sendUpdates(EventUpdates.NONE)
                 .supportsAttachments(false)
                 .build();
 
+        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+
         for (Event event : events) {
 
             PatchEventRequest request = PatchEventRequest.builder()
-                    .start(EventUtils.getStartDate(payload))
-                    .end(EventUtils.getEndDate(payload))
+                    .start(new EventDateTime(task.getStartDate(), "UTC"))
+                    .end(new EventDateTime(task.getDueDate(), "UTC"))
                     .build();
 
             if (request.start() == null && request.end() == null) {
