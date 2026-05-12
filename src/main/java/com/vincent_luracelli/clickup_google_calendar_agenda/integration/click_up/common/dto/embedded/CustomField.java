@@ -2,7 +2,6 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -19,22 +18,10 @@ public record CustomField(
         @JsonProperty("type_config")
         TypeConfig typeConfig) {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    public <T> List<T> valueToList(Class<T> tClass) {
+    public List<String> valueToList() {
         if (value instanceof List<?> list) {
             return list.stream()
-                    .map(item -> {
-                        if (item instanceof String str) {
-                            if (tClass.equals(TagField.class)) {
-                                TagField tag = new TagField();
-                                tag.setId(str);
-                                tag.setLabel(str);
-                                return tClass.cast(tag);
-                            }
-                        }
-                        return objectMapper.convertValue(item, tClass);
-                    })
+                    .map(String::valueOf)
                     .toList();
         }
         return List.of();
