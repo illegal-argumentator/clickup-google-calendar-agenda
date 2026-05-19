@@ -52,6 +52,12 @@ public class EventUtils {
         );
         if (tagRemoved) modifications.add(ModificationType.TAG_REMOVE);
 
+        boolean dateChanged = anyMatchToItems(
+                Set.of("start_date", "due_date"),
+                historyItems
+        );
+        if (dateChanged) modifications.add(ModificationType.DATE_CHANGE);
+
         return modifications;
     }
 

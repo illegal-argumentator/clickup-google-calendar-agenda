@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class TagRemovedModificationStrategy implements EventModificationStrategy {
+public final class TagRemovedModificationStrategy implements EventModificationStrategy {
 
     private final EventRepository eventRepository;
     private final CalendarEventService calendarEventService;
