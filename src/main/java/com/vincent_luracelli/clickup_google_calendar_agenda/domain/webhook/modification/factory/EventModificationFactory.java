@@ -1,5 +1,7 @@
-package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
+package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.factory;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.strategy.EventModificationStrategy;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -7,7 +9,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-final class EventModificationFactory {
+public final class EventModificationFactory {
 
     private final List<EventModificationStrategy> strategies;
 

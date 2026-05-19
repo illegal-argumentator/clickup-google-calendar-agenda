@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.ModificationType;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Tag;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
@@ -22,19 +22,20 @@ public class EventUtils {
     }
 
     public static List<Task> filterTasksTagByTagName(List<Task> tasks) {
-        return tasks.stream().filter(task -> {
+        return tasks.stream().filter(EventUtils::hasValidTags).toList();
+    }
+
+    public static boolean hasValidTags(Task task) {
             List<String> tagNames = task.getTags().stream()
                     .map(Tag::name)
                     .filter(io.micrometer.common.util.StringUtils::isNotBlank)
                     .map(tag -> tag.trim().toLowerCase())
                     .toList();
 
-
             boolean matches = !tagNames.isEmpty() && tagNames.stream()
                     .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()) || tagName.equals(TagType.BESTELBON.getTag()));
             log.info("Requested tags: {}. Matches all: {}.", tagNames, matches);
             return matches;
-        }).toList();
     }
 
     public static Set<ModificationType> getAllModificationTypes(List<ClickUpWebhookPayload.HistoryItem> historyItems) {
@@ -57,6 +58,12 @@ public class EventUtils {
                 historyItems
         );
         if (dateChanged) modifications.add(ModificationType.DATE_CHANGE);
+
+        boolean descriptionChanged = anyMatchToItems(
+                Set.of("content"),
+                historyItems
+        );
+        if (descriptionChanged) modifications.add(ModificationType.DESCRIPTION_CHANGE);
 
         return modifications;
     }

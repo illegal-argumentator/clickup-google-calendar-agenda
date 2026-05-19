@@ -1,10 +1,11 @@
-package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
+package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.strategy;
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventHelper;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Option;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
@@ -26,30 +27,29 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.c
 @RequiredArgsConstructor
 public final class TagAddedModificationStrategy implements EventModificationStrategy {
 
-    private final ClickUpClient clickUpClient;
     private final CalendarEventService calendarEventService;
+    private final EventHelper eventHelper;
 
     @Override
-    public void modify(User user, ClickUpWebhookPayload payload, List<Event> events) {
-        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
-        List<Task> tasks = EventUtils.filterTasksTagByTagName(List.of(task));
-
-        if (!tasks.isEmpty() && events.isEmpty()) {
-            EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
-
-            InsertEventRequest request = InsertEventRequest.builder()
-                    .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
-                    .start(taskTime.start())
-                    .taskId(task.getId())
-                    .description(task.getDescription())
-                    .attendees(getAttendeesEmails(task).stream().map(assignee -> new Attendee(assignee, null)).toList())
-                    .end(taskTime.end())
-                    .build();
-
-            EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
-            calendarEventService.insert(user, eventParam, request);
+    public void modify(User user, ClickUpWebhookPayload payload, List<Event> events, Task task) {
+        if (!EventUtils.hasValidTags(task)) {
+            log.info("Delete events for user: {} - found invalid tags.", user.getEmail());
+            eventHelper.delete(user, events);
             return;
         }
+
+        EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
+        InsertEventRequest request = InsertEventRequest.builder()
+                .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
+                .start(taskTime.start())
+                .taskId(task.getId())
+                .description(task.getDescription())
+                .attendees(getAttendeesEmails(task).stream().map(assignee -> new Attendee(assignee, null)).toList())
+                .end(taskTime.end())
+                .build();
+
+        EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
+        calendarEventService.insert(user, eventParam, request);
 
         log.info("Couldn't create because task is already created.");
     }
