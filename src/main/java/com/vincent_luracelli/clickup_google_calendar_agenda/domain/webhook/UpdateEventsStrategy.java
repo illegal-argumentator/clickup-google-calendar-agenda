@@ -10,6 +10,8 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Option;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.EventClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
@@ -23,15 +25,13 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.googl
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType.GENODIGDEN;
 
 @Slf4j
 @Component
@@ -99,17 +99,18 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     }
 
     private void updateEvents(User user, ClickUpWebhookPayload payload, List<Event> events) {
-
         EventParam params = EventParam.builder()
                 .sendUpdates(EventUpdates.NONE)
                 .supportsAttachments(false)
                 .build();
 
+        Task task = clickUpClient.findTask(user.getClickUpTokenId(), payload.taskId());
+
         for (Event event : events) {
 
             PatchEventRequest request = PatchEventRequest.builder()
-                    .start(EventUtils.getStartDate(payload))
-                    .end(EventUtils.getEndDate(payload))
+                    .start(new EventDateTime(task.getOffsetStartDate(), "UTC"))
+                    .end(new EventDateTime(task.getOffsetDueDate(), "UTC"))
                     .build();
 
             if (request.start() == null && request.end() == null) {
@@ -145,11 +146,13 @@ public class UpdateEventsStrategy implements EventActionStrategy {
 
         if (!tasks.isEmpty() && events.isEmpty()) {
             EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
+
             InsertEventRequest request = InsertEventRequest.builder()
                     .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                     .start(taskTime.start())
                     .taskId(task.getId())
-                    .attendees(task.getAssignees().stream().map(assignee -> new Attendee(assignee.email(), null)).toList())
+                    .description(task.getDescription())
+                    .attendees(getAttendeesEmails(task).stream().map(assignee -> new Attendee(assignee, null)).toList())
                     .end(taskTime.end())
                     .build();
 
@@ -159,6 +162,28 @@ public class UpdateEventsStrategy implements EventActionStrategy {
         }
         log.info("Couldn't create because task is already created.");
     }
+
+    private List<String> getAttendeesEmails(Task task) {
+        try {
+            return task.getCustomFieldByName(GENODIGDEN.getTag())
+                    .map(field -> {
+                        List<String> selectedIds = field.valueToList();
+
+                        return field.typeConfig()
+                                .options()
+                                .stream()
+                                .filter(option -> selectedIds.contains(option.id()))
+                                .map(Option::label)
+                                .toList();
+                    })
+                    .orElse(List.of());
+
+        } catch (Exception e) {
+            log.error("Failed to parse attendees", e);
+            return List.of();
+        }
+    }
+
 
     private void deleteEvent(User user, List<Event> events) {
 

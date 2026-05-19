@@ -27,6 +27,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType.GENODIGDEN;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
 
 @Slf4j
@@ -42,7 +43,7 @@ public class ClickUpClient {
     public Task findTask(String tokenId, String taskId) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
 
-        String path = ClickUpPaths.TASK.getPath() + "/" + taskId;
+        String path = ClickUpPaths.TASK.getPath() + "/" + taskId + "?custom_fields=" + GENODIGDEN.getTag();
         Request request = new Request.Builder()
                 .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
                 .url(path)

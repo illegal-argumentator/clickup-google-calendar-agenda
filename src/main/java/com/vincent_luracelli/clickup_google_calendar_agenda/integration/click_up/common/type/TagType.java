@@ -8,6 +8,7 @@ import lombok.Getter;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public enum TagType {
 
+    GENODIGDEN("genodigden"),
     BAUSTROM("baustrøm"),
     BESTELBON("bestelbon");
 
