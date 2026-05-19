@@ -36,7 +36,7 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.c
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class UpdateEventsStrategy implements EventActionStrategy {
+public class UpdateEventsStrategy {
 
     private final Cache<String, ReentrantLock> lockCacheManager = Caffeine.newBuilder()
             .maximumSize(10_000)
@@ -48,7 +48,6 @@ public class UpdateEventsStrategy implements EventActionStrategy {
     private final CalendarEventService calendarEventService;
     private final EventRepository eventRepository;
 
-    @Override
     public void execute(User user, ClickUpWebhookPayload payload) {
 
         List<Event> events =
@@ -203,10 +202,4 @@ public class UpdateEventsStrategy implements EventActionStrategy {
             calendarEventService.delete(user, event.getId(), eventParam);
         });
     }
-
-    @Override
-    public WebhookEvent getEvent() {
-        return WebhookEvent.TASK_UPDATED;
-    }
-
 }

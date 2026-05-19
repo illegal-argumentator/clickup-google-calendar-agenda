@@ -4,7 +4,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.JsonMapp
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookVerifier;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventActionFactory;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventModificationService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
@@ -30,14 +30,7 @@ public class ClickUpWebhookHandler {
     private final ClickUpClient clickUpClient;
     private final WebhookRepository webhookRepository;
     private final UserRepository userRepository;
-    private final EventActionFactory eventActionFactory;
-
-    private static WebhookEvent extractEventFrom(String event) {
-        return Arrays.stream(WebhookEvent.values())
-                .filter(webhookEvent -> webhookEvent.getEvent().equals(event))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No webhook event found."));
-    }
+    private final EventModificationService eventOrchestrator;
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
@@ -76,9 +69,7 @@ public class ClickUpWebhookHandler {
             log.info("ASYNC START taskId={}", req.taskId());
 
             try {
-                eventActionFactory.getStrategy(extractEventFrom(req.event()))
-                        .execute(userEntity, req);
-
+                eventOrchestrator.process(userEntity, req);
                 log.info("ASYNC END taskId={}", req.taskId());
             } catch (Exception e) {
                 log.error("ASYNC FAILED taskId={}", req.taskId(), e);
