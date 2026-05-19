@@ -25,6 +25,11 @@ public final class TagRemovedModificationStrategy implements EventModificationSt
         if (!EventUtils.hasValidTags(task)) {
             log.info("Delete events for user: {} - found invalid tags.", user.getEmail());
             eventHelper.delete(user, events);
+        } else {
+            if (events.isEmpty()) {
+                log.info("Creating event for user: {}.", user.getEmail());
+                eventHelper.create(user, task);
+            }
         }
     }
 
