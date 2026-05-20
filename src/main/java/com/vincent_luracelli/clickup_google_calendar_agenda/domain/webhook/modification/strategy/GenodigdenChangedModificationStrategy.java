@@ -34,8 +34,9 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
         }
 
         PatchEventRequest.PatchEventRequestBuilder requestBuilder = PatchEventRequest.builder();
-
         for (CustomField customField : Objects.requireNonNull(task).getCustomFields()) {
+
+            System.out.println(customField);
 
             if (customField.name().equals(LOCATION_FIELD)) {
                 CustomField.Location location = customField.valueToLocation();
