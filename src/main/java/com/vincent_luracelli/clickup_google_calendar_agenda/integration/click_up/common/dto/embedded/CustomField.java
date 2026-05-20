@@ -27,4 +27,16 @@ public record CustomField(
         return List.of();
     }
 
+    public Location valueToLocation() {
+        if (value != null && value instanceof Location location) {
+            return location;
+        }
+
+        return null;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Location(@JsonProperty("formatted_address") String formattedAddress) {
+    }
+
 }
