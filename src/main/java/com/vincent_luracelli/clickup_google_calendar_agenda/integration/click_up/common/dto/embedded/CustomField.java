@@ -30,11 +30,11 @@ public record CustomField(
     public static final String LOCATION_FIELD = "Location";
     public static final String GENODIGDEN_FIELD = "genodigden";
     public Location valueToLocation() {
-        if (value != null && value instanceof Location location) {
-            return location;
+        try {
+            return ((Location) value);
+        } catch (ClassCastException e) {
+            return null;
         }
-
-        return null;
     }
 
 
