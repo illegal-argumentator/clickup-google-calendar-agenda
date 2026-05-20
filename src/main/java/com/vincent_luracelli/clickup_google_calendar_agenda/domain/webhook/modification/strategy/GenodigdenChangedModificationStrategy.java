@@ -18,12 +18,13 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
-import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField.*;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField.GENODIGDEN_FIELD;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField.LOCATION_FIELD;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class GenodigdenChangedModificationStrategy implements EventModificationStrategy {
+public final class GenodigdenChangedModificationStrategy implements EventModificationStrategy {
 
     private final EventHelper eventHelper;
 
@@ -37,8 +38,6 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
         PatchEventRequest.PatchEventRequestBuilder requestBuilder = PatchEventRequest.builder();
         for (CustomField customField : Objects.requireNonNull(task).getCustomFields()) {
 
-            System.out.println(customField);
-
             if (customField.name().equals(LOCATION_FIELD)) {
                 CustomField.Location location = customField.valueToLocation();
 
@@ -48,16 +47,16 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
                 List<String> selectedIds = (List<String>) customField.value();
 
                 if (selectedIds == null) {
-                    return;
+                    requestBuilder.attendees(List.of());
+                } else {
+                    List<String> attendees = customField.typeConfig().options().stream()
+                            .filter(option -> selectedIds.contains(option.id()))
+                            .map(Option::label)
+                            .toList();
+                    requestBuilder.attendees(toAttendees(attendees));
                 }
 
-                List<String> attendees = customField.typeConfig().options().stream()
-                        .filter(option -> selectedIds.contains(option.id()))
-                        .map(Option::label)
-                        .toList();
-
-                log.info("Updating genodigden: {}, for user: {}.", attendees, user.getEmail());
-                requestBuilder.attendees(toAttendees(attendees));
+                log.info("Updating genodigden: {}, for user: {}.", selectedIds, user.getEmail());
             }
 
         }
