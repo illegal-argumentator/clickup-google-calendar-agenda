@@ -6,6 +6,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.E
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
@@ -18,6 +19,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
+
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField.LOCATION_FIELD;
 
 @Slf4j
 @Component
@@ -46,10 +50,13 @@ public final class EventHelper {
 
     public void create(User user, Task task) {
         EventDateUtils.TaskTimeline taskTime = EventDateUtils.retrieveTaskTimeline(task);
+        Optional<CustomField> locationField = task.getCustomFieldByName(LOCATION_FIELD);
+
         InsertEventRequest request = InsertEventRequest.builder()
                 .summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName())
                 .start(taskTime.start())
                 .taskId(task.getId())
+                .location(locationField.map(CustomField::getLocationFromField).orElse(null))
                 .description(task.getDescription())
                 .attendees(Task.getAttendeesEmails(task).stream().map(assignee -> new Attendee(assignee, null)).toList())
                 .end(taskTime.end())

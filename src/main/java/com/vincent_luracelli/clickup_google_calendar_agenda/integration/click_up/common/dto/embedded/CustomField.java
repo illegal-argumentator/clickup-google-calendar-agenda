@@ -12,8 +12,8 @@ public record CustomField(
         String id,
         String name,
         String type,
-
         Object value,
+        List<Selected> selected,
 
         @JsonProperty("type_config")
         TypeConfig typeConfig) {
@@ -27,6 +27,8 @@ public record CustomField(
         return List.of();
     }
 
+    public static final String LOCATION_FIELD = "Location";
+    public static final String GENODIGDEN_FIELD = "genodigden";
     public Location valueToLocation() {
         if (value != null && value instanceof Location location) {
             return location;
@@ -35,8 +37,18 @@ public record CustomField(
         return null;
     }
 
+
+    public static String getLocationFromField(CustomField field) {
+        if (field == null || field.valueToLocation() == null) return null;
+        return field.valueToLocation().formattedAddress;
+    }
+
     @JsonIgnoreProperties(ignoreUnknown = true)
     public record Location(@JsonProperty("formatted_address") String formattedAddress) {
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Selected(String label) {
     }
 
 }

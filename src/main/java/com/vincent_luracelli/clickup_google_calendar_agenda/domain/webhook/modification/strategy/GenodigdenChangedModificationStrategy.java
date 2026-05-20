@@ -6,7 +6,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.Event
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Option;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
@@ -18,13 +17,12 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Objects;
 
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField.*;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class GenodigdenChangedModificationStrategy implements EventModificationStrategy {
-
-    private static final String LOCATION_FIELD = "Location";
-    private static final String GENODIGDEN_FIELD = "genodigden";
 
     private final EventHelper eventHelper;
 
@@ -43,7 +41,7 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
                 CustomField.Location location = customField.valueToLocation();
                 requestBuilder.location(location == null ? null : location.formattedAddress());
             } else if (customField.name().equals(GENODIGDEN_FIELD)) {
-                List<String> attendees = customField.typeConfig().options().stream().map(Option::label).toList();
+                List<String> attendees = customField.selected().stream().map(Selected::label).toList();
                 requestBuilder.attendees(toAttendees(attendees));
             }
 
