@@ -28,7 +28,10 @@ public final class TagAddedModificationStrategy implements EventModificationStra
             return;
         }
 
-        eventHelper.create(user, task);
+        if (events.isEmpty()) {
+            eventHelper.create(user, task);
+        }
+
         log.info("Couldn't create because task is already created.");
     }
 
