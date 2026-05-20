@@ -5,6 +5,7 @@ public enum ModificationType {
     TAG_ADD,
     TAG_REMOVE,
     DATE_CHANGE,
-    DESCRIPTION_CHANGE
+    DESCRIPTION_CHANGE,
+    CUSTOM_FIELD_CHANGE
 
 }

@@ -1,11 +1,14 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryResult;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.tries.TryUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.model.Event;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.event.repository.EventRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util.EventDateUtils;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.InsertEventRequest;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.type.EventUpdates;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.service.CalendarEventService;
@@ -54,5 +57,30 @@ public final class EventHelper {
 
         EventParam eventParam = EventParam.builder().supportsAttachments(true).sendUpdates(EventUpdates.ALL).build();
         calendarEventService.insert(user, eventParam, request);
+    }
+
+    public void update(User user, List<Event> events, PatchEventRequest request) {
+        EventParam params = EventParam.builder()
+                .sendUpdates(EventUpdates.NONE)
+                .supportsAttachments(false)
+                .build();
+
+        for (Event event : events) {
+            TryResult<Void> result = TryUtils.tryRun(() ->
+                    calendarEventService.patch(
+                            user,
+                            event.getId(),
+                            request,
+                            params));
+
+            if (result.isSuccess()) {
+                log.info("Successfully updated event {}", event.getId());
+                continue;
+            }
+
+            log.warn("Failed update event {}: {}", event.getId(), result.getOptionalException()
+                    .map(Throwable::getMessage)
+                    .orElse(""));
+        }
     }
 }

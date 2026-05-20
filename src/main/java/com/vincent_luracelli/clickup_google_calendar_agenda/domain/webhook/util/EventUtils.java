@@ -65,6 +65,12 @@ public class EventUtils {
         );
         if (descriptionChanged) modifications.add(ModificationType.DESCRIPTION_CHANGE);
 
+        boolean customFieldChanged = anyMatchToItems(
+                Set.of("custom_field"),
+                historyItems
+        );
+        if (customFieldChanged) modifications.add(ModificationType.CUSTOM_FIELD_CHANGE);
+
         return modifications;
     }
 
