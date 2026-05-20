@@ -6,6 +6,7 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.Event
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.CustomField;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Option;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.PatchEventRequest;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_calendar.common.dto.embedded.Attendee;
@@ -44,7 +45,16 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
                 log.info("Updating location: {}, for user: {}.", location, user.getEmail());
                 requestBuilder.location(location == null ? null : location.formattedAddress());
             } else if (customField.name().equals(GENODIGDEN_FIELD)) {
-                List<String> attendees = customField.selected().stream().map(Selected::label).toList();
+                List<String> selectedIds = (List<String>) customField.value();
+
+                if (selectedIds == null) {
+                    return;
+                }
+
+                List<String> attendees = customField.typeConfig().options().stream()
+                        .filter(option -> selectedIds.contains(option.id()))
+                        .map(Option::label)
+                        .toList();
 
                 log.info("Updating genodigden: {}, for user: {}.", attendees, user.getEmail());
                 requestBuilder.attendees(toAttendees(attendees));
