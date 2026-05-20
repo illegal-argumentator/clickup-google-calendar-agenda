@@ -39,9 +39,13 @@ public class GenodigdenChangedModificationStrategy implements EventModificationS
 
             if (customField.name().equals(LOCATION_FIELD)) {
                 CustomField.Location location = customField.valueToLocation();
+
+                log.info("Updating location: {}, for user: {}.", location, user.getEmail());
                 requestBuilder.location(location == null ? null : location.formattedAddress());
             } else if (customField.name().equals(GENODIGDEN_FIELD)) {
                 List<String> attendees = customField.selected().stream().map(Selected::label).toList();
+
+                log.info("Updating genodigden: {}, for user: {}.", attendees, user.getEmail());
                 requestBuilder.attendees(toAttendees(attendees));
             }
 
