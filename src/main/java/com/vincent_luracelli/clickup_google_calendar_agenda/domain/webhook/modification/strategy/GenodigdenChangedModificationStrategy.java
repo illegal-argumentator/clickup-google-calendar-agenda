@@ -42,7 +42,7 @@ public final class GenodigdenChangedModificationStrategy implements EventModific
                 CustomField.Location location = customField.valueToLocation();
 
                 log.info("Updating location: {}, for user: {}.", location, user.getEmail());
-                requestBuilder.location(location == null ? null : location.formattedAddress());
+                requestBuilder.location(location == null ? "" : location.formattedAddress());
             } else if (customField.name().equals(GENODIGDEN_FIELD)) {
                 List<String> selectedIds = (List<String>) customField.value();
 

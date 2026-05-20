@@ -28,7 +28,7 @@ public final class NameChangedModificationStrategy implements EventModificationS
             return;
         }
 
-        PatchEventRequest request = PatchEventRequest.builder().summary(task.getName()).build();
+        PatchEventRequest request = PatchEventRequest.builder().summary("\uD83D\uDCC5 [" + task.getList().getName() + "] " + task.getName()).build();
         eventHelper.update(user, events, request);
     }
 
