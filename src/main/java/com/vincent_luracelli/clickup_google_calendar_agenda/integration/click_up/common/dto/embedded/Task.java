@@ -10,11 +10,10 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType.GENODIGDEN;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.FieldType.GENODIGDEN;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)

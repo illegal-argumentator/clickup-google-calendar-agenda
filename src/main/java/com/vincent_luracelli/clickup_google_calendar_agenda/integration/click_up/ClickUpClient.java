@@ -10,11 +10,9 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookBody;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookItem;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookRespond;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Folder;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service.ClickUpAuthService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.web.controller.click_up.dto.TaskFilterParam;
-import io.swagger.v3.oas.annotations.Webhook;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -27,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.List;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
-import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType.GENODIGDEN;
+import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.FieldType.GENODIGDEN;
 import static com.vincent_luracelli.clickup_google_calendar_agenda.security.common.constants.AuthConstants.AUTHORIZATION_HEADER;
 
 @Slf4j
@@ -50,18 +48,6 @@ public class ClickUpClient {
                 .build();
 
         return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, Task.class);
-    }
-
-    public Folder findFolder(String tokenId, String folderId) {
-        ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
-
-        String path = ClickUpPaths.FOLDER.getPath() + "/" + folderId;
-        Request request = new Request.Builder()
-                .addHeader(AUTHORIZATION_HEADER, clickUpToken.getAccessToken())
-                .url(path)
-                .build();
-
-        return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, Folder.class);
     }
 
     public TeamsResponse findTeams(User user) {

@@ -33,7 +33,7 @@ public class EventUtils {
                     .toList();
 
             boolean matches = !tagNames.isEmpty() && tagNames.stream()
-                    .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()) || tagName.equals(TagType.BESTELBON.getTag()));
+                    .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()));
             log.info("Requested tags: {}. Matches all: {}.", tagNames, matches);
             return matches;
     }
