@@ -2,7 +2,6 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.util
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.modification.type.ModificationType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
-import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Tag;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.type.TagType;
 import lombok.extern.slf4j.Slf4j;
@@ -22,20 +21,24 @@ public class EventUtils {
     }
 
     public static List<Task> filterTasksTagByTagName(List<Task> tasks) {
-        return tasks.stream().filter(EventUtils::hasValidTags).toList();
+        return tasks.stream().filter(EventUtils::containsValidTags).toList();
     }
 
+    @Deprecated
     public static boolean hasValidTags(Task task) {
-            List<String> tagNames = task.getTags().stream()
-                    .map(Tag::name)
-                    .filter(io.micrometer.common.util.StringUtils::isNotBlank)
-                    .map(tag -> tag.trim().toLowerCase())
-                    .toList();
-
-            boolean matches = !tagNames.isEmpty() && tagNames.stream()
+        List<String> tags = task.getTags();
+        boolean matches = !tags.isEmpty() && tags.stream()
                     .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()));
-            log.info("Requested tags: {}. Matches all: {}.", tagNames, matches);
+            log.info("Requested tags: {}. Matches all: {}.", tags, matches);
             return matches;
+    }
+
+    public static boolean containsValidTags(Task task) {
+        List<String> tags = task.getTags();
+        boolean contains = !tags.isEmpty() && tags.stream()
+                .anyMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()));
+        log.info("Requested tags: {}. Contains {}.", tags, contains);
+        return contains;
     }
 
     public static Set<ModificationType> getAllModificationTypes(List<ClickUpWebhookPayload.HistoryItem> historyItems) {

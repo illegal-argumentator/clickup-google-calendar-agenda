@@ -126,4 +126,13 @@ public class Task {
             return List.of();
         }
     }
+
+    public List<String> getTags() {
+        return tags.stream()
+                .map(Tag::name)
+                .filter(org.apache.commons.lang3.StringUtils::isNotBlank)
+                .map(tag -> tag.trim().toLowerCase())
+                .toList();
+
+    }
 }

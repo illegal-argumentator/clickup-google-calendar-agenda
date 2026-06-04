@@ -22,7 +22,7 @@ public final class TagAddedModificationStrategy implements EventModificationStra
 
     @Override
     public void modify(User user, ClickUpWebhookPayload payload, List<Event> events, Task task) {
-        if (!EventUtils.hasValidTags(task)) {
+        if (!EventUtils.containsValidTags(task)) {
             log.info("Delete events for user: {} - found invalid tags.", user.getEmail());
             eventHelper.delete(user, events);
             return;
