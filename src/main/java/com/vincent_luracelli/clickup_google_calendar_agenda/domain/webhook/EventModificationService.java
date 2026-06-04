@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 
 @Slf4j
@@ -55,7 +54,7 @@ public final class EventModificationService {
         for (ModificationType modification : requestModifications) {
             EventModificationStrategy strategy = factory.getStrategy(modification);
             log.info("Processing modification for type: {}, for user: {}.", strategy.getType(), user.getEmail());
-            CompletableFuture.runAsync(() -> strategy.modify(user, payload, events, task));
+            strategy.modify(user, payload, events, task);
         }
     }
 }
