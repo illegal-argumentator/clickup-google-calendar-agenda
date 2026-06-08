@@ -6,9 +6,9 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public enum TagType {
+public enum FieldType {
 
-    BAUSTROM("baustrøm");
+    GENODIGDEN("genodigden");
 
     private final String tag;
 
