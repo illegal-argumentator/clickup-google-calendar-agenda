@@ -1,5 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +12,7 @@ import java.time.Instant;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WebhookEntity {
     @Id
     private String webhookId;

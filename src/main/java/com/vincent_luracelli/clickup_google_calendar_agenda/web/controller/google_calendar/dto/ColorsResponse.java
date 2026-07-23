@@ -9,6 +9,7 @@ public record ColorsResponse(
     Map<String, Color> calendar,
     Map<String, Color> event) {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Color(
             String background,
             String foreground) {

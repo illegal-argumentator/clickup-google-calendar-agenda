@@ -16,6 +16,7 @@ public record ClickUpWebhook(
         Health health
 ) {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public record Health(
             String status,
             @JsonProperty("fail_count")
