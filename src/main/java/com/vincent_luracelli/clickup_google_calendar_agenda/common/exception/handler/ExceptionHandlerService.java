@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ExceptionHandlerService {
@@ -27,8 +29,10 @@ public class ExceptionHandlerService {
         return exceptionResponse;
     }
 
-    private void report(String content, String to) {
-        mailSender.sendMail("Internal server error.", content, to);
+    private void report(String content, List<String> to) {
+        for (String s : to) {
+            mailSender.sendMail("Internal server error.", content, s);
+        }
     }
 
 }

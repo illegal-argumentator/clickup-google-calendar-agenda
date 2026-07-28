@@ -5,6 +5,8 @@ import lombok.Setter;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Configuration
@@ -19,7 +21,7 @@ public class MailProperties {
 
     private String password;
 
-    private String to;
+    private List<String> to;
 
     private String from;
 
