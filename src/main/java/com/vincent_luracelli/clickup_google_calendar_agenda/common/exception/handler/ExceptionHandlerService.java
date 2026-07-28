@@ -17,6 +17,8 @@ public class ExceptionHandlerService {
     private final MailSender mailSender;
     private final MailProperties mailProperties;
 
+    private static final int MAX_MESSAGE_SIZE = 5_000;
+
     public ExceptionResponse handleInternalServerError(Exception e) {
         ExceptionResponse exceptionResponse = ExceptionResponse.builder()
                 .source(SourceType.API)
@@ -24,9 +26,14 @@ public class ExceptionHandlerService {
                 .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .build();
 
-        report("Something went wrong on API side: %s".formatted(e.getMessage()), mailProperties.getTo());
+        report("Something went wrong on API side: %s".formatted(normalizeMessage(e.getMessage())), mailProperties.getTo());
 
         return exceptionResponse;
+    }
+
+    private String normalizeMessage(String message) {
+        if (message.length() > MAX_MESSAGE_SIZE) return message.substring(0, MAX_MESSAGE_SIZE) + "...";
+        return message;
     }
 
     private void report(String content, List<String> to) {
