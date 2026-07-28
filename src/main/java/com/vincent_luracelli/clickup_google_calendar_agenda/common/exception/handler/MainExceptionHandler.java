@@ -1,6 +1,8 @@
-package com.vincent_luracelli.clickup_google_calendar_agenda.common.exception;
+package com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.handler;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.*;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +15,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class MainExceptionHandler {
+
+    private final ExceptionHandlerService exceptionHandlerService;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
@@ -62,23 +67,9 @@ public class MainExceptionHandler {
         return ResponseEntity.status(exceptionResponse.code()).body(exceptionResponse);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
+    @ExceptionHandler({IllegalArgumentException.class, NullPointerException.class, CriticalApiException.class})
     public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(IllegalArgumentException e) {
-        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
-                .source(SourceType.API)
-                .body(e.getMessage())
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .build();
-        return ResponseEntity.internalServerError().body(exceptionResponse);
-    }
-
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<ExceptionResponse> handleNullPointerException(NullPointerException e) {
-        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
-                .source(SourceType.API)
-                .body(e.getMessage())
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .build();
+        ExceptionResponse exceptionResponse = exceptionHandlerService.handleInternalServerError(e);
         return ResponseEntity.internalServerError().body(exceptionResponse);
     }
 }

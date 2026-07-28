@@ -2,7 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_u
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.CriticalApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.constants.ClickUpPaths;
@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -24,7 +23,6 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class ClickUpOAuthClient {
 
     private final OkHttpUtil okHttpUtil;
-
     private final ObjectMapper objectMapper;
 
     public AccessTokenResponse getAccessToken(AccessTokenRequest accessTokenRequest) {
@@ -40,7 +38,7 @@ public class ClickUpOAuthClient {
             return okHttpUtil.handleApiRequest(SourceType.CLICK_UP, request, AccessTokenResponse.class);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
-            throw new ApiException("Couldn't parse request body for getting access token", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CriticalApiException("Couldn't parse request body for getting access token");
         }
     }
 }

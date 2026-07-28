@@ -1,6 +1,6 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.service;
 
-import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.CriticalApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.ListsResponse;
@@ -10,7 +10,6 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -43,7 +42,7 @@ public class ClickUpSpaceService {
             }
             executorService.shutdown();
         } catch (ExecutionException | InterruptedException e) {
-            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CriticalApiException(e.getMessage());
         }
         return MembersResponse.builder().members(members).build();
     }

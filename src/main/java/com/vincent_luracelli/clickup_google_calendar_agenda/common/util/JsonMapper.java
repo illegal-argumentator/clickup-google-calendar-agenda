@@ -17,7 +17,7 @@ public class JsonMapper {
             return OBJECT_MAPPER.readValue(json, clazz);
         } catch (JsonProcessingException e) {
             log.info("JsonProcessingException: {}, class {}", json, clazz, e);
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException(e);
         }
     }
 }

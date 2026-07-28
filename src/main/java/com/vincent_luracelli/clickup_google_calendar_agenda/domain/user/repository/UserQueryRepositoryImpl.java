@@ -6,14 +6,13 @@ import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.List;
 
-public class UserQueryRepositoryImpl implements UserQueryRepository{
+public class UserQueryRepositoryImpl implements UserQueryRepository {
 
     private final MongoTemplate mongoTemplate;
 
     public UserQueryRepositoryImpl(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
-
 
     @Override
     public List<User> findBy(Query query) {

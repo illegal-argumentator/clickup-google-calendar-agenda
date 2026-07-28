@@ -3,6 +3,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.integration.google_
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.CriticalApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.OkHttpUtil;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.calendar_token.model.CalendarToken;
@@ -49,7 +50,7 @@ public class EventClient {
             return okHttpUtil.handleApiRequest(SourceType.GOOGLE_CALENDAR, request, EventResponse.class);
         } catch (JsonProcessingException e) {
             log.error("JsonProcessingException: ", e);
-            throw new ApiException("Couldn't parse request body for event creation", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            throw new CriticalApiException("Couldn't parse request body for event creation");
         }
     }
 
