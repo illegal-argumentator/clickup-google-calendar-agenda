@@ -13,12 +13,6 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties("google")
 public class GoogleProps {
 
-    @PostConstruct
-    public void init() {
-        System.out.println(oauth);
-        System.out.println(oauth.getClientId());
-    }
-
     private OAuth oauth = new OAuth();
 
 }
