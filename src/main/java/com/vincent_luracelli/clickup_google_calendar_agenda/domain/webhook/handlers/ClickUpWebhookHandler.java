@@ -2,16 +2,18 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.hand
 
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.JsonMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookVerifier;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventModificationService;
-import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -22,12 +24,11 @@ public class ClickUpWebhookHandler {
     private final ClickUpWebhookService clickUpWebhookService;
 
     private final UserRepository userRepository;
-
-    private final WebhookRepository webhookRepository;
     private final EventModificationService eventOrchestrator;
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
         var req = JsonMapper.fromJson(payload, ClickUpWebhookPayload.class);
+
         if (req.historyItems().isEmpty()) {
             log.warn("Empty history items received");
             return ResponseEntity.ok("No history items");
@@ -44,19 +45,35 @@ public class ClickUpWebhookHandler {
         }
 
         log.info("Processing webhook for req {}", req);
-        var webhook = webhookRepository.findById(req.webhookId())
-                .orElseThrow(() -> new RuntimeException("Webhook not found: " + req.webhookId()));
-        var userEntity = userRepository.findById(webhook.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found: " + webhook.getUserId()));
 
-        if (userEntity.getCalendarTokenId() == null) {
-            log.warn("User {} has no calendar token", userEntity.getEmail());
+       if (WebhookEvent.TASK_UPDATED.nameOf(req.event())) {
+           Optional<String> creatorEmail = getTaskCreatorEmail(req);
+           if (creatorEmail.isEmpty()) {
+               log.info("No task creator in history items. Skipping.");
+               return ResponseEntity.accepted().build();
+           }
+
+           Optional<User> user = userRepository.findByEmail(creatorEmail.get());
+            if (user.isEmpty()) {
+                log.info("Created task does not correspond to APP registered user. Skipping.");
+                return ResponseEntity.accepted().build();
+            } else {
+                return process(user.get(), req);
+            }
+        }
+
+        return ResponseEntity.ok("OK");
+    }
+
+    private ResponseEntity<String> process(User user, ClickUpWebhookPayload req) {
+        if (user.getCalendarTokenId() == null) {
+            log.warn("User {} has no calendar token", user.getEmail());
             return ResponseEntity.ok("User has no calendar token");
         }
 
         CompletableFuture.runAsync(() -> {
             try {
-                eventOrchestrator.process(userEntity, req);
+                eventOrchestrator.process(user, req);
             } catch (Exception e) {
                 log.error("ASYNC FAILED taskId={}", req.taskId(), e);
                 throw e;
@@ -64,5 +81,12 @@ public class ClickUpWebhookHandler {
         });
 
         return ResponseEntity.ok("OK");
+    }
+
+    private Optional<String> getTaskCreatorEmail(ClickUpWebhookPayload req) {
+        return req.historyItems().stream()
+                .filter(ClickUpWebhookPayload.HistoryItem::isTaskCreator)
+                .map(historyItem -> historyItem.user().email())
+                .findFirst();
     }
 }

@@ -24,7 +24,15 @@ public record ClickUpWebhookPayload(
             User user,
             JsonNode before,
             JsonNode  after
-    ) {}
+    ) {
+
+        public static final String TASK_CREATION = "task_creation";
+
+        public boolean isTaskCreator() {
+            return field.equals(TASK_CREATION);
+        }
+
+    }
 
     public record User(
             long id,

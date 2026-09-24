@@ -13,4 +13,14 @@ public enum WebhookEvent {
 
     private final String event;
 
+    public boolean nameOf(String name) {
+        try {
+            WebhookEvent.valueOf(name);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 }
