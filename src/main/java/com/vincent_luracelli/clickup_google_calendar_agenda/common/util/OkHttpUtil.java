@@ -2,6 +2,7 @@ package com.vincent_luracelli.clickup_google_calendar_agenda.common.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.ApiException;
+import com.vincent_luracelli.clickup_google_calendar_agenda.common.exception.CriticalApiException;
 import com.vincent_luracelli.clickup_google_calendar_agenda.common.type.SourceType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class OkHttpUtil {
             return objectMapper.readValue(responseContent, responseTarget);
         } catch (IOException e) {
             logOkHttpUtilError(e.getMessage());
-            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
+            throw new CriticalApiException(e.getMessage());
         }
     }
 
@@ -37,13 +38,13 @@ public class OkHttpUtil {
             if (!response.isSuccessful()) {
                 String message = objectMapper.readValue(response.body().string(), Object.class).toString();
                 logOkHttpUtilError(message);
-                throw new ApiException(message, HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
+                throw new ApiException(message, HttpStatus.valueOf(response.code()).value(), sourceType);
             }
 
             return response.body().string();
         } catch (IOException e) {
             logOkHttpUtilError(e.getMessage());
-            throw new ApiException(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), sourceType);
+            throw new CriticalApiException(e.getMessage());
         }
     }
 

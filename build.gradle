@@ -45,6 +45,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 
+	implementation("org.springframework.boot:spring-boot-starter-mail:4.1.0")
+
     // Source: https://mvnrepository.com/artifact/com.github.ben-manes.caffeine/caffeine
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.3")
 
