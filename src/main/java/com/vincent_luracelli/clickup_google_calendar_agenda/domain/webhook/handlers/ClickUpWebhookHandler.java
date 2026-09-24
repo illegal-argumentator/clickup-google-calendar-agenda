@@ -46,7 +46,7 @@ public class ClickUpWebhookHandler {
 
         log.info("Processing webhook for req {}", req);
 
-       if (WebhookEvent.TASK_UPDATED.name().equals(req.event())) {
+       if (WebhookEvent.TASK_UPDATED.getEvent().equals(req.event())) {
            Optional<String> creatorEmail = getTaskCreatorEmail(req);
            if (creatorEmail.isEmpty()) {
                log.info("No task creator in history items. Skipping.");
