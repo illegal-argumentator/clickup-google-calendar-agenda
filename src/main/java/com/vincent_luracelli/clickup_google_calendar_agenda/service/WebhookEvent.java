@@ -18,6 +18,7 @@ public enum WebhookEvent {
             WebhookEvent.valueOf(name);
             return true;
         } catch (Exception e) {
+            System.out.printf("ex", e);
             return false;
         }
     }
