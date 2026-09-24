@@ -47,13 +47,7 @@ public class ClickUpWebhookHandler {
         log.info("Processing webhook for req {}", req);
 
        if (WebhookEvent.TASK_UPDATED.getEvent().equals(req.event())) {
-           Optional<String> creatorEmail = getTaskCreatorEmail(req);
-           if (creatorEmail.isEmpty()) {
-               log.info("No task creator in history items. Skipping.");
-               return ResponseEntity.accepted().build();
-           }
-
-           Optional<User> user = userRepository.findByEmail(creatorEmail.get());
+           Optional<User> user = userRepository.findByEmail(getTaskCreatorEmail(req));
             if (user.isEmpty()) {
                 log.info("Created task does not correspond to APP registered user. Skipping.");
                 return ResponseEntity.accepted().build();
@@ -83,10 +77,10 @@ public class ClickUpWebhookHandler {
         return ResponseEntity.ok("OK");
     }
 
-    private Optional<String> getTaskCreatorEmail(ClickUpWebhookPayload req) {
+    private String getTaskCreatorEmail(ClickUpWebhookPayload req) {
         return req.historyItems().stream()
                 .filter(ClickUpWebhookPayload.HistoryItem::isTaskCreator)
                 .map(historyItem -> historyItem.user().email())
-                .findFirst();
+                .findFirst().orElseGet(() -> req.historyItems().get(0).user().email());
     }
 }
