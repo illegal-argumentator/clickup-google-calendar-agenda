@@ -27,18 +27,14 @@ public class EventUtils {
     @Deprecated
     public static boolean hasValidTags(Task task) {
         List<String> tags = task.getTags();
-        boolean matches = !tags.isEmpty() && tags.stream()
+        return !tags.isEmpty() && tags.stream()
                     .allMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()));
-            log.info("Requested tags: {}. Matches all: {}.", tags, matches);
-            return matches;
     }
 
     public static boolean containsValidTags(Task task) {
         List<String> tags = task.getTags();
-        boolean contains = !tags.isEmpty() && tags.stream()
+        return !tags.isEmpty() && tags.stream()
                 .anyMatch(tagName -> tagName.equals(TagType.BAUSTROM.getTag()));
-        log.info("Requested tags: {}. Contains {}.", tags, contains);
-        return contains;
     }
 
     public static Set<ModificationType> getAllModificationTypes(List<ClickUpWebhookPayload.HistoryItem> historyItems) {
