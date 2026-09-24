@@ -18,9 +18,12 @@ import java.util.concurrent.CompletableFuture;
 @Service
 @RequiredArgsConstructor
 public class ClickUpWebhookHandler {
+
     private final ClickUpWebhookService clickUpWebhookService;
-    private final WebhookRepository webhookRepository;
+
     private final UserRepository userRepository;
+
+    private final WebhookRepository webhookRepository;
     private final EventModificationService eventOrchestrator;
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
@@ -52,11 +55,8 @@ public class ClickUpWebhookHandler {
         }
 
         CompletableFuture.runAsync(() -> {
-            log.info("ASYNC START taskId={}", req.taskId());
-
             try {
                 eventOrchestrator.process(userEntity, req);
-                log.info("ASYNC END taskId={}", req.taskId());
             } catch (Exception e) {
                 log.error("ASYNC FAILED taskId={}", req.taskId(), e);
                 throw e;

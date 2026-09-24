@@ -20,11 +20,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClickUpWebhookHealthService implements WebhookHealthService {
 
-    private final ClickUpWebhookService webhookService;
-
-    private final ClickUpClient clickUpClient;
-
     private final UserService userService;
+
+    private final ClickUpWebhookService webhookService;
+    private final ClickUpClient clickUpClient;
 
     @Override
     public void checkAndFix() {
@@ -44,7 +43,6 @@ public class ClickUpWebhookHealthService implements WebhookHealthService {
 
     private void processWebhook(String teamId, User user, ClickUpWebhook webhook) {
         ClickUpWebhook.Health health = webhook.health();
-        log.info("Checking webhook health for user: {}, health: {}.", user.getEmail(), health.status());
         if (!WebhookHealth.isActive(health.status())) fixWebhook(webhook.id(), teamId, user);
     }
 
