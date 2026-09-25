@@ -5,7 +5,9 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookV
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventModificationService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
+import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
 import com.vincent_luracelli.clickup_google_calendar_agenda.service.WebhookEvent;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ClickUpWebhookHandler {
 
+    private final ClickUpClient clickUpClient;
     private final ClickUpWebhookService clickUpWebhookService;
 
     private final UserRepository userRepository;
@@ -47,7 +50,14 @@ public class ClickUpWebhookHandler {
         log.info("Processing webhook for req {}", req);
 
        if (WebhookEvent.TASK_UPDATED.getEvent().equals(req.event())) {
-           Optional<User> user = userRepository.findByEmail(getTaskCreatorEmail(req));
+
+           Optional<User> webhookUser = userRepository.findByEmail(getWebhookUserEmail(req));
+           if (webhookUser.isEmpty()) {
+               log.info("Created task does not correspond to APP registered webhook user. Skipping.");
+               return ResponseEntity.accepted().build();
+           }
+
+           Optional<User> user = userRepository.findByEmail(getTaskCreatorEmail(webhookUser.get(), req));
             if (user.isEmpty()) {
                 log.info("Created task does not correspond to APP registered user. Skipping.");
                 return ResponseEntity.accepted().build();
@@ -77,7 +87,12 @@ public class ClickUpWebhookHandler {
         return ResponseEntity.ok("OK");
     }
 
-    private String getTaskCreatorEmail(ClickUpWebhookPayload req) {
+    private String getTaskCreatorEmail(User user, ClickUpWebhookPayload req) {
+        Task task = clickUpClient.findTask(user.getClickUpTokenId(), req.taskId());
+        return task.getCreator().email();
+    }
+
+    private String getWebhookUserEmail(ClickUpWebhookPayload req) {
         return req.historyItems().stream()
                 .filter(ClickUpWebhookPayload.HistoryItem::isTaskCreator)
                 .map(historyItem -> historyItem.user().email())
