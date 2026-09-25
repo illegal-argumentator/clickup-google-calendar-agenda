@@ -5,6 +5,8 @@ import com.vincent_luracelli.clickup_google_calendar_agenda.common.util.WebhookV
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.model.User;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.user.repository.UserRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.EventModificationService;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.entities.WebhookEntity;
+import com.vincent_luracelli.clickup_google_calendar_agenda.domain.webhook.repositories.WebhookRepository;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.ClickUpClient;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.clickup.ClickUpWebhookPayload;
 import com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.dto.embedded.Task;
@@ -27,6 +29,7 @@ public class ClickUpWebhookHandler {
     private final ClickUpWebhookService clickUpWebhookService;
 
     private final UserRepository userRepository;
+    private final WebhookRepository webhookRepository;
     private final EventModificationService eventOrchestrator;
 
     public ResponseEntity<String> handleWebhook(String payload, String signature) {
@@ -62,6 +65,13 @@ public class ClickUpWebhookHandler {
                 log.info("Created task does not correspond to APP registered user. Skipping.");
                 return ResponseEntity.accepted().build();
             } else {
+
+                Optional<WebhookEntity> webhookEntity = webhookRepository.findById(req.webhookId());
+                if (webhookEntity.isEmpty() || !webhookEntity.get().getUserId().equals(user.get().getId())) {
+                    log.info("Webhook user is not creator of task. Skipping.");
+                    return ResponseEntity.accepted().build();
+                }
+
                 return process(user.get(), req);
             }
         }
