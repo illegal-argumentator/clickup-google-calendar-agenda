@@ -163,11 +163,26 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                 Arrays.stream(WebhookEvent.values()).map(WebhookEvent::getEvent).collect(Collectors.toSet())
         );
 
-        TryUtils.tryGet(() -> clickUpClient.createWebhooks(teamId, body, user.getClickUpTokenId()), 3,
-                        () -> ThreadUtils.sleep(30_000)
-                ).onFail(e -> log.warn(e.getMessage(), e))
+        log.info("Creating ClickUp webhook for user {} and team {} at {}",
+                user.getId(), teamId, body.endpoint());
+
+        TryUtils.tryGet(() -> {
+                    var created = clickUpClient.createWebhooks(teamId, body, user.getClickUpTokenId());
+                    if (created == null || created.webhook() == null) {
+                        throw new IllegalStateException("ClickUp returned an empty webhook creation response");
+                    }
+                    return created;
+                }, 3,
+                        (attempt, error) -> {
+                            log.warn("ClickUp webhook creation attempt {} failed for user {} and team {}: {}",
+                                    attempt + 1, user.getId(), teamId, error.getMessage(), error);
+                            ThreadUtils.sleep(30_000);
+                        })
+                .onFail(e -> log.error("Failed to create ClickUp webhook for user {} and team {} after retries",
+                        user.getId(), teamId, e))
                 .onSuccess(webhook -> {
-                    log.info("Webhook created for user {}: {}", user.getId(), webhook.webhook().endpoint());
+                    log.info("Webhook created for user {}: id={}, endpoint={}",
+                            user.getId(), webhook.webhook().id(), webhook.webhook().endpoint());
                     handleWebhook(webhook.webhook(), user.getId());
                 });
     }

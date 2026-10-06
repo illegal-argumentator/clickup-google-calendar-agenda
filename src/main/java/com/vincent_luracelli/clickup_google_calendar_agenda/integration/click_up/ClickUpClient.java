@@ -21,7 +21,9 @@ import org.springframework.http.RequestEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 
+import java.time.Duration;
 import java.util.List;
 
 import static com.vincent_luracelli.clickup_google_calendar_agenda.integration.click_up.common.builder.ClickUpPathBuilder.*;
@@ -32,11 +34,18 @@ import static com.vincent_luracelli.clickup_google_calendar_agenda.security.comm
 @Service
 @RequiredArgsConstructor
 public class ClickUpClient {
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate = createRestTemplate();
 
     private final OkHttpUtil okHttpUtil;
 
     private final ClickUpAuthService clickUpAuthService;
+
+    private static RestTemplate createRestTemplate() {
+        var requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+        requestFactory.setReadTimeout(Duration.ofSeconds(20));
+        return new RestTemplate(requestFactory);
+    }
 
     public Task findTask(String tokenId, String taskId) {
         ClickUpToken clickUpToken = clickUpAuthService.findClickUpTokenOrThrow(tokenId);
