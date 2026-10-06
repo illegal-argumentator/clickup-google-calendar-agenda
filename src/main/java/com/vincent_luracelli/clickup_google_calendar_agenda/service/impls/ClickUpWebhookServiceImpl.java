@@ -99,17 +99,26 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                     continue;
                 }
                 var webhooks = webhookResult.orElseThrow();
-                if (webhooks.stream().anyMatch(it -> it.endpoint().contains(webBackendProps.getDomain()))) {
-                    webhooks.stream().filter(it -> it.endpoint().contains(webBackendProps.getDomain()))
-                            .findFirst()
-                            .ifPresent(existingWebhook -> {
-                                log.info("Webhook already exists for user {}: {}", user.getId(), existingWebhook.endpoint());
-                                handleWebhook(existingWebhook, user.getId());
-                                // TODO delete webhooks
-//                                clickUpClient.deleteWebhooks(existingWebhook.id(), user);
-                            });
+                var ownedWebhook = webhooks.stream()
+                        .filter(it -> it.endpoint().contains(webBackendProps.getDomain()))
+                        .filter(it -> webhookRepository.findById(it.id())
+                                .map(entity -> Objects.equals(entity.getUserId(), user.getId()))
+                                .orElse(false))
+                        .findFirst();
+
+                if (ownedWebhook.isPresent()) {
+                    var existingWebhook = ownedWebhook.get();
+                    log.info("Webhook already exists for user {}: id={}, endpoint={}",
+                            user.getId(), existingWebhook.id(), existingWebhook.endpoint());
+                    handleWebhook(existingWebhook, user.getId());
                     continue;
                 }
+
+                webhooks.stream()
+                        .filter(it -> it.endpoint().contains(webBackendProps.getDomain()))
+                        .filter(it -> webhookRepository.findById(it.id()).isPresent())
+                        .forEach(it -> log.info("Webhook {} has a different registered owner; not reusing it for user {}",
+                                it.id(), user.getId()));
 
                 createWebhook(team.id(), user);
             }
@@ -129,12 +138,12 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     }
 
     private void handleWebhook(ClickUpWebhook webhook, String userId) {
-        webhookRepository.findById(webhook.id()).ifPresent(existing -> {
-            if (!Objects.equals(existing.getUserId(), userId)) {
-                log.warn("Webhook {} is already mapped to user {}, remapping it to user {}",
-                        webhook.id(), existing.getUserId(), userId);
-            }
-        });
+        var existing = webhookRepository.findById(webhook.id());
+        if (existing.isPresent() && !Objects.equals(existing.get().getUserId(), userId)) {
+            log.warn("Webhook {} belongs to user {}; refusing to remap it to user {}",
+                    webhook.id(), existing.get().getUserId(), userId);
+            return;
+        }
 
         secretCacheManager.put(webhook.id(), webhook.secret());
         var entity = new WebhookEntity(
