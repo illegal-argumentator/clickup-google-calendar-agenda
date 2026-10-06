@@ -103,26 +103,17 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
                     continue;
                 }
                 var webhooks = webhookResult.orElseThrow();
-                var ownedWebhook = webhooks.stream()
+                var applicationWebhook = webhooks.stream()
                         .filter(this::isApplicationWebhook)
-                        .filter(it -> webhookRepository.findById(it.id())
-                                .map(entity -> Objects.equals(entity.getUserId(), user.getId()))
-                                .orElse(false))
                         .findFirst();
 
-                if (ownedWebhook.isPresent()) {
-                    var existingWebhook = ownedWebhook.get();
-                    log.info("Webhook already exists for user {}: id={}, endpoint={}",
+                if (applicationWebhook.isPresent()) {
+                    var existingWebhook = applicationWebhook.get();
+                    log.info("Reusing ClickUp webhook returned for authenticated user {}: id={}, endpoint={}",
                             user.getId(), existingWebhook.id(), existingWebhook.endpoint());
                     handleWebhook(existingWebhook, user.getId());
                     continue;
                 }
-
-                webhooks.stream()
-                        .filter(this::isApplicationWebhook)
-                        .filter(it -> webhookRepository.findById(it.id()).isPresent())
-                        .forEach(it -> log.info("Webhook {} has a different registered owner; not reusing it for user {}",
-                                it.id(), user.getId()));
 
                 createWebhook(team.id(), user);
             }
@@ -144,9 +135,8 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     private void handleWebhook(ClickUpWebhook webhook, String userId) {
         var existing = webhookRepository.findById(webhook.id());
         if (existing.isPresent() && !Objects.equals(existing.get().getUserId(), userId)) {
-            log.warn("Webhook {} belongs to user {}; refusing to remap it to user {}",
+            log.warn("Repairing stale mapping for ClickUp webhook {}: user {} -> authenticated user {}",
                     webhook.id(), existing.get().getUserId(), userId);
-            return;
         }
 
         secretCacheManager.put(webhook.id(), webhook.secret());
