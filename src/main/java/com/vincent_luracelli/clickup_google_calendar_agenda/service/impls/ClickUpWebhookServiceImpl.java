@@ -26,6 +26,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -128,13 +129,22 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
     }
 
     private void handleWebhook(ClickUpWebhook webhook, String userId) {
+        webhookRepository.findById(webhook.id()).ifPresent(existing -> {
+            if (!Objects.equals(existing.getUserId(), userId)) {
+                log.warn("Webhook {} is already mapped to user {}, remapping it to user {}",
+                        webhook.id(), existing.getUserId(), userId);
+            }
+        });
+
         secretCacheManager.put(webhook.id(), webhook.secret());
         var entity = new WebhookEntity(
                 webhook.id(),
                 userId,
                 Instant.now()
         );
-        webhookRepository.save(entity);
+        var saved = webhookRepository.save(entity);
+        log.info("Persisted ClickUp webhook mapping: webhookId={}, userId={}",
+                saved.getWebhookId(), saved.getUserId());
     }
 
     @Override
