@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -53,27 +54,34 @@ public class ClickUpWebhookHandler {
         log.info("Processing webhook for req {}", req);
 
        if (WebhookEvent.TASK_UPDATED.getEvent().equals(req.event())) {
-
-           Optional<User> webhookUser = userRepository.findByEmail(getWebhookUserEmail(req));
-           if (webhookUser.isEmpty()) {
-               log.info("Created task does not correspond to APP registered webhook user. Skipping.");
+           Optional<WebhookEntity> webhookEntity = webhookRepository.findById(req.webhookId());
+           if (webhookEntity.isEmpty()) {
+               log.info("Webhook {} is not registered in the application. Skipping.", req.webhookId());
                return ResponseEntity.accepted().build();
            }
 
-           Optional<User> user = userRepository.findByEmail(getTaskCreatorEmail(webhookUser.get(), req));
-            if (user.isEmpty()) {
-                log.info("Created task does not correspond to APP registered user. Skipping.");
-                return ResponseEntity.accepted().build();
-            } else {
+           Optional<User> webhookOwner = userRepository.findById(webhookEntity.get().getUserId());
+           if (webhookOwner.isEmpty()) {
+               log.info("Owner {} of webhook {} is not registered in the application. Skipping.",
+                       webhookEntity.get().getUserId(), req.webhookId());
+               return ResponseEntity.accepted().build();
+           }
 
-                Optional<WebhookEntity> webhookEntity = webhookRepository.findById(req.webhookId());
-                if (webhookEntity.isEmpty() || !webhookEntity.get().getUserId().equals(user.get().getId())) {
-                    log.info("Webhook user is not creator of task. Skipping.");
-                    return ResponseEntity.accepted().build();
-                }
+           User owner = webhookOwner.get();
+           String creatorEmail = getTaskCreatorEmail(owner, req);
+           Optional<User> taskCreator = userRepository.findByEmail(creatorEmail);
+           if (taskCreator.isEmpty()) {
+               log.info("Task creator {} is not registered in the application. Skipping.", creatorEmail);
+               return ResponseEntity.accepted().build();
+           }
 
-                return process(user.get(), req);
-            }
+           if (!Objects.equals(owner.getId(), taskCreator.get().getId())) {
+               log.info("Webhook owner {} is not creator of task {} (creator: {}). Skipping.",
+                       owner.getEmail(), req.taskId(), taskCreator.get().getEmail());
+               return ResponseEntity.accepted().build();
+           }
+
+           return process(owner, req);
         }
 
         return ResponseEntity.ok("OK");
@@ -100,12 +108,5 @@ public class ClickUpWebhookHandler {
     private String getTaskCreatorEmail(User user, ClickUpWebhookPayload req) {
         Task task = clickUpClient.findTask(user.getClickUpTokenId(), req.taskId());
         return task.getCreator().email();
-    }
-
-    private String getWebhookUserEmail(ClickUpWebhookPayload req) {
-        return req.historyItems().stream()
-                .filter(ClickUpWebhookPayload.HistoryItem::isTaskCreator)
-                .map(historyItem -> historyItem.user().email())
-                .findFirst().orElseGet(() -> req.historyItems().get(0).user().email());
     }
 }
