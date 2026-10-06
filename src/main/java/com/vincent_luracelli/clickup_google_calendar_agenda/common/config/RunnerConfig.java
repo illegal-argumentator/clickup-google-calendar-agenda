@@ -1,5 +1,7 @@
 package com.vincent_luracelli.clickup_google_calendar_agenda.common.config;
 
+import com.vincent_luracelli.clickup_google_calendar_agenda.service.ClickUpWebhookService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
@@ -7,7 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor
 public class RunnerConfig implements CommandLineRunner {
+
+    private final ClickUpWebhookService clickUpWebhookService;
 
     @Value("${server.host}")
     private String SERVER_HOST;
@@ -23,6 +28,13 @@ public class RunnerConfig implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Swagger UI: {}", SERVER_URL_TEMPLATE.formatted(SERVER_HOST, SERVER_PORT, SERVER_CONTEXT_PATH));
+        try {
+            log.info("Resetting application ClickUp webhooks before startup setup");
+            clickUpWebhookService.resetWebhooks();
+            clickUpWebhookService.setupWebhook();
+        } catch (Exception e) {
+            log.error("ClickUp webhook reset/setup failed during startup", e);
+        }
     }
 
 }

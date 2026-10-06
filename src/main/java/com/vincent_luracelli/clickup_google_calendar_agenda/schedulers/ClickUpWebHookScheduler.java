@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 class ClickUpWebHookScheduler {
     private final ClickUpWebhookService clickUpWebhookService;
 
-    @Scheduled(fixedDelay = 60 * 60 * 1000)
+    @Scheduled(fixedDelay = 60 * 60 * 1000, initialDelay = 60 * 60 * 1000)
     private void runScheduler() {
         clickUpWebhookService.setupWebhook();
     }
