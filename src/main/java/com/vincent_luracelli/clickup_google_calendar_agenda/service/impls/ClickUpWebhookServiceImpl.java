@@ -24,7 +24,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,61 +61,6 @@ class ClickUpWebhookServiceImpl implements ClickUpWebhookService {
         execute(List.of(user.orElseThrow()));
 
         return Optional.ofNullable(secretCacheManager.getIfPresent(webhookId));
-    }
-
-    @Override
-    public void resetWebhooks() {
-        var users = userRepository.findBy(createSearch(Set.of()));
-        Set<String> discoveredWebhookIds = new HashSet<>();
-        Set<String> deletedWebhookIds = new HashSet<>();
-
-        for (User user : users) {
-            var teamsResult = TryUtils.tryGet(() -> clickUpClient.findTeams(user), 3,
-                    () -> ThreadUtils.sleep(30_000));
-            if (teamsResult.isFailure()) {
-                throw new IllegalStateException("Failed to list ClickUp teams for user " + user.getId(),
-                        teamsResult.exception());
-            }
-
-            for (Team team : teamsResult.orElseThrow().teams()) {
-                var webhooksResult = TryUtils.tryGet(() -> clickUpClient.getWebhooks(team.id(), user), 3,
-                        () -> ThreadUtils.sleep(30_000));
-                if (webhooksResult.isFailure()) {
-                    throw new IllegalStateException("Failed to list ClickUp webhooks for team " + team.id(),
-                            webhooksResult.exception());
-                }
-
-                for (ClickUpWebhook webhook : webhooksResult.orElseThrow()) {
-                    if (!isApplicationWebhook(webhook)) {
-                        continue;
-                    }
-
-                    discoveredWebhookIds.add(webhook.id());
-                    if (deletedWebhookIds.contains(webhook.id())) {
-                        continue;
-                    }
-
-                    var deleteResult = TryUtils.tryRun(() -> clickUpClient.deleteWebhooks(webhook.id(), user));
-                    if (deleteResult.isSuccess()) {
-                        deletedWebhookIds.add(webhook.id());
-                        log.info("Deleted ClickUp webhook {} found for user {}", webhook.id(), user.getId());
-                    } else {
-                        log.warn("Could not delete ClickUp webhook {} with user {}: {}",
-                                webhook.id(), user.getId(), deleteResult.exception().getMessage());
-                    }
-                }
-            }
-        }
-
-        if (!deletedWebhookIds.containsAll(discoveredWebhookIds)) {
-            var remainingIds = new HashSet<>(discoveredWebhookIds);
-            remainingIds.removeAll(deletedWebhookIds);
-            throw new IllegalStateException("Could not delete all application ClickUp webhooks: " + remainingIds);
-        }
-
-        webhookRepository.deleteAll();
-        secretCacheManager.invalidateAll();
-        log.info("Removed {} application ClickUp webhooks and cleared local mappings", deletedWebhookIds.size());
     }
 
     private boolean isApplicationWebhook(ClickUpWebhook webhook) {

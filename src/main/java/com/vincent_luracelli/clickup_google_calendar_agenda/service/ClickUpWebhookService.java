@@ -8,8 +8,6 @@ public interface ClickUpWebhookService {
 
     Optional<String> getSecret(String webhookId);
 
-    void resetWebhooks();
-
     void setupWebhook(String... userIds);
 
     void setupWebhook();
